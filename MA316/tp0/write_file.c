@@ -19,6 +19,11 @@ int main(int argc, char *argv[]){
     }else{
         int n = atoi(argv[1]);
 
+        if(n <= 1 || n > MAX_LINE_SIZE){
+            printf("Please provide a number greater than 1\n");
+            return 0;
+        }
+
         float x_min = - 6 * M_PI;
         float x_max = 6 * M_PI;
 
@@ -29,7 +34,7 @@ int main(int argc, char *argv[]){
         
         for(int j = 0; j < n; j++){
             xs[j] = x_min + j * delta_x;
-            if(xs[j] == 0){
+            if(fabs(xs[j]) < 1e-6){ //zero checking with float noise
                 ys[j] = 1;
             }else{
                 ys[j] = sin(xs[j]) / xs[j];
@@ -44,7 +49,7 @@ int main(int argc, char *argv[]){
             printf("Unable to create file");
             return 0;
         }else{
-            printf("Output file created succesfully");
+            printf("Output file created succesfully\n");
         }
 
 
@@ -52,7 +57,8 @@ int main(int argc, char *argv[]){
         for (int i = 0; i < n ; i++){
             fprintf(fp,"%f\t%f \n", xs[i],ys[i]);
         }
-
+        
+        fclose(fp);
 
         
     }
