@@ -1,0 +1,205 @@
+\documentclass[a4paper,12pt]{article}
+
+%%%%%%%%%%%%%%%%%% Extensions %%%%%%%%%%%%%%%%%%%
+
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+%\usepackage{pstricks}
+\usepackage{eucal}
+\usepackage{mathrsfs}
+%\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{layout}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nc}{\newcommand}
+\nc{\dsp}{\displaystyle}
+\nc{\pprime}{\prime\prime}
+\nc{\mrm}{\mathrm}
+\nc{\lbr}{\lbrack}
+\nc{\rbr}{\rbrack}
+\nc{\R}{\mathbb{R}}
+\nc{\Z}{\mathbb{Z}}
+\nc{\bfx}{\mathbf{x}}
+\nc{\bfs}{\mathbf{s}}
+\nc{\bfn}{\mathbf{n}}
+\nc{\bfe}{\mathbf{e}}
+\nc{\ora}{\overrightarrow}
+\nc{\Dx}{\Delta x}
+\nc{\Dt}{\Delta t}
+\renewcommand{\headrulewidth}{0pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tutorial class 1}
+\date{}
+
+\begin{document}
+
+
+\quad\\[10pt]
+
+\centerline{\huge TP 0: shell + hello world}
+
+\centerline{\rule{5cm}{1pt}}
+
+\thispagestyle{fancy}
+\fancyhead[L]{
+  Master Sciences Technologie Santé\\ 
+  Mention Mathématiques et Applications
+}
+
+\fancyhead[R]{
+  MU4MA016\\
+  2026-2027}
+
+
+\quad\\[-5pt]
+\section{Discovering the shell}
+
+
+
+\noindent 
+The goal of this exercise is to get familiar with the so-called ``shell'' running in a command window. All of the steps below except for the first one could/should be done without using the mouse (if you wish to fully apply to this rule it implies not  using a browser to search for help on the internet...).  Help within the shell can be obtained using the {\tt man} command (a shorthand for {\it manual}), and the shell itself is called {\it bash} (shorthand for {\it Bourne again shell}), so {\tt man bash} will give you access to the (huge) description of it. Help on individual commands can be obtained by {\tt man} followed by the name of the command.\\
+
+ 
+\begin{itemize}
+
+\item[1)] Open a terminal window.
+
+\item[2)] Read the manual of the commands \texttt{cd} and \texttt{pwd}. 
+
+\item[3)] Navigate to the root directory \texttt{/}, read the manual of the command \texttt{ls}, and then list the content of the root directory (all entries and with long listing format). Are these listed entries files or directories ? Who is the owner of these and would you be able to read and/or write over them ?
+
+\item[4)] Navigate back to you home directory, list all of its entries using {\tt ls}, and place them into a file called {\tt file1.txt}. For that purpose, explore the possibilities of redirecting the shell output(s) into files (inside the bash manual search for the section called REDIRECTION, searches like in the Vim editor are done using the slash key {\tt /} followed by the searched string).
+
+\item[5)] Read the manual for the command {\tt mkdir}. From your home directory,
+	create a subdirectory named {\tt MA316}, and inside the latter another one named {\tt tp0} (can you do both at once ?).
+
+\item[6)] Read the manual for the commands {\tt cp} and {\tt mv}. Make a copy of
+	the file {\tt file1.txt} inside {\tt MA316/tp0}, which you will name
+		{\tt file2.txt}. Then move {\tt file1.txt} into {\tt MA316/tp0}.
+		Navigate into {\tt MA316/tp0} and check that both files inside it are identical (using the {\tt diff} command).   
+
+\item[7)] Edit {\tt file2.txt} using an editor ({\tt vim} and {\tt emacs} are top choices), apply some changes, and then observe how the difference is reported by {\tt diff}.
+
+\item[8)] Erase both of these files now, so that we have a clean directory for real work. 
+
+\end{itemize}
+
+\noindent Other frequently used shell commands include : {\tt pwd}, {\tt cat}, {\tt more}, {\tt ps -aux}, {\tt top}, {\tt grep} or {\tt egrep}. The use of pipes {\tt cmd1 | cmd2 } that bridge the output of {\tt cmd1} to the input of {\tt cmd2} is also a powerful feature to be aware of. 
+
+\medskip\noindent
+You will find tons of information online about the shell, feel free to now use a
+browser and a mouse in your learning process (but remember about the existence
+of the {\tt man} command, and the fact not all online resources are exact...).
+
+\medskip
+
+
+\section{Hello world in C}
+
+\begin{itemize}
+
+\item[1)] Create the source code file {\tt hello.c} for a program that will simply print "Hello, World!" to the screen.
+\item[2)] Compile that program into an executable named {\tt hello}, using the
+	GNU C compiler {\tt gcc} directly.
+\item[3)] Compile it instead using the CMake tool (documentation online). This may seem tedious at
+	first, but it will save you a lot if time when your projects will get
+		bigger, with many source files and/or third party code.
+
+\end{itemize}
+
+\quad\\
+This is just the starting point of your journey with C/C++. There are also tons of information online, and some good printed books to (ask me depending on your present knowledge of these langages). For a quick reference, {\tt cppreference.com} and {\tt cplusplus.com} are recommended online sources.\\
+
+
+\section{Loops and formatted output}
+Write a C program that takes as command line argument an integer $n$ and then prints the first $n$ lines of Pascal's triangle in the terminal:
+$$
+\begin{array}{llll}
+A_{0,0}\\
+A_{1,0} & A_{1,1}\\
+A_{2,0} & A_{2,1} & A_{2,2}\\
+\vdots & \vdots & \vdots& \ddots
+\end{array}
+$$
+using the recurrence formula $A_{i,j} = A_{i-1,j-1} + A_{i-1,j}$ (if $0 < j < i$, and $1$ otherwise). 
+
+
+\section{Reading and writing into a file using C}
+
+\begin{itemize}
+
+\item[1)] Build a C program, with executable called \texttt{read\_file},
+  which reads the content of a text file (whose name is a command line argument) 
+  and print it line by line in the terminal. Test it over the file 
+  \texttt{test-tp0.txt} included within this TP0 directory.\\
+  
+\item[2)] Let $n$ be a positive integer, $x_{\mrm{min}} = -6\pi$, $x_{\mrm{max}} = +6\pi$, and $
+  \Delta x = (x_{\mrm{max}}-x_{\mrm{min}})/(n-1)$. For $j=0,\dots, n-1$, set  
+  $x_j = x_{\mrm{min}} + j \Delta x$ and $y_j = \sin(x_j)/x_j$. Write a program that
+  takes $n$ as input and writes a text file formatted as follows:\\[10pt]
+  \begin{tabular}{lll}
+    $x_0$ & &$y_0$\\
+    $x_1$ & &$y_1$\\
+    $\vdots$ && $\vdots$\\
+    $x_{n-1}$ && $y_{n-1}$\\   
+  \end{tabular}
+  \quad\\[10pt]
+  with a tab separating elements in the same line, and linebreaks to separate lines.\\
+
+\item[3)] Make a graphical representation of the function $x\mapsto \sin(x)/x$ on the interval 
+  $x\in \lbr-6\pi,+6\pi\rbr$ using GNU Gnuplot tracing program (see \texttt{http://www.gnuplot.info}).
+
+\end{itemize}
+
+\section{Using Git}
+I have set up a Git repository for you to save your files during the whole
+semester. That not only provides a backup, it will teach you how to deal with
+version/history in larger projects, and also collaborative work.\\
+The repository is hosted on Github, and you would traditionally clone it
+using the command :
+\begin{center}
+	\verb|git clone https://[token]@github.com/didiersmets/UM4MA316\_Students.git| 
+\end{center}
+where you replace {\tt [token]} by the character string provided in class. The
+token will provide you with read and write access to the repo.
+
+That will create a directory (a clone of the repo) called {\tt UM4MA316\_Students} inside your home
+directory, and you can check that the token was saved (with other info) 
+inside the {\tt .git/config} file in that directory. Configure the local cloned 
+repo with you data 
+\begin{enumerate}
+	\item
+		Set your name and email into your local git config : from inside
+		the {\tt UM4MA316\_Students} directory launch the commands
+		\begin{center}
+		{\tt git config --local user.name "yournamewithoutspace"}
+		\end{center}
+		and then 
+		\begin{center}
+		{\tt git config --local user.email "youremail"}
+		\end{center}
+		You can check that this is recorded in the {\tt .git/config}
+		file and won't be needed anymore for future uploads.
+	\item Next, learn (git documentation) how to create a new branch, and
+		create one named according to your family name.   
+	\item Switch to that new branch, start working the TP, and take habit to
+		upload (i.e. {\tt commit} and {\tt push}) your work regularly,
+		ideally once every TP class. 
+\end{enumerate}
+Take the time to learn the basics of Git, either through the {\tt man} command 
+or using online tutorials. 
+The goal is to get familiar with that fantastic tool.
+\end{document}
+

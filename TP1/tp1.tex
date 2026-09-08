@@ -1,0 +1,417 @@
+\documentclass[a4paper,12pt]{article}
+
+%%%%%%%%%%%%%%%%%% Extensions %%%%%%%%%%%%%%%%%%%
+
+\usepackage[table]{xcolor}
+\usepackage{a4wide}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+%\usepackage{pstricks}
+\usepackage{eucal}
+\usepackage{mathrsfs}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{layout}
+\usepackage{fancyhdr}
+
+\usepackage{listings}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+
+\definecolor{commentgreen}{RGB}{2,112,10}
+\definecolor{eminence}{RGB}{108,48,130}
+\definecolor{weborange}{RGB}{255,165,0}
+\definecolor{frenchplum}{RGB}{129,20,83}
+\definecolor{lgrey}{RGB}{235,235,235}
+
+\lstset{
+  language=C,                     % choose the language of the code
+  numbers=none,                   % where to put the line-numbers
+  stepnumber=1,                   % the step between two line-numbers.        
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{lgrey},  % choose the background color. You must add \usepackage{color}
+  inputencoding=utf8,
+  frame=tb,
+  upquote=true,
+  commentstyle=\color{commentgreen},
+  keywordstyle=\color{eminence},
+  stringstyle=\color{red},
+  basicstyle=\small\ttfamily, % basic font setting
+  emph={int,char,double,float,unsigned,void,bool},
+  emphstyle={\color{blue}},
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  tabsize=4,                      % sets default tabsize to 2 spaces
+  %captionpos=b,                   % sets the caption-position to bottom
+  breaklines=false,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+}
+
+%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nc}{\newcommand}
+\nc{\dsp}{\displaystyle}
+\nc{\pprime}{\prime\prime}
+\nc{\mrm}{\mathrm}
+\nc{\lbr}{\lbrack}
+\nc{\rbr}{\rbrack}
+\nc{\mT}{\mathrm{T}}
+\nc{\R}{\mathbb{R}}
+\nc{\Z}{\mathbb{Z}}
+\nc{\bfx}{\mathbf{x}}
+\nc{\bfs}{\mathbf{s}}
+\nc{\bfn}{\mathbf{n}}
+\nc{\bfe}{\mathbf{e}}
+\nc{\ora}{\overrightarrow}
+\nc{\Dx}{\Delta x}
+\nc{\Dt}{\Delta t}
+\renewcommand{\headrulewidth}{0pt}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tutorial class}
+\date{}
+
+\begin{document}
+
+
+\quad\\[10pt]
+
+\centerline{\huge TP 1}
+
+\centerline{\rule{5cm}{1pt}}
+
+\thispagestyle{fancy}
+\fancyhead[L]{
+  Master Sciences Technologie Santé\\ 
+  Mention Mathématiques et Applications
+}
+
+\fancyhead[R]{
+  UM4MA316\\
+  2026-2027}
+
+
+\quad\\[-5pt]
+\section{Circular buffers}
+
+The goal of this exercise is three folds :
+\begin{itemize}
+ \item Implement a queue data structure through a circular buffer.
+ \item Build a simple application program using a queue, and learn how to deal with multiple source files in C.
+ \item Modify your C program into a C++ one to make use of templates for genericity.
+\end{itemize}
+These notions will be clarified in the course of the exercise.
+
+\medskip
+
+In class we have already discussed the notion of stack, where pushes and pops are always performed at the top. A queue is similar in nature, the only difference being that the notion of ``top'' is replaced by both a front and a tail, and pushes are always performed at the tail while pops always occur at the front. 
+
+\begin{enumerate}
+	\item[1)] If necessary, get familiar (e.g. from Wikipedia  \url{https://en.wikipedia.org/wiki/Queue_(abstract_data_type)}) with the notion of queue, and understand how it can be implemented using so-called circular buffers (\url{https://en.wikipedia.org/wiki/Circular_buffer}).
+
+	\item[2)] In the file {\tt include/circular\_buffer\_queue.h}, located in the directory {\tt TP1}, an API for a queue is proposed to you. The C struct itself has the form :
+\end{enumerate}
+\begin{lstlisting}[caption=]
+struct Queue {
+	size_t front;     // index of the first element in the queue
+	size_t length;    // number of items presently in the queue
+	size_t capacity;  // capacity of the queue (in nbr of items)
+	size_t elem_size; // length in bytes of each item in the queue
+	void   *data;     // address of the array
+};
+\end{lstlisting}
+\begin{enumerate}
+\item[] As you can observe, the type of the items in the queue is not prescribed (and hence not known by the compiler). Since C is a strongly typed language, we rely instead on the {\it size} (in bytes) of each item, which must be prescribed at the level of the queue initialization.
+\end{enumerate}
+\begin{lstlisting}[caption=]
+struct Queue *queue_init(size_t elem_size, size_t capacity);
+\end{lstlisting}
+\begin{enumerate}
+\item[] The enqueue and dequeue operations, since the type is unknown, have the form:
+\end{enumerate}
+\begin{lstlisting}[caption=]
+void queue_enqueue(struct Queue *q, const void *src);
+void queue_dequeue(struct Queue *q, void *dest);
+\end{lstlisting}
+\begin{enumerate}
+	\item[] The data will be copied from {\tt src} into {\tt data} or from {\tt data} into {\tt dest} using the function {\tt memcpy} (found in the {\tt <string.h>} header).
+
+Your are asked to create a directory called {\tt src} at the same level as the directory {\tt include} and edit a file {\tt src/circular\_buffer\_queue.c} implementing all the functions declared in the header 
+{\tt include/circular\_buffer\_queue.h}. You should take care of increasing the capacity of the buffer if the length of the queue reaches its capacity. For that purpose, implement a function 
+\end{enumerate}
+\begin{lstlisting}[caption=]
+static void enlarge_queue_capacity(struct Queue *q);
+\end{lstlisting}
+\begin{enumerate}
+\item[] That last function need not be part of the API (the user doesn't care), the reason why it is only declared and defined in the {\tt .c} file. The keyword {\tt static} implies that the function will be unknown to external compile units, like our {\tt test\_queue} here below.
+
+\item[3)]  Write a file {\tt src/test\_queue.c} that will contain a single {\tt main} function which is expected to do the following. First initiate an empty queue {\tt q} of integers, then iteratively pick random integers {\tt p} (through the {\tt rand} function in the {\tt stdlib} library) and then enqueue {\tt p} in {\tt q} if {\tt p} is even and  instead dequeue one item (and do nothing with it) from {\tt q} when {\tt p} is odd. The number {\tt n} of successive random integers to be picked should be given as a command line argument, and the main function should return the largest length {\tt l\_max} of the queue {\tt q} during the whole process.
+
+In order to compile your program, you may use the command:\\
+{\tt gcc src/circular\_buffer\_queue.c src/test\_queue.c -I include -o test\_queue}\\
+We have already encountered the {\tt -o} (output file) gcc option. The {\tt -I} option allows to add some directories to the include path for header files, here the {\tt include} directory.
+
+\item[4)] ({\it Bonus}) Could you compute from a theoretical point of view the expectation of {\tt l\_max} in terms of {\tt n}, or at least an estimate of it ? If you can't do the maths you could try to guess the result by running multiple tests with different orders of magnitude for {\tt n} and observing the graph of ${\tt n} \mapsto {\tt l\_max}$. Empirical methods are sometimes of great help.
+
+\item[5)] The genericity obtained by {\it type erasure} (i.e. use of cast to {\tt void *}) in C has a few drawbacks. One of them is that fewer optimizations are possible for the compiler, in particular when the data is a fundamental scalar type, because we must call the external {\tt memcpy} function to perform simple operations such as read and write. The language C++ has a feature called {\it templates} that allows to write generic code without type erasure. Our queue structure could be transformed in C++ into\footnote{Note the disappearance of the {\tt elem\_size} field, which is no longer needed when the type {\tt T} is instanciated hence known to the compiler.} 
+\end{enumerate}
+\begin{lstlisting}[caption=]
+template <typename T>
+struct Queue {
+	size_t front;     // index of the first element in the queue
+	size_t length;    // number of items presently in the queue
+	size_t capacity;  // capacity of the queue (in nbr of items)
+	T      *data;     // address of the array
+};
+\end{lstlisting}
+\begin{enumerate}
+\item[]
+Discover about the basics of templates online and adapt your code accordingly, in particular removing the use of {\tt memcpy}. It is common to use the {\tt .cpp} extension for C++ source files (but keep {\tt .h} for headers), and to switch to a C++ compiler replace {\tt gcc} by {\tt g++}.  
+\end{enumerate}
+
+\section{Bubble, insertion and merge sort}
+
+We are interested here in the problem of sorting a sequence of $N$ arbitrary integers 
+in increasing order. For the sequence of 10 integers e.g.
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 11 & 54 & 23 & 6 & 7 & 89 & 4 & 2 & 8 & 45 \\ \hline
+  \end{tabular}\,,
+\end{center}
+we wish to obtain as a result the sequence :
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 2 & 4 & 6 & 7 & 8 & 11 & 23 & 45 & 54 & 89 \\ \hline
+  \end{tabular}\,.
+\end{center}
+For that purpose, there exists a large number of sorting algorithms.
+In this exercise you will implement three among the simplest of them 
+(we shall study an additional two that have theoretical importance 
+in class).
+
+For each sorting algorithm below, you are requested to write a function (and possibly additional subroutines if needed) implementing it. The function shall take as input :\\[-5pt]
+\begin{itemize}
+\item[$\bullet$] a \verb?int*? representing the adress of the array of integers to be sorted,
+\item[$\bullet$] an \verb?int? representing the number of elements in the array,\\[-5pt]
+\end{itemize}
+and will have no return value (it will thus modify directly its input - such routines are 
+called {\it in place}). Once this is done, you will write a \verb?main? function which\\[-5pt]
+\begin{itemize}
+\item[{1)}] loops over $N$ for $N= 10, 20, 50, 100, 200, 500, 1000$ and for each value of $N$:
+\begin{itemize}
+\item[*] generates an array of $N$ random integers,
+\item[*] calls your sorting algorithm over it,
+\item[*] measures the execution time and records it.
+\end{itemize}
+\item[{2)}] writes the data ($N$ versus exectution time) into a file suitable for gnuplot,
+\item[{3)}] launches gnuplot through a {\tt system()} call, using a logarithmic scale for both the axis.
+\end{itemize}
+
+\subsection{Bubble sort}
+\label{sec:bulle}
+This simple algorithm and easy to understand and to implement, but as you will observe it is often the less efficient in terms of speed. Starting from the first element, if it is larger than the next one we swap them.
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 11 & 54 & 23 & 6 & 7 & 89 & 4 & 2 & 8 & 45 \\ \hline
+  \end{tabular}
+\end{center}
+We next proceed accordingly with the second element, comparing it with the third.
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 11 & 23 & 54 & 6 & 7 & 89 & 4 & 2 & 8 & 45 \\ \hline
+  \end{tabular}
+\end{center}
+And we go on until we reach the end of the sequence.
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 11 & 23 & 6 & 7 & 54 & 4 & 2 & 8 & 45 & 89 \\ \hline
+  \end{tabular}
+\end{center}
+At this stage it is clear that the last element of the array is the greatest one, and it is therefore in final position. We repeat then the whole process on the restrictied sequence obtained by omitting the last element (here the first nine elements). At the end of this step the last two elements of the array are in final position.
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 11 & 6 & 7 & 23 & 4 & 2 & 8 & 45 & 54 & 89 \\ \hline
+  \end{tabular}
+\end{center}
+This is repeated until the size of the restricted subsequence is one, which yields the sorted array
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 2 & 4 & 6 & 7 & 8 & 11 & 23 & 45 & 54 & 89 \\ \hline
+  \end{tabular}\,.
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Insertion sort}
+This algorithm is often used to sort short arrays, as part of more involved sorting algorithms. It is based on the following strategy. Assume that for some $k$ the first $k$ elements of the sequence are in increasing order (here $k=4$), but not necessarilly in final position. 
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 6 & 11 & 23 & 54 & 7 & 89 & 4 & 2 & 8 & 45 \\ \hline
+  \end{tabular}
+\end{center}
+The goal is then to {\bf insert} the element $k+1$ th position in the correct position
+{\bf within} that restricted sequence composed of the first $k$ elements. For that 
+prupose, we swap the elements in positions $k$ and $k+1$ (if needed), then $k-1$ et $k$ (if needed) etc, 
+until the sequence composed of the first $k+1$ elements is sorted (this happens as soon as one of the swaps is not needed).
+\begin{center}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+    \hline 6 & 7 & 11 & 23 & 54 & 89 & 4 & 2 & 8 & 45 \\ \hline
+  \end{tabular}
+\end{center}
+One then proceeds to the next step, that is inserting the element in position $k+2$ into the sequence 
+composed of the first $k+1$ elements, etc. The algorithm starts by inserting the second element in the sequence composed of the first element only (and which is obviously ordered).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Merge sort}
+This is an optimal algorithm from the point of view of algorithmic complexity, if counting the number of comparisons and/or swaps. It is based on the very powerful idea of "divide and conquer". The algorithm is based one an  intermediate routine called \verb?merge? which we present first. 
+
+
+\paragraph{Subroutine \textsc{merge}} That routine takes as input 
+ an \verb?int*? representing an array of integers which we denote here by $\mrm{T}$,
+and three \verb?int? which we denote here by $p,q,r$ and such that $p\leq q < r$. It assumes that the subsequences  
+$\mT[p],\mT[p+1],\dots\mT[q]$ one one hand, and $\mT[q+1],\mT[q+2],\dots\mT[r]$ on the other hand, are already sorted in increasing order each, and will output the whole sequence in increasing order.
+
+\quad\\
+The process goes as follows. First, we compare $\mT[p]$ et $\mT[q]$.
+ We retain the smallest of the two, and we save it. Let's say it was $\mT[p]$ here, we then compare $\mT[p+1]$ et $\mT[q]$, retain the smallest of the two, and save it for positioning in second place in the final sequence. Et caetera.
+
+\quad\\
+Here is an example at work, where the left most arrays are the ones that need to be merged, and the right most array is the (intermediate) merged array, one iteration after the other. The reyed cells are the ones considered for comparison at each step.
+
+\quad\\
+\textbf{Iterate 1:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline \cellcolor{gray}6 & 7 & 11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline \cellcolor{gray}2 & 3 & 9 & 20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|}
+  \hline 2 \\ \hline
+\end{tabular}
+
+\quad\\
+\textbf{Iterate 2:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline \cellcolor{gray}6 & 7 & 11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & \cellcolor{gray}3 & 9 & 20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|}
+  \hline 2 & 3 \\ \hline
+\end{tabular}
+
+
+\quad\\
+\textbf{Iterate 3:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline \cellcolor{gray}6 & 7 & 11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & 3 & \cellcolor{gray}9 & 20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|}
+  \hline 2 & 3 & 6\\ \hline
+\end{tabular}
+
+
+\quad\\
+\textbf{Iterate 4:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline 6 & \cellcolor{gray}7 & 11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & 3 & \cellcolor{gray}9 & 20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline 2 & 3 & 6 & 7\\ \hline
+\end{tabular}
+
+\quad\\
+\textbf{Iterate 5:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline 6 &  7 & \cellcolor{gray}11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & 3 & \cellcolor{gray}9 & 20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|c|}
+  \hline 2 & 3 & 6 & 7 & 9\\ \hline
+\end{tabular}
+
+\quad\\
+\textbf{Iterate 6:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline 6 &  7 & \cellcolor{gray}11 & 23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & 3 & 9 & \cellcolor{gray}20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|c|c|}
+  \hline 2 & 3 & 6 & 7 & 9 & 11\\ \hline
+\end{tabular}
+
+\quad\\
+\textbf{Iterate 7:}
+\quad
+\begin{tabular}{|c|c|c|c|}
+  \hline 6 &  7 & 11 & \cellcolor{gray}23 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|}
+  \hline  2 & 3 & 9 & \cellcolor{gray}20 \\ \hline
+\end{tabular}
+\quad 
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+  \hline 2 & 3 & 6 & 7 & 9 & 11 & 20 & 23\\ \hline
+\end{tabular}
+
+
+\newpage 
+\paragraph{\textsc{merge sort} algorithm} Once that subroutine implemented, the merge sort can then be described in the following short pseudo-code form:
+
+\quad\\
+\verb?MergeSort?($\mT,p,r$)\\
+if (p<r) \{\\
+\textcolor{white}{.}\hspace{0.25cm} $q = \lfloor (p+r)/2\rfloor$\\
+\textcolor{white}{.}\hspace{0.25cm} \verb?MergeSort?($\mT,p,q$)\\
+\textcolor{white}{.}\hspace{0.25cm} \verb?MergeSort?($\mT,q+1,r$)\\
+\textcolor{white}{.}\hspace{0.25cm} \verb?Merge?($\mT,p,q,r$)\\
+\}
+
+\quad\\
+In the above, $\lfloor n\rfloor$ denotes the integer part of $n$. Note the recursive nature of the algorithm. To sort the whole array, it suffices to call \verb?MergeSort? with $p=0$ and $r = $ \textrm{length}($\mT$)\,-1.
+
+\quad\\
+{\bf Note:} The \verb?merge? cannot fully work in place (understanding this is part of the exercise, perhaps the most interesting part!). One possibility is to allocate space as needed inside that routine (but pay attention to avoid memory leaks by releasing in due time). A better solution ({\it more challenging}) is to pre-allocate an array $S$ with the same size of $T$, initially copy $T$ into it, and then ping-pong between $T$ and $S$ in the \verb?MergeSort? recursive call (besides, it is actually possible and probably recommended to avoid recursivity complitely and replace it with a while loop).
+\end{document}
+

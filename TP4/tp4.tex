@@ -1,0 +1,300 @@
+\documentclass[a4paper,11pt]{article}
+
+%%%%%%%%%%%%%%%%%% Extensions %%%%%%%%%%%%%%%%%%%
+
+\usepackage[table]{xcolor}
+\usepackage{a4wide}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+%\usepackage{pstricks}
+\usepackage{eucal}
+\usepackage{mathrsfs}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{layout}
+\usepackage{fancyhdr}
+
+\usepackage{listings}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+
+\definecolor{commentgreen}{RGB}{2,112,10}
+\definecolor{eminence}{RGB}{108,48,130}
+\definecolor{weborange}{RGB}{255,165,0}
+\definecolor{frenchplum}{RGB}{129,20,83}
+\definecolor{lgrey}{RGB}{235,235,235}
+
+\lstset{
+  language=C,                     % choose the language of the code
+  numbers=none,                   % where to put the line-numbers
+  stepnumber=1,                   % the step between two line-numbers.        
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{lgrey},  % choose the background color. You must add \usepackage{color}
+  inputencoding=utf8,
+  frame=tb,
+  upquote=true,
+  commentstyle=\color{commentgreen},
+  keywordstyle=\color{eminence},
+  stringstyle=\color{red},
+  basicstyle=\small\ttfamily, % basic font setting
+  emph={int,char,double,float,unsigned,void,bool},
+  emphstyle={\color{blue}},
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  tabsize=4,                      % sets default tabsize to 2 spaces
+  %captionpos=b,                   % sets the caption-position to bottom
+  breaklines=false,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+}
+
+%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nc}{\newcommand}
+\nc{\dsp}{\displaystyle}
+\nc{\pprime}{\prime\prime}
+\nc{\mrm}{\mathrm}
+\nc{\lbr}{\lbrack}
+\nc{\rbr}{\rbrack}
+\nc{\mT}{\mathrm{T}}
+\nc{\R}{\mathbb{R}}
+\nc{\Z}{\mathbb{Z}}
+\nc{\bfx}{\mathbf{x}}
+\nc{\bfs}{\mathbf{s}}
+\nc{\bfn}{\mathbf{n}}
+\nc{\bfe}{\mathbf{e}}
+\nc{\ora}{\overrightarrow}
+\nc{\Dx}{\Delta x}
+\nc{\Dt}{\Delta t}
+\renewcommand{\headrulewidth}{0pt}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tutorial class}
+\date{}
+
+\begin{document}
+
+
+\quad\\[10pt]
+
+\centerline{\huge TP 4}
+
+\centerline{\rule{5cm}{1pt}}
+
+\thispagestyle{fancy}
+\fancyhead[L]{
+  Master Sciences Technologie Santé\\ 
+  Mention Mathématiques et Applications
+}
+
+\fancyhead[R]{
+  UM4MA316\\
+  2026-2027}
+
+\setlength{\parindent}{0cm}
+  
+\section{Heaps and priority queues}
+
+The goal of this exercise is to implement a priority queue data structure.  
+Our implementation will be based on the notion of heap, which we have studied 
+in class, with the additional feature that priority values should be updatable\footnote{
+This is a desirable feature in some algorithms, in particular the famous 
+Dijkstra algorithm which will learn in class.}. 
+Such feature is absent from (e.g.) the C++ standard library.
+
+\medskip
+
+As a warm-up we shall start by implementing a standard heap based priority queue.\\
+The elements in the heap array will be of the following form, where {\tt id} is
+their unique identifier and {\tt val} is their priority value.
+
+\begin{lstlisting}[caption=]
+struct priority_data {
+	int id;
+	float val;
+};
+\end{lstlisting}
+
+The priority queue itself is nothing more than dynamical array of {\tt struct priority\_data} implementing a heap:
+
+\begin{lstlisting}[caption=]
+struct priority_queue {
+	struct priority_data *heap;
+	int capacity;
+	int size;
+};
+\end{lstlisting}
+
+\medskip
+
+{\bf Exercise 1.} Implement the following functions:
+\begin{lstlisting}[caption=]
+int priority_queue_init(struct priority_queue *q);
+void priority_queue_push(struct priority_queue *q, int id, float val);
+struct priority_data priority_queue_pop(struct priority_queue *q);
+\end{lstlisting}
+The last two functions will make use of the following elementary heap operations, which
+should not be part of the API (hence static functions in the .c source file):
+\begin{lstlisting}[caption=]
+static void swap(struct priority_queue *q, int pos1, int pos2);
+static void sift_up(struct priority_queue *q, int pos);
+static void sift_down(struct priority_queue *q, int pos);
+\end{lstlisting}
+Recall that we have defined sift-up and sift-down in class as the operations which
+make a node in the heap be recursively swapped with its parent (for sift-up) or with 
+one of its children (for sift-down) until the heap property is satisfied. Wether you
+implement these recursively or not is up to you, but non recursive versions are potentially
+faster if implemented properly.
+
+\bigskip
+
+{\bf Exercise 2.} 
+Our next goal is to implement a function:
+\begin{lstlisting}[caption=]
+void priority_queue_update(struct priority_queue *q, int key, float new_val);
+\end{lstlisting}
+
+Since we have no cost effective way yet to search for {\tt key} in our priority 
+queue heap\footnote{Basically our only strategy would be linear search in the
+heap array.}, we shall modify slightly our structure. One possibility would be 
+to add a dictionary {\tt key} $\to$ {\tt pos\_in\_heap}, e.g. through a hash table 
+or a binary search tree, and update it at each push or pop. Here we shall deal 
+with the simpler situation where {\tt id}s are assumed sufficiently small so that 
+they can be used directly as indices into a {\tt pos\_in\_heap} array (i.e. the 
+position in {\tt heap} of the data with id {\tt id} is stored in {\tt pos\_in\_heap[id]}). 
+Such a situation is common when the id is already an index into an existing user data array. 
+
+\begin{lstlisting}[caption=]
+struct priority_queue {
+	struct priority_data *heap;
+	int capacity;
+	int size;
+	int *pos_in_heap;
+};
+\end{lstlisting}
+
+The initialization function should be modified into
+\begin{lstlisting}[caption=]
+int priority_queue_init(struct priority_queue *q, int max_id);
+\end{lstlisting}
+and the latter will also allocate an array of {\tt max\_id + 1} integers and
+pre-fill it with $-1$ (which we will understand as the code for the corresponding
+id being not present yet in the priority queue, making the assumption that effective 
+ids are all non negative).
+
+The {\tt pos\_in\_heap} array should be updated at each push or pop operations. 
+This will imply some modifications in the code for the {\tt swap}, 
+{\tt priority\_queue\_push} and {\tt priority\_queue\_pop} functions.
+ 
+\section{(Intrusive) AVL trees}
+
+
+In class we have studied the notion of binary search tree, including the version
+called AVL which had an auto-balancing property using tree rotations as needed.
+In this exercise you will implement AVL trees for arbitrary user data equipped
+with an ordering. We use a so-called {\it intrusive} data structure, meaning the
+tree nodes will note contain user data as a struct field, but instead the user
+data structs will need to define our tree nodes as part of themselves. In
+particular, memory allocation is entirely delegated to user code, and we shall not deal with it.
+
+\medskip 
+
+More precisely, we define the tree node structure: 
+
+\begin{lstlisting}[caption=]
+struct avl_node {
+    struct avl_node* left;
+    struct avl_node* right;
+    int height;	
+};
+\end{lstlisting}
+
+and the tree structure:
+
+\begin{lstlisting}[caption=]
+struct avl_tree {
+    struct avl_node* root;
+    int (*cmp)(const void *, const void *);
+    int offset;	
+};
+\end{lstlisting}
+
+The user structure (assuming it is called {\tt user\_data} here), will be of the form 
+
+\begin{lstlisting}[caption=]
+struct user_data {
+    /*
+     * whatever struct fields before node, possibly none
+     */
+    struct avl_node* node;
+    /*
+     * whatever struct fields after node, possibly none
+     */
+};
+\end{lstlisting}
+
+The {\tt offset} field of the {\tt struct avl\_tree} data structure needs to be initialized
+with the offset of the field {\tt node} in {\tt struct user\_data}. In C/C++ this can be
+obtained by the function {\tt offsetof(struct user\_data, node)} (the general prototype is
+{\tt offsetof(structname, fieldname)}). This offset allows to obtain the address of the user
+data from the address of the node (simply by subtracting offset from the latter).
+
+The {\tt cmp} field of the {\tt struct avl\_tree} data structure also needs to be filled at 
+initialization, it is the address of the function responsible for comparing two {\tt struct user\_data}.
+In C/C++, the address of a function is given simply by its name. 
+
+The prototype for our {\tt struct avl\_tree} structure will thus be
+\begin{lstlisting}[caption=]
+void avl_tree_initialize(struct avl_tree *t, 
+                         int (*cmp)(const void *, const void *),
+                         int offset);
+\end{lstlisting}
+
+\bigskip
+
+{\bf Exercise 1.} In addition to the initialization function above, implement the following API functions:
+\begin{lstlisting}[caption=]
+void *avl_tree_find(struct avl_tree *t, const void *data);
+void avl_tree_insert(struct avl_tree *t, void *data);
+\end{lstlisting}
+These will make use of non API functions, in particular rotations.
+
+Then test your implementation in a {\tt main.c} file with the user data of your choice (e.g. strings). 
+
+\bigskip
+
+{\bf Exercise 2.} (More challenging)
+A less trivial but more efficient implementation can be based on the following
+\begin{lstlisting}[caption=]
+struct avl_node {
+    struct avl_node* children[2];
+    uintptr_t pcb;
+};
+\end{lstlisting}
+The replacement of left and right child pointers by an array of two can be used to avoid 
+some branches in your code and symmetrize it.\\
+More importantly, the {\tt pcb} field (acronym for parent-child-balance) packs three informations 
+into one (the type {\tt uintptr\_t} is an unsigned integer type sufficiently large to contain any 
+memory address of the system). The lower two bits are used to store the balance factor of the node 
+(shifted by one so that it fits into $\{0, 1, 2\}$). The third lower bit
+indicates whether the node is the left child or right child of its parent. 
+Finally the remaining bits correspond to the address of the parent node (or more precisely: the 
+address of the parent node is obtained from pcb by clearing the lowest three bits). This works 
+provided tree nodes are always 8bytes aligned in memory (meaning that their address is a 
+multiple of 8), which will always be the case on 64bit systems.
+
+\medskip 
+You will try to avoid recursion as much as possible in your implementation (it can be completely 
+eliminated). Having the parent pointer available helps in speeding-up other common tree API 
+functions which we have not touched here, in particular tree traversal, which you can implement as well.
+
+\centerline{\rule{6cm}{1pt}}
+
+\end{document}

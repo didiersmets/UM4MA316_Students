@@ -1,0 +1,246 @@
+\documentclass[a4paper,11pt]{article}
+
+%%%%%%%%%%%%%%%%%% Extensions %%%%%%%%%%%%%%%%%%%
+
+\usepackage[table]{xcolor}
+\usepackage{a4wide}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+%\usepackage{pstricks}
+\usepackage{eucal}
+\usepackage{mathrsfs}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{layout}
+\usepackage{fancyhdr}
+
+\usepackage{listings}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+
+\definecolor{commentgreen}{RGB}{2,112,10}
+\definecolor{eminence}{RGB}{108,48,130}
+\definecolor{weborange}{RGB}{255,165,0}
+\definecolor{frenchplum}{RGB}{129,20,83}
+\definecolor{lgrey}{RGB}{235,235,235}
+
+\lstset{
+  language=C,                     % choose the language of the code
+  numbers=none,                   % where to put the line-numbers
+  stepnumber=1,                   % the step between two line-numbers.        
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{lgrey},  % choose the background color. You must add \usepackage{color}
+  inputencoding=utf8,
+  frame=tb,
+  upquote=true,
+  commentstyle=\color{commentgreen},
+  keywordstyle=\color{eminence},
+  stringstyle=\color{red},
+  basicstyle=\small\ttfamily, % basic font setting
+  emph={int,char,double,float,unsigned,void,bool},
+  emphstyle={\color{blue}},
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  tabsize=4,                      % sets default tabsize to 2 spaces
+  %captionpos=b,                   % sets the caption-position to bottom
+  breaklines=false,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+}
+
+%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nc}{\newcommand}
+\nc{\dsp}{\displaystyle}
+\nc{\pprime}{\prime\prime}
+\nc{\mrm}{\mathrm}
+\nc{\lbr}{\lbrack}
+\nc{\rbr}{\rbrack}
+\nc{\mT}{\mathrm{T}}
+\nc{\R}{\mathbb{R}}
+\nc{\Z}{\mathbb{Z}}
+\nc{\bfx}{\mathbf{x}}
+\nc{\bfs}{\mathbf{s}}
+\nc{\bfn}{\mathbf{n}}
+\nc{\bfe}{\mathbf{e}}
+\nc{\ora}{\overrightarrow}
+\nc{\Dx}{\Delta x}
+\nc{\Dt}{\Delta t}
+\renewcommand{\headrulewidth}{0pt}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tutorial class}
+\date{}
+
+\begin{document}
+
+
+\quad\\[10pt]
+
+\centerline{\huge TP 3}
+
+\centerline{\rule{5cm}{1pt}}
+
+\thispagestyle{fancy}
+\fancyhead[L]{
+  Master Sciences Technologie Santé\\ 
+  Mention Mathématiques et Applications
+}
+
+\fancyhead[R]{
+  UM4MA316\\
+  2026-2027}
+
+\setlength{\parindent}{0cm}
+  
+\section*{Hashtables and Mesh Adjacency}
+
+The data structure {\tt struct Mesh} which we have used in TP2 
+is kind of minimalistic and efficient in terms of memory footprint, 
+but for some mesh operations it can reveal itself insufficient. 
+In particular, there is no direct way to list the (at most\footnote{In the following we shall only consider meshes for which each edge can belong to at most two triangles, with opposite orientation in each of them.}) three
+neighbouring triangles of a given triangle. Since this information
+is essential in many important algorithms acting on meshes, it is useful 
+to build some adjacency tables in addition to the mesh structure itself. The 
+goal of these exercise notes is to test and compare the benefit of hashtables
+in the construction of such tables.
+\medskip
+
+
+{\bf Exercise 1.} Implement a function
+\begin{lstlisting}[caption=]
+int edge_pos_in_tri(int v1, int v2, struct Triangle t);
+\end{lstlisting}
+which returns the position of the oriented edge $v1 \to v2$ in
+the triangle {\tt t}. By convention, for a triangle whose vertices index list is ${\tt a, b, c}$, 
+the edge $a \to b$ has position $0$, the edge $b \to c$ has position $1$, and the edge  
+$c \to a$ has position $2$. If the edge $v1 \to v2$ is not part of ${\tt t}$, then the 
+function should return -1.
+
+\bigskip
+
+{\bf Exercise 2.} Based on the previous, implement a function {\tt tris\_are\_neighbors} 
+which determines if two triangles are neighbours (i.e. if they share a common edge, with opposite orientations). 
+The function shall return $-1$ if they are not, and otherwise the position (in the meaning of Exercise 1) of their common edge in the first triangle.
+\begin{lstlisting}[caption=]
+int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m)
+\end{lstlisting}
+
+\bigskip
+ 
+If a triangular mesh has $ntri$ triangles, then its adjacency
+table $adj$ is an array of length $3 * ntri$ of integers which is formed 
+in the following way: For each $0 \leq i \leq ntri - 1$, and for each
+$0 \leq j \leq 2$, $adj[3 * i + j)]$ contains the index of the 
+triangle which is ajacent to the triangle of index $i$ along its edge of index $j$. 
+If such a triangle does not exist (i.e. if that edge is a boundary edge), then
+this is specified by letting $adj[3 * i + j)] = -1.$ 
+
+\medskip
+
+{\bf Exercise 3.} In this exercise you are asked to build a function {\tt build\_adjacency\_table1} 
+in the most naive way: Loop over all triangles in the mesh, and for each of them
+loop once more over all triangles of the mesh and check for adjancency using the 
+function {\tt tris\_are\_neighbors} of Exercise 2, and update the adjacency table 
+accordingly. The function should initially allocate space for an array $adj$ of
+{\tt 3 * m->ntri} integers, and fill it with $-1.$ Upon completion the function should
+return the address of the adjacency array. 
+\begin{lstlisting}[caption=]
+int *build_adjacency_table1(const struct Mesh *m)
+\end{lstlisting}
+
+\medskip
+
+The previous function has time complexity $O(ntri^2)$, because of the double loop.
+It turns out to be impractical for meshes typically used in applications (up to a 
+few million triangles). 
+
+\medskip
+
+Two triangles being neighbours in the mesh if and only if they share a common edge, 
+the construction of the adjacency table can be accelerated by first building a dictionnary 
+of edges. A {\it key} of that dictionnary is a pair $(v_1,v_2)$, representing an oriented edge, 
+and the corresponding {\it value} is the index of the triangle which contains it. 
+
+\medskip
+
+{\bf Exercise 4.} Following the lines above, and using the implementation already provided in 
+{\tt hash\_tables.h} and {\tt hash\_tables.c} for generic hash tables in C, implement 
+a function {\tt build\_edge\_table1} which initialises and then fill a hash table whose
+keys are of type 
+\begin{lstlisting}[caption=]
+struct Edge {
+	int v1;  
+	int v2;
+};
+\end{lstlisting}
+and whose values are of type {\tt int}. The function prototype is
+\begin{lstlisting}[caption=]
+struct HashTable *build_edge_table1(const struct Mesh *m);
+\end{lstlisting}
+The function should first allocate memory for an hash table, and eventually 
+return its address once its has been filled with the mesh data. 
+
+\bigskip
+
+We are now ready for a second implementation of the construction of the adjacency
+table. For that purpose, once the edge hash table is built it suffices to loop
+over all triangles of the mesh, and then for each of its three edges look-up for 
+the opposing edge (i.e. with vertex order reversed) in the hash table, and potentially 
+update the adjacency table. 
+
+\medskip
+
+{\bf Exercise 5.} Code a function {\tt build\_adjacency\_table2}, which has the same inputs and outputs as the 
+function {\tt build\_adjacency\_table1} in Exercise 3, but based on the new strategy proposed above.   
+\begin{lstlisting}[caption=]
+int *build_adjacency_table2(const struct Mesh *m);
+\end{lstlisting}
+The function should create, use, and then dispose the edge hash table as part of its implementation. 
+
+\bigskip
+
+{\bf Exercise 6.} 
+Here we shall implement a third (and optimal) strategy to build the adjacency table, using
+an ad-hoc (rather than generic) hash table based on chaining and taking advantage of the fact
+that the map $(v_1,v_2) \mapsto v_1$ is a good candidate hash function if not too much triangles
+share a common vertex (a situation which is common an considered a quality for meshes). For that purpose we
+define the structure
+\begin{lstlisting}[caption=]
+struct EdgeTable {
+	int *head;
+	int *next;
+};
+\end{lstlisting}
+The field {\tt head} refers to an (allocated) array of $nvert$ (the number of vertices of the mesh) integers, while {\tt next} (of size $3 * ntri$, the number of oriented edges in the mesh) will allow to perform the chaining. As previosly stated, the hash function associates to each oriented edge its first vertex index. When inserting 
+an edge, say $v1 \to v_2$, one first look in the array $head[v_1]$ : if it is empty (encoded by the value $-1$), then one encode there that edge (by convention the edge number $j$ ($0\leq j \leq 2$) of triangle $i$ ($0 \leq i \leq ntri - 1$) is encoded by $3 * i + j$). If it is not empty, then one pushes the code of the edge as in a stack: the code in $head[v1]$ is first copied into a temporary variable (say $tmp$), then 
+$head[v1]$ is updated with the value $3 * i +j$ and finally (this is the chaining) we encode $next[3 * i + j] = tmp$. You can then deduce (after a bit of thinking!) what is the process for a look-up in that edge table. That will bring you to implement the following functions: 
+\begin{lstlisting}[caption=]
+void edge_table_initialize(struct EdgeTable *et, int nvert, int ntri);
+
+void edge_table_dispose(struct EdgeTable *et);
+
+void edge_table_insert(int v1, int edge_code, struct EdgeTable *et);
+
+int  edge_table_find(int v1, int v2, const struct EdgeTable *et, 
+                                                const struct Mesh *m);
+
+struct EdgeTable *build_edge_table3(const struct Mesh *m);
+
+int *build_adjacency_table3(const struct Mesh *m);
+\end{lstlisting}
+
+\bigskip
+
+{\bf Exercise 7.} Test the timings for the above three methods of construction of the adjacency table in a separate {\tt tp3.c}. The corresponding exectuable should take the mesh input filename as a command line argument. Sample data is provided in the {\tt data} directory in the TP archive, and routines to read them are provided in the {\tt include} and {\tt src} directories. Note that the first ($O(ntri^2)$) method will be too slow for the {\tt bugatti.obj} mesh, you should exclude that method for that mesh.
+
+\centerline{\rule{6cm}{1pt}}
+
+\end{document}

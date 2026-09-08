@@ -1,0 +1,124 @@
+\documentclass[a4paper,12pt]{article}
+
+%%%%%%%%%%%%%%%%%% Extensions %%%%%%%%%%%%%%%%%%%
+
+\usepackage{a4wide}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{array}
+%\usepackage{pstricks}
+\usepackage{eucal}
+\usepackage{mathrsfs}
+%\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{layout}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%
+
+\newcommand{\nc}{\newcommand}
+\nc{\dsp}{\displaystyle}
+\nc{\pprime}{\prime\prime}
+\nc{\mrm}{\mathrm}
+\nc{\lbr}{\lbrack}
+\nc{\rbr}{\rbrack}
+\nc{\R}{\mathbb{R}}
+\nc{\Z}{\mathbb{Z}}
+\nc{\bfx}{\mathbf{x}}
+\nc{\bfs}{\mathbf{s}}
+\nc{\bfn}{\mathbf{n}}
+\nc{\bfe}{\mathbf{e}}
+\nc{\ora}{\overrightarrow}
+\nc{\Dx}{\Delta x}
+\nc{\Dt}{\Delta t}
+\renewcommand{\headrulewidth}{0pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Tutorial class 2}
+\date{}
+
+\begin{document}
+
+
+\quad\\[10pt]
+
+\centerline{\huge TP 2: C structs and meshes}
+
+\centerline{\rule{5cm}{1pt}}
+
+\thispagestyle{fancy}
+\fancyhead[L]{
+  Master Sciences Technologie Santé\\ 
+  Mention Mathématiques et Applications
+}
+
+\fancyhead[R]{
+  UM4MA316\\
+  2026-2027}
+
+
+\quad\\[-5pt]
+\section{Indexed triangular meshes}
+
+
+\begin{itemize}
+
+\item[1)] Implement a C structure (key word \texttt{struct}),
+  that we shall name \texttt{Vertex}, which models a point in 2D space. Use {\tt double} precision 
+  for coordinates.\\[-5pt]
+
+\item[2)] Implement a structure named \texttt{Triangle} for an indexed triangle in the plane. Indexed here mean that   that the triangle vertices are not given explicitly, but through their index (i.e. position) in an array of vertices.\\[-5pt]
+
+\item[3)] Implement a \texttt{Mesh2D} data structure that models a triangular 2D mesh. That structure should contain the following 4 pieces of information~:
+  \begin{itemize}
+  \item[$\bullet$] an integer \texttt{nv} representing the number of vertices in the mesh,
+  \item[$\bullet$] (the address of) an array of {\tt Vertex}, named \texttt{vert}, where actual vertices are to be found or loaded,
+  \item[$\bullet$] an integer \texttt{nt} which represents the number of triangles in the mesh,
+  \item[$\bullet$] (the address of) an array of \texttt{Triangle}, named \texttt{tri}, where actual triangles are to be found or loaded.\\[-5pt]
+  \end{itemize}
+
+\item[4)] Write a function that initialises a {\tt Mesh2D} data structure able to load a given number of vertices and triangles, with the following prototype: \texttt{int initialize\_mesh2D(struct Mesh2D* m, int vtx\_capacity, int tri\_capacity)}. This function should allocate memory. Write a corresponding dispose function : \texttt{void dispose\_mesh2D(struct Mesh2D* m)}, which shall in particular release allocated memory.\\[-5pt]
+
+\item[5)] Write a function with prototype \texttt{double area\_mesh2D(struct Mesh2D* m)} that computes the (signed) area of a mesh.
+
+\item[6)] ({\it More challenging}) Modify the data structures above to describe a surface mesh in 3D space. Devise then a function that computes the volume enclosed by a surface mesh, assuming the latter is closed.\\
+{\it Hint}: Recall that by the divergence theorem 
+$$\int_\Omega {\rm div}( \vec X) = \int_{\partial\Omega} \vec X \cdot \vec n$$
+whenever $\Omega$ (with piecewise $\mathcal{C}^1$ boundary) is an open bounded set and
+$\vec X$ is a $\mathcal{C}^1$ vector field, and where $\vec n$ refers to the unit outward normal 
+to $\Omega.$ Choosing $\vec X(x,y,z) = (x,y,z)$ 
+(for which ${\rm div}\vec X = 3$), allows to transform volume integrals into
+flux integrals, over triangles in our case. For the latter, check that for an
+affine vector field the flux is equal to the product of the triangle area with
+the scalar product of the triangle normal vector and the vector field evaluated
+at the triangle barycentre.
+
+\end{itemize}
+
+\section{Reading, writing (and visualizing) a mesh}
+
+There are many different file formats for encoding meshes, in particular because a mesh data structure can contain much more information (normals, additional scalar or vector fields associated to vertices and/or triangles), depending on the application, than the most simple one we have described above. In these exercise notes, we shall restrict to the INRIA mesh format.
+
+\begin{itemize}
+\item[1)]  Open the scientific report introducing the {\tt medit} mesh visualization software at\\ 
+\url{https://ljll.fr/frey/publications/RT-0253.pdf} and find in there the specs for the {\tt .mesh} file format.\\[-5pt]
+
+\item[2)] Create a function with prototype \texttt{int read\_mesh2D(struct Mesh2D* m, const char* filename)}
+  that reads a 2D mesh from a {\tt .mesh} file and loads it into a {\tt Mesh2D} data structure. What to do in case the file contains a different kind of mesh or unnecessary vertex or triangle attributes is up to you.\\[-5pt]
+
+\item[3)] Create a function with prototype \texttt{int mesh2D\_to\_gnuplot(struct Mesh2D* m, const char* filename)} which writes the data of a {\tt Mesh2D} data structure into a new file which can then be sent directly to {\tt gnuplot} for visualization.\\[-5pt]
+  
+\item[4)] Write a function with prototype \texttt{int write\_mesh2D(struct Mesh2D* m, const char* filename)} that writes the data of a {\tt Mesh2D} data structure into a new file using the {\tt .mesh} file format.   
+
+\item[5)] ({\it More challenging}) Browse or clone the code at
+\url{https://github.com/didiersmets/Myosotis}. It contains C++ code for loading and visualizing surface meshes with a potentially huge number of triangles, by using a multi resolution simplification process. Your goal here is not to understand the whole code archive, but its overall structure and build process (using {\tt cmake}) in order to add the possibility to use INRIA {\tt .mesh} mesh files as inputs (the present version in the archive only accepts Wavefront {\tt .obj} and Stanford {\tt .ply} mesh file formats).  
+
+\end{itemize}
+\end{document}
+
