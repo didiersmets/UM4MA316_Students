@@ -1,0 +1,9 @@
+git clone https://[token]@github.com/didiersmets/UM4MA316\_Students.git
+
+git branch LUCE (si il n'existe pas)
+
+git switch LUCE
+
+git add -all
+git commit -m "nimporte quoi"
+git push
