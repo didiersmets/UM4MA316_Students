@@ -6,4 +6,5 @@ git switch LUCE
 
 git add -all
 git commit -m "nimporte quoi"
+git status (optionel)
 git push
