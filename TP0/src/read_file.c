@@ -16,4 +16,6 @@ int main(int argc, char *argv[]) {
     while ((c=fgets(buff, n,fp)) != NULL) {
         printf("%s", c);
     }
+
+    fclose(fp);
 }
