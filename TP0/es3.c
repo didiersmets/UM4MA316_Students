@@ -4,8 +4,14 @@ int main(){
 
     int n;
 
-    printf("Insert input: \n");
-    scanf("%d", &n);
+    while(n <= 0){
+        printf("Insert input: \n");
+        scanf("%d", &n);
+
+        if(n<=0){
+        printf("Error, n must be > 0\n");
+        }
+    }
 
     int mat[n][n];
 

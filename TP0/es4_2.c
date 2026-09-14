@@ -22,5 +22,7 @@ int main(int argc, char *argv[]){
         fprintf(fptr, "%f   %f\n", x[j], y[j]);
     }
 
+    fclose(fptr);
+
     return 0;
 }
