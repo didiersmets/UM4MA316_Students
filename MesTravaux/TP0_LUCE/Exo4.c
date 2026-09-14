@@ -40,9 +40,9 @@ int main(){
     }
 
     char buffer[256];
-    char *res = fgets(buffer, 3, f);
-
-    while (res!=NULL){
+    char *res = fgets(buffer, 3, f); //permet de ne pas avoir res == NULL 
+                                     // et donc de rentrer dans le while
+    while (res!=NULL){  
         printf("%s",res);
         res = fgets(buffer, 3, f);
     }
