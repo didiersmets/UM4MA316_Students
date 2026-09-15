@@ -1,5 +1,7 @@
+#ifndef CIRC_QUEUE
+#define CIRC_QUEUE
+
 #include <stdbool.h>
-#include <stddef.h> // for size_t
 
 struct Queue {
 	size_t front; // index of the first element in the queue
@@ -20,4 +22,6 @@ void queue_dispose(struct Queue *q);
 void queue_enqueue(struct Queue *q, const void *src);
 
 void queue_dequeue(struct Queue *q, void *dest);
+
+#endif
 
