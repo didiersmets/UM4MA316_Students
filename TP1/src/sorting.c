@@ -1,6 +1,16 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
+
+void print_array(int* A, size_t size) {
+    for (size_t i = 0 ; i < size ; i++) {
+        printf("%d\t", A[i]);
+    }
+    puts("");
+}
 
 void bubble_sort(int *A, size_t size) {
     int buff = 0;
@@ -38,18 +48,38 @@ void insertion_sort(int *A, size_t size) {
     }
 }
 
-/*
-void merge_sort(int *A, size_t size) {
-    
-}
-*/
-
-void print_array(int* A, size_t size) {
-    for (size_t i = 0 ; i < size ; i++) {
-        printf("%d\t", A[i]);
+void Merge(int *A, size_t p, size_t q, size_t r) {
+    puts("Entering merge. Section to sort: ");
+    print_array(&A[p],r-p);
+    int *T = malloc(r-p);
+    int index1 = p;
+    int index2 = q;
+    int val1 = A[p]; 
+    int val2 = A[q];
+    for (size_t i = 0 ; i < r - p ; i++) {
+        val1 = A[index1]; 
+        val2 = A[index2];
+        T[i] = (val1 < val2) ? val1 : val2;
+        index1 = (val1 < val2) ? index1 + 1 : index1;
+        index2 = (val1 < val2) ? index2 : index2 + 1;
     }
-    puts("");
+    memcpy(&A[p], T, (r-p) * sizeof(int));
+    print_array(T,r-p);
+    free(T);
 }
+
+void MergeSort(int *A, size_t p, size_t r) {
+    int q = 0;
+    if (p < r) {
+        puts("Entering if in merge sort.");
+        q = floor((p+r)/2);
+        printf("p is %ld and q is %d\n", p, q);
+        MergeSort(A, p, q);
+        MergeSort(A, q+1, r);
+        Merge(A, p, q, r);
+    }
+}
+
 
 
 int main(void) {
@@ -69,7 +99,7 @@ int main(void) {
     A[9] = 45;
 
     print_array(A, n);
-    insertion_sort(A, n);
+    MergeSort(A, 0, n);
     print_array(A, n);
 
     return 0;
