@@ -8,7 +8,9 @@ git add -all
 git commit -m "nimporte quoi"
 git status (optionel)
 git push
+(first time you have to say where you are going to push)
 
+git push -u origin YOURNAME
 
 pour retrouver les un fichier supprimé mais pas commité :
 git restore <nom du fichier>
