@@ -5,3 +5,5 @@
 *.exe
 .vscode/
 .gitignore
+**/build
+

@@ -7,7 +7,7 @@ git clone https://[token]@github.com/didiersmets/UM4MA316_Students.git
 replacing token with its actual value given during 1st TP class.
 
 
-inside MA316/tpo
+TP0
 
 2_hello.c
 
@@ -16,4 +16,5 @@ inside MA316/tpo
 
 
 4_read_file.c uses stack allocated array
-4_write_file.c uses heap allocated array (size is kept at 1000 * double max)
+4_write_file.c uses stack allocated array
+4_2_write_file.c uses heap allocated array (size is kept at 1000 * double max)

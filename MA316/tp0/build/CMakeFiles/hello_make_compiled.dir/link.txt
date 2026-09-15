@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic -Wl,--dependency-file=CMakeFiles/hello_make_compiled.dir/link.d CMakeFiles/hello_make_compiled.dir/hello.c.o -o hello_make_compiled
