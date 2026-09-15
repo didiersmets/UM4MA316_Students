@@ -85,6 +85,8 @@ void Merge(int *T, int p, int q, int r){
         }
     }
 
+    //je mets les éléments restants à la suite du tableau
+
     while (i<taille1){
         tableau[count++]=T[p+i];
         i++;
@@ -94,6 +96,8 @@ void Merge(int *T, int p, int q, int r){
         tableau[count++]=T[q+j+1];
         j++;
     }
+
+    //je remplace les éléments de T par les éléments triés de tableau
 
     for(int k=p; k<(p+(taille1+taille2)); k++){
         T[k]=tableau[k-p];
@@ -118,7 +122,8 @@ int main(int argc, char* argv[]){
     srand(time(NULL));
 
     int N;
-    argc<2 ? printf("Afin de tester la validite de nos fonctions, veuillez entrer un entier\n"), scanf("%d",&N) : (N=atoi(argv[1]));
+    argc<2 ? printf("Afin de tester la validite de nos fonctions, veuillez entrer un entier qui
+    representera la taille du tableau\n"), scanf("%d",&N) : (N=atoi(argv[1]));
 
     int *array = (int *)malloc(sizeof(int)*N);
     int *array2 = (int *)malloc(sizeof(int)*N);
