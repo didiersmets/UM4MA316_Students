@@ -74,7 +74,8 @@ void queue_enqueue ( struct Queue *q , const void * src ){
 
     size_t idx = (q -> front + q -> length) % q -> capacity;
 
-    void *dest = (char*)q->data + (idx * q -> elem_size);
+    void *dest = (char*)q->data 
+    + (idx * q -> elem_size);
 
     memcpy(dest, src, q -> elem_size);
 
