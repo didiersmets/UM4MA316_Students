@@ -21,9 +21,9 @@ int main(int argc, char *argv[]){
 
     for(int i=0; i<N; i++){
         p = rand()%11;
-        printf("tour %d p=%d\n",i+1,p);
+        printf("\ntour %d || p=%d\n",i+1,p);
         
-        if ( p%2 == 1 ){
+        if ( p%2 == 0 ){
 
             printf("p=%d entre dans la queue\n",p);
             queue_enqueue(q,&p);
@@ -38,20 +38,21 @@ int main(int argc, char *argv[]){
                 printf("p=%d ne fait rien, file vide\n",p);
             } else {
                 void *dest=malloc(sizeof(q->elem_size));
-                queue_dequeue(q, dest);
+                queue_dequeue(q, dest); 
                 int QuiEstCe = *(int *)dest;
                 printf("%d est sorti de la queue\n", QuiEstCe);
                 free(dest);
             }
         }
     }
-    printf("l_max = %d\n", l_max);
+    printf("\nl_max = %d\n\n", l_max);
 
 
 
     //affiche le contenu de la queue
     int taille = 0;
     char *adresse_valeur;
+    printf("Contenu de la file :\n\n");
 
     while(taille < q->length){
 
@@ -62,7 +63,7 @@ int main(int argc, char *argv[]){
         
         taille++;
     }
-
+    printf("\n");
     queue_dispose(q);
 
     return 0;   

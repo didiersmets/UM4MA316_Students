@@ -71,7 +71,9 @@ void queue_enqueue(struct Queue *q, const void *src){
         printf("enlargement succeeded, nb of elements is %zu thus capacity goes from %zu to %zu\n",q->length, previous_capacity, q->capacity);
     }
     void *dest = (char *)q->data + q->elem_size * ((q->front + q->length-1) % q->capacity);
-    memcpy(dest, src, q->elem_size);
+    //on retire 1 pour ne pas compter q->front deux fois, puisque le premier élément est compris dans le nombre d'élément présent
+    //dans la file
+    memcpy(dest, src, q->elem_size); //met ce qui se trouve dans source à l'adresse donnée par dest
 }
 
 void queue_dequeue ( struct Queue *q , void * dest ){
@@ -79,7 +81,7 @@ void queue_dequeue ( struct Queue *q , void * dest ){
         return;
     }
     void *src = (char*) q->data + q->elem_size*q->front;
-    memcpy(dest, src, q->elem_size);
+    memcpy(dest, src, q->elem_size); //récupère l'élément du début de la queue, et la met  dans dest
     printf("Je dequeue : %d\n", *(int*)dest);
     q->length--;
     q->front = (q->front + 1) %q->capacity;
