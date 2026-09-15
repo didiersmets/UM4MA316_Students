@@ -44,8 +44,8 @@ void queue_enqueue(struct Queue *q, const void *src) {
         enlarge_queue_capacity(q);
     }
 
-    void *dest = q-> data;
-    dest = memcpy(dest + sizeof(int)*q->length, src, sizeof(int));
+    int *dest = (int *)q-> data;
+    memcpy(&dest[q->length], src, sizeof(int));
     q->length+=1;
 }
 
@@ -54,8 +54,8 @@ void queue_dequeue(struct Queue *q, void *dest) {
         puts("Queue is empty, can not dequeue!");
     }
     else {
-        void *src = q-> data;
-        dest = memcpy(dest, src + sizeof(int) * q->front, sizeof(int));
+        int *src = (int *)q-> data;
+        memcpy(dest, &src[q->front], sizeof(int));
         q->front +=1;
         q->length-=1;
     }
