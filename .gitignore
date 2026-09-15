@@ -6,4 +6,5 @@
 .vscode/
 .gitignore
 **/build
+token.txt
 
