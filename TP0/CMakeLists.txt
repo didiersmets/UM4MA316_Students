@@ -8,6 +8,7 @@ add_executable(3_2_pascal 3_2_pascal.c)
 
 
 add_executable(4_read_file 4_read_file.c)
-target_link_libraries(4_read_file PRIVATE m)
 add_executable(4_write_file 4_write_file.c)
+target_link_libraries(4_write_file PRIVATE m) #for linking math.h
 add_executable(4_2_write_file 4_2_write_file.c)
+target_link_libraries(4_2_write_file PRIVATE m) #for linking math.h
