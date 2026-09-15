@@ -15,11 +15,30 @@ void bubble_sort(int *A, size_t size) {
     }
 }
 
-/*
+
 void insertion_sort(int *A, size_t size) {
-    
+    int buff = 0;
+    int previous = 0;
+    int j = 0;
+    for (size_t i = 1; i < size; i++) {
+        buff = A[i];
+        previous = A[i-1];
+        j = i;
+        while (buff < previous && j!=0) {
+            
+
+            A[j-1] = buff;
+            A[j] = previous;
+
+            j -= 1;
+            
+            buff = A[j];
+            previous = A[j-1];
+        }
+    }
 }
 
+/*
 void merge_sort(int *A, size_t size) {
     
 }
@@ -50,7 +69,7 @@ int main(void) {
     A[9] = 45;
 
     print_array(A, n);
-    bubble_sort(A, n);
+    insertion_sort(A, n);
     print_array(A, n);
 
     return 0;
