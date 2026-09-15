@@ -2,6 +2,7 @@
 #define CIRC_QUEUE
 
 #include <stdbool.h>
+#include <stddef.h>
 
 struct Queue {
 	size_t front; // index of the first element in the queue

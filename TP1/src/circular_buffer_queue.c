@@ -53,7 +53,7 @@ static void enlarge_queue_capacity(struct Queue *q){
     void *temp = malloc(2 * q->elem_size * q->capacity);
     for(int i=0; i<q->length; i++){
       void *dest =  temp + i * q->elem_size; 
-      void *src = q->data + i * q->elem_size;
+      void *src = q->data + ((q->front + i) % q->capacity) * q->elem_size;
       memcpy(dest, src, q->elem_size);
     }
     free(q->data);

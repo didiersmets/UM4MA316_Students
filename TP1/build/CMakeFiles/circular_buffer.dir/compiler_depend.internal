@@ -153,6 +153,7 @@ CMakeFiles/circular_buffer.dir/src/test_queue.c.o
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_stdio.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_string.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/secure/_strings.h
+ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stddef.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdint.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdio.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/stdlib.h
@@ -200,8 +201,17 @@ CMakeFiles/circular_buffer.dir/src/test_queue.c.o
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/signal.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/stdio.h
  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/wait.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_header_macro.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_max_align_t.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_null.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_offsetof.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_ptrdiff_t.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_rsize_t.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_size_t.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/__stddef_wchar_t.h
  /Library/Developer/CommandLineTools/usr/lib/clang/17/include/ptrcheck.h
  /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdbool.h
+ /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stddef.h
  /Library/Developer/CommandLineTools/usr/lib/clang/17/include/stdint.h
  /Users/mathieu/academic/cs/c_stuff/dsa_study/sidate/UM4MA316_Students/TP1/include/circular_buffer_queue.h
 
