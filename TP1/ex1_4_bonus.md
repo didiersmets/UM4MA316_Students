@@ -1,4 +1,4 @@
-## Exercicee 1.4 (bonus)
+## Exercice 1.4 (bonus)
 
 After running the code with different orders of magnitude (I did 10 times for each), and calculating the mean, we come up with this result :
 
