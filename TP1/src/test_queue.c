@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "circular_buffer_queue.h"
 
 int main(int argc, char *argv[]) {
 
     struct Queue *q = queue_init(sizeof(int), 0);
     int l_max = 0;   
+    srand(time(NULL)); 
 
     if (argc < 2) {
         return 1;
