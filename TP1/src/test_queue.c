@@ -17,25 +17,27 @@ add some directories to the include path for header files, here the include dire
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
+#include <unistd.h>
 
-#include "../include/circular_buffer_queue.h"
+#include "circular_buffer_queue.h"
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-int main()
+int main(int argc, char *argv[])
 {
     int cycles;
     int random;
-    int *dest;
+    int dest;
     int lmax = 0;
     struct Queue *q = queue_init(sizeof(int), 0);
 
-    srand(time(NULL));
+    srand(time(NULL) ^ getpid());
 
-    do
-    {
-        printf("Insert the number of cycles:\n");
-        scanf("%d", &cycles);
-    } while (cycles < 0);
+   if (argc != 2) {
+        fprintf(stderr, "Usage: %s <number_of_cycles>\n", argv[0]);
+        return 1;
+    }
+
+    cycles = atoi(argv[1]);
 
     for (int i = 0; i < cycles; i++)
     {
@@ -47,13 +49,13 @@ int main()
         }
         else
         {
-            queue_dequeue(q, dest);
+            queue_dequeue(q, &dest);
         }
 
         lmax = MAX(lmax, queue_length(q));
     }
 
-    printf("The maximum length achieved in the process is: %d\n", lmax);
+    printf("%d %d\n", cycles, lmax);
   
     queue_dispose(q);
    
