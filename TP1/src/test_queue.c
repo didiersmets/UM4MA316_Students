@@ -23,14 +23,11 @@ int main(int argc, char *argv[]) {
             int trash;
             queue_dequeue(q, &trash);
         }
-
         if (q->length > l_max){l_max = q->length;}
     }
    
     queue_dispose(q);
-
     printf("%d \n", l_max);
-
     return 0;
 
 }

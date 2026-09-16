@@ -9,6 +9,9 @@ struct Queue {
 };
 
 template <typename T>
+static void enlarge_queue_capacity(Queue<T> *q);
+
+template <typename T>
 Queue<T> *queue_init(size_t capacity){
     Queue<T> *queue = new Queue<T>;
     queue -> front = 0; // index of the first element in the queue
@@ -29,14 +32,14 @@ size_t queue_length(const Queue<T> *q){
 }
 
 template <typename T>
-void queue_dispose(const Queue<T> *q){
+void queue_dispose(Queue<T> *q){
     if (q == nullptr) return;
     delete[] q->data;
     delete q;
 }
 
 template <typename T>
-void queue_enqueue(const Queue<T> *q, const T src){
+void queue_enqueue(Queue<T> *q, const T src){
     if (q->length == q->capacity){
         enlarge_queue_capacity(q);
     }
@@ -46,7 +49,7 @@ void queue_enqueue(const Queue<T> *q, const T src){
 }
 
 template <typename T>
-void queue_dequeue(const Queue<T> *q, const T dest){
+void queue_dequeue(Queue<T> *q, T &dest){
     if (q->length == 0) return;
     dest = q->data[q->front];
     q->front =(q->front + 1) % q->capacity;
@@ -54,7 +57,7 @@ void queue_dequeue(const Queue<T> *q, const T dest){
 }
 
 template <typename T>
-static void enlarge_queue_capacity(const Queue<T> *q){
+static void enlarge_queue_capacity(Queue<T> *q){
     size_t newcapacity = q->capacity + 1;
     T *newdata = new T[newcapacity];
 

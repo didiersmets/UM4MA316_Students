@@ -1,16 +1,17 @@
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 #include "circular_buffer_queue_cpp.h"
 
 int main(int argc, char *argv[]) {
 
-    Queue<int> *q = queue_init<int>(0);
-    size_t l_max = 0;
-    srand(time(NULL));
-
     if (argc < 2) {
         return 1;
     }
+
+    Queue<int> *q = queue_init<int>(0);
+    size_t l_max = 0;
+    srand(time(NULL));
     
     for (int i = 0; i < std::atoi(argv[1]); i++){
         int n = std::rand();
