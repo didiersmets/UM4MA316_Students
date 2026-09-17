@@ -7,7 +7,7 @@ int main(int argc, char *argv[]){
     FILE *fp = fopen(argv[1], "r");
     if(fp == NULL){
         perror("failed to open file\n");
-        return 0;
+        return 1;
     }
 
 

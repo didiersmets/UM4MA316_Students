@@ -18,13 +18,13 @@ int main(int argc, char *argv[]){
 
     if (argc < 2){
         printf("Please only provide one interger as input \n");
-        return 0;
+        return 1;
     }else{
         int n = atoi(argv[1]);
 
         if(n <= 1 || n > MAX_LINE_SIZE){
             printf("Please provide a number greater than 1\n");
-            return 0;
+            return 1;
         }
 
         double x_min = - 6 * M_PI;

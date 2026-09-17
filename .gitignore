@@ -7,4 +7,5 @@
 .gitignore
 **/build
 token.txt
+.DS_Store
 

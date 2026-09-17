@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 
     if (argc < 2){
         printf("Please only provide one interger as input \n");
-        return 0;
+        return 1;
     }else{
         int n = atoi(argv[1]);
         printf("Your input no is: %d \n", n);
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
         //if input is larger than 1000 exit
         if( n > MAX_SIZE){
             printf("please enter n<=1000\n");
-            return 0;
+            return 1;
         }
 
         int triangle[MAX_SIZE][MAX_SIZE];
