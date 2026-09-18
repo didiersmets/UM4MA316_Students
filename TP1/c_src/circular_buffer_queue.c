@@ -46,7 +46,7 @@ void queue_enqueue(struct Queue *q, const void *src){
         enlarge_queue_capacity(q);
     }
     // array index to be accessed
-    int index = (q->front + q->length) % q->capacity;
+    size_t index = (q->front + q->length) % q->capacity;
 
     //conversion to byte offset
     size_t byte_offset = (size_t)index * q->elem_size;
@@ -64,7 +64,7 @@ void queue_dequeue(struct Queue *q, void *dest){
         printf("Dequeue was called althought the queue is empty");
     }else{
         //copy the item do test
-        int index = (q->front);
+        size_t index = (q->front);
         size_t byte_offset = (size_t)index * q->elem_size;
         void* element_ptr = (char*)q->data + byte_offset;
         memcpy(dest, element_ptr, q->elem_size);
@@ -91,8 +91,8 @@ static void enlarge_queue_capacity(struct Queue * q){
     //transfer the old data into new data.
     for(int e = 0; e<q->length; e++){
         // array index to be accessed
-        int index_q = (q->front + e) % q->capacity;
-        int index_new_q = e;
+        size_t index_q = (q->front + e) % q->capacity;
+        size_t index_new_q = e;
 
         //conversion to byte offset
         size_t byte_offset_q = (size_t)index_q * q->elem_size;
