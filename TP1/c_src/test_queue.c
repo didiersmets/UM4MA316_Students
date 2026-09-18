@@ -3,7 +3,7 @@
 #include <math.h>
 #include <time.h>
 
-#include "../include/circular_buffer_queue.h"
+#include "./include/circular_buffer_queue.h"
 
 
 int main(int argc, char* argv[]){
@@ -35,12 +35,12 @@ int main(int argc, char* argv[]){
                 queue_dequeue(q, &dest);
 
             }
-            if(q->length > max_length){
-                max_length = q->length;
+            if(queue_length(q) > max_length){
+                max_length = queue_length(q);
             }
             //the main function should return the largest length l_max
             //of the queue q during the whole process
-            printf("Current q length:   %d \n",(int)q->length);
+            printf("Current q length:   %d \n",(int)queue_length(q));
             printf("Max length reached: %d \n", max_length);
         }
 
