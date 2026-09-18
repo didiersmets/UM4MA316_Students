@@ -20,7 +20,6 @@ target_include_directories(c_test PRIVATE c_src/include)
 
 # c++ code
 add_executable(cpp_test
-    cpp_src/circular_buffer_queue.cpp
     cpp_src/test_queue.cpp # your C++ test runner / main
 )
 target_include_directories(cpp_test PRIVATE cpp_src/include)

@@ -82,7 +82,7 @@ void queue_dequeue(struct Queue *q, void *dest){
 
 static void enlarge_queue_capacity(struct Queue * q){
 
-    int new_capacity = q->capacity * 2;
+    size_t new_capacity = q->capacity * 2;
 
 
     void *new_data = malloc(new_capacity * q->elem_size);
