@@ -26,19 +26,17 @@ struct Queue *queue_init(size_t elem_size, size_t capacity){
 
     q->data = data; //pass the data pointer to the data in q
 
+    q->front = 0;
+    q->length = 0;
+    q->capacity = capacity;
+    q->elem_size = elem_size;
+
     return q;
 }
 
 void queue_dispose(struct Queue *q){
     free(q->data);
-    if(q->data != NULL){
-        printf("Could not free the data \n");
-    }
     free(q);
-    if(q != NULL){
-        printf("Could not free the data \n");
-    }
-
 }
 
 void queue_enqueue(struct Queue *q, const void *src){
@@ -65,47 +63,55 @@ void queue_dequeue(struct Queue *q, void *dest){
     if(q->length == 0){ //the queue is already empty
         printf("Dequeue was called althought the queue is empty");
     }else{
+        //copy the item do test
+        int index = (q->front);
+        size_t byte_offset = (size_t)index * q->elem_size;
+        void* element_ptr = (char*)q->data + byte_offset;
+        memcpy(dest, element_ptr, q->elem_size);
+
+        //"remove" from queue
         q->length--;
         //move the front by 1 address
         //if the front has reached capacity make it 0
         q->front++;
         if (q->front == q->capacity){
-            q->front == 0;
+            q->front = 0;
         }
     }
 }
 
 static void enlarge_queue_capacity(struct Queue * q){
-    //allocate a new queue to copy stuff to
-    struct Queue *new_q = malloc(sizeof(struct Queue));
 
-    int new_capacity = q->capacity +1 ;
+    int new_capacity = q->capacity * 2;
 
-    new_q->front = 0;
-    new_q->length = q->length;
-    new_q->capacity = new_capacity;
-    new_q->elem_size = q->elem_size;
 
     void *new_data = malloc(new_capacity * q->elem_size);
-    new_q->data = new_data;
 
 
     //transfer the old data into new data.
     for(int e = 0; e<q->length; e++){
         // array index to be accessed
         int index_q = (q->front + e) % q->capacity;
-        int index_new_q = (new_q->front + e) % new_q->capacity;
+        int index_new_q = e;
 
         //conversion to byte offset
         size_t byte_offset_q = (size_t)index_q * q->elem_size;
-        size_t byte_offset_new_q = (size_t)index_new_q * new_q->elem_size;
+        size_t byte_offset_new_q = (size_t)index_new_q * q->elem_size;
 
         // calculated address and memcpy. Cast to char is just to the sum sums 1 byte * byte_offset
         void* element_ptr_q = (char*)q->data + byte_offset_q;
-        void* element_ptr_new_q = (char*)new_q->data + byte_offset_new_q;
+        void* element_ptr_new_q = (char*)new_data + byte_offset_new_q;
 
         //copy the new item 
-        memcpy(element_ptr_q, element_ptr_new_q, new_q->elem_size);
+        memcpy(element_ptr_new_q, element_ptr_q, q->elem_size);
 
     }
+
+    //free the old data and put the new pointer in
+    free(q->data);
+    q->data = new_data;
+
+    q->front = 0;
+    q->capacity = new_capacity;
+
 }
