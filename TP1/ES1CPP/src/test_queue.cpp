@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib> 
+#include <iostream>
 #include "../include/circular_buffer_queue.h"
 
 int main(int argc, char *argv[]){
@@ -9,13 +8,13 @@ int main(int argc, char *argv[]){
 
     int n = atoi(argv[1]);
 
-    struct Queue * q = queue_init(sizeof(int),n);
+    Queue<int> * q = queue_init<int>(n);
     size_t max_len = 0;
 
     for(int i = 0; i<n; i++){
         int p = rand();
         if(p%2==0){
-            queue_enqueue(q, &p);
+            queue_enqueue(q, p);
             if(max_len<queue_length(q)){
                 max_len = queue_length(q);
             }
@@ -27,7 +26,7 @@ int main(int argc, char *argv[]){
 
     queue_dispose(q);
 
-    printf("Max length = %zu\n", max_len);
+    std::cout << "Max length = " << max_len << "\n";
 
     return 0;
 }

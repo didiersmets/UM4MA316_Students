@@ -20,4 +20,3 @@ void queue_dispose(struct Queue *q);
 void queue_enqueue(struct Queue *q, const void *src);
 
 void queue_dequeue(struct Queue *q, void *dest);
-
