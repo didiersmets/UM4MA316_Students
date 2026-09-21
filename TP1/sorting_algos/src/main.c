@@ -38,7 +38,12 @@ int main() {
       fprintf(coord, "%d   %.10f\n", n, y_co[j][k]);
     }
   }
-  
+
   fclose(coord);
+  const char *command = "gnuplot plot.gnuplot";
+  int cr = system(command);
+  if (cr != 0) {
+    fprintf(stderr, "Impossible de lancer la commande: %s\n", command);
+  }
   return 0;
 }
