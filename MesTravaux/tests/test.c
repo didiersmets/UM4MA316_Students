@@ -1,26 +1,10 @@
 #include <stdio.h>
+#include "test2.c"
+#include <stdlib.h>
+
 
 int main(){
-    FILE *f = fopen("test.txt","r");
-     if (f==NULL){
-        printf("erreur\n");
-        return 0;
-    }
-
-    char buffer[256];
-    char *res = fgets(buffer, 100, f);
-    int i = 2;
-
-
-    while (res!=NULL){
-        res = fgets(buffer, i, f);
-        if (res!=NULL){
-        printf("%s",res);}
-        printf(",");
-        i++;
-    }
-
-
-    
-
+    printf("%d\n",facto(6));
+    printf("%d\n",6*5*4*2*3);
+    return 1;
 }
