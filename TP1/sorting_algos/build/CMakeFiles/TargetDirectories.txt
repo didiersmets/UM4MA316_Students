@@ -1,0 +1,3 @@
+/Users/mathieu/academic/cs/c_stuff/dsa_study/sidate/UM4MA316_Students/TP1/sorting_algos/build/CMakeFiles/sorting_algos_cmp.dir
+/Users/mathieu/academic/cs/c_stuff/dsa_study/sidate/UM4MA316_Students/TP1/sorting_algos/build/CMakeFiles/edit_cache.dir
+/Users/mathieu/academic/cs/c_stuff/dsa_study/sidate/UM4MA316_Students/TP1/sorting_algos/build/CMakeFiles/rebuild_cache.dir

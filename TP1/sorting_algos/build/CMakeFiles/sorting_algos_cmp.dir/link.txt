@@ -1,0 +1,1 @@
+/usr/bin/cc  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/sorting_algos_cmp.dir/src/algos.c.o CMakeFiles/sorting_algos_cmp.dir/src/main.c.o -o sorting_algos_cmp
