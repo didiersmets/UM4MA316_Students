@@ -1,10 +1,27 @@
 #include <stdio.h>
-#include "test2.c"
-#include <stdlib.h>
+
+#include <math.h>
+
+
+
+
+
+
+
+void area(double a,double b,double c,double d){ 
+    printf("aire deter %lf\n", 0.5*(a*d-b*c) );
+    printf("aire sans deter %lf\n", 0.5*sqrt((pow(a,2)+pow(b,2))) * sqrt((pow(c,2)+pow(d,2))) * sqrt(1 - pow((a*c + b*d )/(sqrt((pow(a,2)+pow(b,2))) * sqrt((pow(c,2)+pow(d,2)))),2)    ));
+   
+
+}
+
+
+
 
 
 int main(){
-    printf("%d\n",facto(6));
-    printf("%d\n",6*5*4*2*3);
+    area(22,31,43,52);
+
+
     return 1;
 }

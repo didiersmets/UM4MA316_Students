@@ -45,6 +45,7 @@ void dispose_mesh2D(struct Mesh2D*m){
 double area_mesh2D(struct Mesh2D* m){ //je comprends que c'est la somme de l'air de chaque triangle de mesh2D
 
     double aire_totale = 0;
+    double aire = 0;
 
     for(int i=0; i<(m->nt); i++){
 
@@ -61,6 +62,16 @@ double area_mesh2D(struct Mesh2D* m){ //je comprends que c'est la somme de l'air
         AC.y = C.y - A.y;
 
         aire_totale += 0.5*(AB.x*AC.y-AC.x*AB.y); //déterminant de la matrice composée des vecteurs colonnes AB et AC, qui divisé par 2 donne l'aire signé du trangle ABC
+        printf("aire deter = %lf\n", 0.5*(AB.x*AC.y-AC.x*AB.y));
+
+
+        //sans deter, mais ce n'est pas signé
+        double normeAB = AB.x*AB.x + AB.y*AB.y;
+        double normeAC = AC.x*AC.x + AC.y*AC.y;
+        double cosABAC = (AB.x*AC.x + AB.y*AC.y)/ (normeAB*normeAC);
+        aire = (normeAB*normeAC)*0.5 * sqrt(1-cosABAC*cosABAC);
+        printf("aire sans deter %lf\n", aire);
+    
     }
 
     return aire_totale;
@@ -73,7 +84,7 @@ int read(struct Mesh2D* m, const char* filename){
         exit(1);
     }
 
-    //on voit dans les fichiers mesh à disposition que la dimension est 3, on a 5 points de 3 coordonnées, et 4 triangles, formant, une pyramide à base triangulaire
+    //on voit dans les fichiers mesh à disposition que la dimension est 3, on a 5 points de 3 coordonnées, et 4 triangles, formant une pyramide à base triangulaire
     //nous allons alors prendre les valeurs en oubliant la 3ème coordonnée
     char buffer[256];
     char mot[256];
@@ -81,7 +92,7 @@ int read(struct Mesh2D* m, const char* filename){
 
     while ((strcmp(mot,"Vertices")!=0) && res!=NULL){ //strcmp == 0 si les deux chaines de caractères mises en argument sont identiques
         res = fgets(buffer, 256, f);
-        sscanf(buffer, "%s", mot);
+        sscanf(buffer, "%s", mot); //scanf lit depuis stdin, fscanf lit depuis un fichier, sscanf lit depuis un string
     }
     if (res == NULL) printf("Pas de 'Vertices' dans ton fichier\n");
 
