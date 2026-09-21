@@ -84,6 +84,56 @@ void merge_sort(int* T, int p, int r){
     }
 }
 
+void merge2_subroutine(int *TI, int *TF, int p, int q, int r){
+    int i = p;
+    int j = q + 1;
+    int k = p;
+
+    while (i <= q && j <= r) {
+        if (TI[i] < TI[j]) {
+            TF[k] = TI[i];
+            i++;
+        }
+        else {
+            TF[k] = TI[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i <= q) {
+        TF[k] = TI[i];
+        i++;
+        k++;
+    }
+
+    while (j <= r) {
+        TF[k] = TI[j];
+        j++;
+        k++;
+    }
+
+
+}
+
+void merge2_sort_internal(int* F, int* I, int p, int r){
+    if(p < r){
+        int q = (p+r)/2;
+        merge2_sort_internal(I, F, p, q);
+        merge2_sort_internal(I, F, q + 1, r);
+        merge2_subroutine(F, I, p, q, r);
+    }
+}
+
+void merge2_sort(int *T, int N){
+    int* B = malloc(sizeof(int) * N);
+    for (int i = 0; i < N; i++) {
+        B[i] = T[i];
+    }
+    merge2_sort_internal(B, T, 0, N-1);
+    free(B);
+}
+
 int main(int argc, char * argv[]) {
     int sizes[] = {10, 20, 50, 100, 200, 500, 1000, 5000, 10000, 20000, 50000, 100000};
     srand(time(NULL));
@@ -100,6 +150,7 @@ int main(int argc, char * argv[]) {
         int *bubble_tab = malloc(sizeof(int) * n);
         int *insertion_tab = malloc(sizeof(int) * n);
         int *merge_tab = malloc(sizeof(int) * n);
+        int *merge2_tab = malloc(sizeof(int) * n);
 
         for (int i=0; i < n; i++){
             original[i] = (rand() % 100) + 1;
@@ -108,6 +159,8 @@ int main(int argc, char * argv[]) {
         memcpy(bubble_tab, original, sizeof(int) * n);
         memcpy(insertion_tab, original, sizeof(int) * n);
         memcpy(merge_tab, original, sizeof(int) * n);
+        memcpy(merge2_tab, original, sizeof(int) * n);
+
 
         clock_t start = clock();
         bubblesort(bubble_tab, n);
@@ -124,12 +177,19 @@ int main(int argc, char * argv[]) {
         end = clock();
         double merge_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-        fprintf(file, "%d %f %f %f\n", n, bubble_time, insertion_time, merge_time);
+        start = clock();
+        merge2_sort(merge2_tab, n - 1);
+        end = clock();
+        double merge2_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+        fprintf(file, "%d %f %f %f %f\n", n, bubble_time, insertion_time, merge_time, merge2_time);
 
         free(original);
         free(bubble_tab);
         free(insertion_tab);
         free(merge_tab);
+        free(merge2_tab);
+
     }
 
     fclose(file);
