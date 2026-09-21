@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+
+#include "./include/circular_buffer_queue.hpp"
+
+
+int main(int argc, char* argv[]){
+    srand(time(NULL));
+
+    if (argc < 2){
+        printf("Please only provide one interger as input \n");
+        return 1;
+    }else{
+    
+        int n = atoi(argv[1]);
+        printf("Your input no is: %d \n", n);
+
+        //First initiate an empty queue q of integers,
+        struct Queue<int> *q = queue_init<int>(n);
+
+
+        int max_length = 0;
+        //iteratively pick random integers p
+        //and then enqueue p in q if p is even
+        //and instead dequeue one item from q whenp is odd.
+        for(int i = 0; i<n; i++){
+            
+            int p = rand() % 101; //generate random between 0 and 100;
+            if(p % 2 == 0){
+                queue_enqueue(q, &p);
+            }else{
+                int dest;
+                queue_dequeue(q, &dest);
+
+            }
+            if(queue_length(q) > max_length){
+                max_length = queue_length(q);
+            }
+            //the main function should return the largest length l_max
+            //of the queue q during the whole process
+            printf("Current q length:   %d \n",(int)queue_length(q));
+            printf("Max length reached: %d \n", max_length);
+        }
+
+        queue_dispose(q);
+    }
+    return 0;
+}

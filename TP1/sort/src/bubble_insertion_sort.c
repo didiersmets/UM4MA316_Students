@@ -5,6 +5,8 @@
 
 void bubble_sort(int* input_vector, int vector_size);
 void print_vector(int* input_vector, int vector_size);
+void insertion_sort(int* input_vector, int vector_size);
+void verifier(int* input_vector, int vector_size);
 
 int main(int argc, void *argv[]){
     srand(time(NULL));
@@ -31,16 +33,17 @@ int main(int argc, void *argv[]){
 
 
         // --- SORTING ---
-        //calls your sorting algorithm over it
-        //measures the execution time and records it
+
         clock_t start = clock();
-        bubble_sort(vector,curr_vector_size);
+        //bubble_sort(vector,curr_vector_size);
+        insertion_sort(vector, curr_vector_size);
         clock_t end = clock();
+        verifier(vector,curr_vector_size);
         double seconds = (double)(end - start) / CLOCKS_PER_SEC;
         exec_times[i] = seconds;
         printf("Execution of sort with %d elements took %lf \n", curr_vector_size, seconds);
 
-        printf("Sorted vector \n");
+        printf("Bubble Sorted vector \n");
         print_vector(vector, curr_vector_size);
 
 
@@ -48,7 +51,7 @@ int main(int argc, void *argv[]){
         free(vector);
     }
 
-    FILE *fp = fopen("exec_times.txt", "w");
+    FILE *fp = fopen("insertion_exec_times.txt", "w");
 
     for(int i = 0; i < n_elements_size; i++){
         fprintf(fp,"%d\t%lf \n", n_elements[i], exec_times[i]);
@@ -84,9 +87,39 @@ void bubble_sort(int* input_vector, int vector_size){
     }
 }
 
+void insertion_sort(int* input_vector, int vector_size){
+    if (input_vector == NULL || vector_size == 0){
+        printf("provide a valid vector or a size > 0 \n");
+    }else{
+        //iteration until fully sorted (n-1)
+        for(int i = 0; i < vector_size-1; i++){
+            //iteration on progressively smaller parts of array
+            for(int k = i; k >= 0; k--){
+                if(input_vector[k+1] < input_vector[k]){
+                    //swap
+                    int tmp = input_vector[k];
+                    input_vector[k] = input_vector[k+1];
+                    input_vector[k+1] = tmp;
+                }
+            }
+        }
+    }
+}
+
 void print_vector(int* input_vector, int vector_size){
     for(int i = 0; i < vector_size; i++){
         printf("%d ", input_vector[i]);
     }
     printf("\n");
+}
+
+
+void verifier(int* input_vector, int vector_size){
+    for (int i = 0; i < vector_size - 1; i++) {
+        if (input_vector[i + 1] < input_vector[i]) {
+
+            fprintf(stderr, "Error at index %d \n", i); 
+            return;
+        }
+    }
 }
