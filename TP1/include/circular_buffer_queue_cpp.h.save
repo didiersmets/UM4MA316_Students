@@ -1,0 +1,5 @@
+template <typename T>
+struct Queue {
+    size_t front;
+    size_t length;
+    size_t capacity;
