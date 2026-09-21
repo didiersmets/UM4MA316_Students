@@ -12,3 +12,7 @@ set(CMAKE_C_STANDARD 11)
 add_executable(bubble_insertion_sort
     src/bubble_insertion_sort.c
 )
+
+add_executable(merge_sort
+    src/merge_sort.c
+)

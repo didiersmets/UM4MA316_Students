@@ -4,8 +4,9 @@
 #include <string.h>
 
 void bubble_sort(int* input_vector, int vector_size);
-void print_vector(int* input_vector, int vector_size);
 void insertion_sort(int* input_vector, int vector_size);
+
+void print_vector(int* input_vector, int vector_size);
 void verifier(int* input_vector, int vector_size);
 
 int main(int argc, void *argv[]){
