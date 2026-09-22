@@ -1,6 +1,12 @@
+#include<stdio.h>
 #include<stdlib.h>
 #include"circular_buffer_queue.h"
-int main(int n){
+int main(int argc, char *argv[]){
+	if(argc!=2){
+		printf("Please entre the parameter correctly.\n");
+		return 0;
+	}
+	int n=atoi(argv[1]);
 	struct Queue *q=queue_init(sizeof(int), n);
 	if(n==0){
 		return 0;
@@ -17,7 +23,9 @@ int main(int n){
 			}
 		}
 		if(l_max<q->length){
-			l_max++;
+			l_max=q->length;
 		}
-	return l_max;
+	}
+	printf("%d %d\n", n, l_max);
+	return 1;
 }
