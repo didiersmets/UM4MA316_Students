@@ -12,7 +12,7 @@ int main()
     int N[] = {10, 20, 50, 100, 200, 500, 1000};
     int random;
     double exe_time[7] = {0.0};
-    const char *filename = "exetime_bubble.dat";
+    const char *filename = "exetime_insertion.dat";
     FILE *f;
 
     f = fopen(filename, "w");
@@ -26,10 +26,10 @@ int main()
     {
         int *data = (int *)malloc(N[i] * sizeof(int));
         random_fill(data, N[i]);
-        
+
         clock_t begin = clock();
-        //insertion_sort(data, N[i]);
-        bubble_sort(data, N[i]);
+        insertion_sort(data, N[i]);
+        //bubble_sort(data, N[i]);
         if (i == 1)
         {
             for (int j = 0; j < N[i]; j++)
@@ -60,7 +60,7 @@ void bubble_sort(int *data, int size)
     }
     for (int j = 0; j < size; j++)
     {
-        for (int i = 0; i < size-j-1; i++)
+        for (int i = 0; i < size - j - 1; i++)
         {
             if (data[i] > data[i + 1])
             {
@@ -86,26 +86,23 @@ void random_fill(int *data, int size)
 void insertion_sort(int *data, int size)
 {
     assert(data != NULL);
-    int j=0;
+    int j = 0;
     int temp;
     if (size == 1)
     {
         return;
     }
 
-    for(int i = 0; i<size-1; i++)
+    for (int i = 0; i < size; i++)
     {
-        if(data[i+1]<data[i]){
-            //perform a backward positioning
-            j = i+1; 
-            while(j>0 && data[j]<data[j-1]){
-                temp = data[j];
-                data[j] = data[j-1];
-                data[j-1] = temp;
-                j--;
-            }
+        // perform a backward positioning
+        j = i;
+        while (j > 0 && data[j] < data[j - 1])
+        {
+            temp = data[j];
+            data[j] = data[j - 1];
+            data[j - 1] = temp;
+            j--;
         }
     }
 }
-
-
