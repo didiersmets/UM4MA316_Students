@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
         int *arr2 = malloc(N[i] * sizeof(int));
 
         for(int j = 0; j < N[i]; j++) {
-            arr[j] = rand();
+            arr[j] = rand() % 100;
         }
 
         memcpy(arr1, arr, N[i] * sizeof(int));

@@ -24,7 +24,7 @@ void insertionSort(int *array, int n) {
     int k = 1;
     int i = 0;
 
-    while((array[i + 1] < array[i]) && i < n) {
+    while(i < n-1 && array[i] < array[i + 1]) {
         k++;
         i++;
     }
@@ -42,25 +42,22 @@ void insertionSort(int *array, int n) {
 }
 
 void merge(int *T, int p, int q, int r) {
+    // printf("%d, %d\n", p, r);
     int *S = malloc((r - p + 1) * sizeof(int));
-
-    memcpy(S, T, (r + 1) * sizeof(int));
 
     int p1 = p;
     int p2 = q + 1;
 
-    for(int i = 0; i < r + 1; i++) {
-        if(T[p1] < T[p2]) {
-            S[i] = T[p1];
-            p1++;
+    for(int i = 0; i < r - p + 1; i++) {
+        if(p2 == r + 1 || (p1 != q + 1 && T[p1] <= T[p2])) {
+            S[i] = T[p1++];
         }
         else {
-            S[i] = T[p2];
-            p2++;
+            S[i] = T[p2++];
         }
     }
 
-    memcpy(T, S + p * sizeof(int), (r - p + 1) * sizeof(int));
+    memcpy(T + p, S, (r - p + 1) * sizeof(int));
     free(S);
 }
 
