@@ -35,8 +35,6 @@ void merge_subroutine(int *T,  int p, int q, int r){
         return;
     }
     
-
-
     while (i >= p && j <= r && T[i] > T[j]) {
         i--;
         j++;
@@ -62,6 +60,7 @@ void merge_sort(int* T, int p, int r){
     if(p < r){
         int size = r - p + 1;
         
+        //once the size is small enough (THRESHOLD), it is more efficient to apply an insertionsort
         if (size <= THRESHOLD){
             insertionsort(&T[p], size);
             return;
