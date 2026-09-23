@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#define THRESHOLD 16
+
 
 void bubblesort(int *tab, int n){
 
@@ -134,8 +136,101 @@ void merge2_sort(int *T, int N){
     free(B);
 }
 
+void merge_inplace_subroutine(int *T,  int p, int q, int r){
+    int i = q;
+    int j = q + 1;
+
+    if (p > q || q >= r) {
+        return;
+    }
+
+    if (T[q] <= T[q + 1]) {
+        return;
+    }
+    
+    while (i >= p && j <= r && T[i] > T[j]) {
+        i--;
+        j++;
+    }
+
+    int blockA = i+1;
+    int blockB = q+1;
+
+    while (blockA <= q && blockB < j) {
+        int tmp = T[blockA];
+        T[blockA] = T[blockB];
+        T[blockB] = tmp;
+        blockA++;
+        blockB++;
+    }
+
+    merge_inplace_subroutine(T, p, i, q);
+    merge_inplace_subroutine(T, q + 1, j - 1, r);
+
+}
+
+void merge_inplace_sort(int* T, int p, int r){
+    if(p < r){
+        int q = (p+r)/2;
+        merge_inplace_sort(T, p, q);
+        merge_inplace_sort(T, q + 1, r);
+        merge_inplace_subroutine(T, p, q, r);
+    }
+}
+
+void merge_hybrid_subroutine(int *T,  int p, int q, int r){
+    int i = q;
+    int j = q + 1;
+
+    if (p > q || q >= r) {
+        return;
+    }
+
+    if (T[q] <= T[q + 1]) {
+        return;
+    }
+    
+
+
+    while (i >= p && j <= r && T[i] > T[j]) {
+        i--;
+        j++;
+    }
+
+    int blockA = i+1;
+    int blockB = q+1;
+
+    while (blockA <= q && blockB < j) {
+        int tmp = T[blockA];
+        T[blockA] = T[blockB];
+        T[blockB] = tmp;
+        blockA++;
+        blockB++;
+    }
+
+    merge_hybrid_subroutine(T, p, i, q);
+    merge_hybrid_subroutine(T, q + 1, j - 1, r);
+
+}
+
+void merge_hybrid_sort(int* T, int p, int r){
+    if(p < r){
+
+        int size = r - p + 1;
+        if (size <= THRESHOLD){
+            insertionsort(&T[p], size);
+            return;
+        }
+
+        int q = (p+r)/2;
+        merge_hybrid_sort(T, p, q);
+        merge_hybrid_sort(T, q + 1, r);
+        merge_hybrid_subroutine(T, p, q, r);
+    }
+}
+
 int main(int argc, char * argv[]) {
-    int sizes[] = {10, 20, 50, 100, 200, 500, 1000, 5000, 10000, 20000, 50000, 100000};
+    int sizes[] = {10, 20, 50, 100, 200, 500, 1000, 5000, 10000};
     srand(time(NULL));
     FILE *file = fopen("times.txt", "w");
     if (file == NULL) {
@@ -143,7 +238,7 @@ int main(int argc, char * argv[]) {
         return 1;
     }
 
-    for (int s = 0; s < 12; s++) {
+    for (int s = 0; s < 9; s++) {
         int n = sizes[s];
 
         int *original = malloc(sizeof(int) * n);
@@ -151,6 +246,9 @@ int main(int argc, char * argv[]) {
         int *insertion_tab = malloc(sizeof(int) * n);
         int *merge_tab = malloc(sizeof(int) * n);
         int *merge2_tab = malloc(sizeof(int) * n);
+        int *merge_inplace_tab = malloc(sizeof(int) * n);
+        int *merge_hybrid_tab = malloc(sizeof(int) * n);
+
 
         for (int i=0; i < n; i++){
             original[i] = (rand() % 100) + 1;
@@ -160,7 +258,8 @@ int main(int argc, char * argv[]) {
         memcpy(insertion_tab, original, sizeof(int) * n);
         memcpy(merge_tab, original, sizeof(int) * n);
         memcpy(merge2_tab, original, sizeof(int) * n);
-
+        memcpy(merge_inplace_tab, original, sizeof(int) * n);        
+        memcpy(merge_hybrid_tab, original, sizeof(int) * n);
 
         clock_t start = clock();
         bubblesort(bubble_tab, n);
@@ -178,17 +277,30 @@ int main(int argc, char * argv[]) {
         double merge_time = (double)(end - start) / CLOCKS_PER_SEC;
 
         start = clock();
-        merge2_sort(merge2_tab, n - 1);
+        merge2_sort(merge2_tab, n);
         end = clock();
         double merge2_time = (double)(end - start) / CLOCKS_PER_SEC;
 
-        fprintf(file, "%d %f %f %f %f\n", n, bubble_time, insertion_time, merge_time, merge2_time);
+        start = clock();
+        merge_inplace_sort(merge_inplace_tab, 0, n - 1);
+        end = clock();
+        double merge_inplace_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+        start = clock();
+        merge_hybrid_sort(merge_hybrid_tab, 0, n - 1);
+        end = clock();
+        double merge_hybrid_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+
+        fprintf(file, "%d %f %f %f %f %f %f\n", n, bubble_time, insertion_time, merge_time, merge2_time, merge_inplace_time, merge_hybrid_time);
 
         free(original);
         free(bubble_tab);
         free(insertion_tab);
         free(merge_tab);
         free(merge2_tab);
+        free(merge_inplace_tab);
+        free(merge_hybrid_tab);
 
     }
 

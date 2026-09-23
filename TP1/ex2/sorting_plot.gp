@@ -13,6 +13,9 @@ set grid
 plot "times.txt" using 1:2 with linespoints title "Bubble sort", \
      "times.txt" using 1:3 with linespoints title "Insertion sort", \
      "times.txt" using 1:4 with linespoints title "Merge sort", \
-     "times.txt" using 1:5 with linespoints title "Merge v2 sort"
+     "times.txt" using 1:5 with linespoints title "Merge v2 sort", \
+     "times.txt" using 1:6 with linespoints title "Merge inplace sort", \
+     "times.txt" using 1:7 with linespoints title "Merge hybrid sort"
+
 
 set output
