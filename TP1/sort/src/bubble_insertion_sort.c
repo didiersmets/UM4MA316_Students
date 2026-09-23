@@ -9,7 +9,7 @@ void insertion_sort(int* input_vector, int vector_size);
 void print_vector(int* input_vector, int vector_size);
 void verifier(int* input_vector, int vector_size);
 
-int main(int argc, void *argv[]){
+int main(int argc, char *argv[]){
     srand(time(NULL));
     
     int n_elements[] = {10, 20, 50, 100, 200, 500, 1000};

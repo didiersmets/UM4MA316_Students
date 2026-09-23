@@ -16,7 +16,7 @@ void merge_noalloc(int *unsorted, int p, int q, int r, int* sorted);
 void print_vector(int* input_vector, int vector_size);
 void verifier(int* input_vector, int vector_size);
 
-int main(int argc, void *argv[]){
+int main(int argc, char *argv[]){
     srand(time(NULL));
     
     int n_elements[] = {10, 20, 50, 100, 200, 500, 1000};
@@ -61,7 +61,7 @@ int main(int argc, void *argv[]){
         free(vector);
     }
 
-    FILE *fp = fopen("merge_pingpong_exec_times.txt", "w");
+    FILE *fp = fopen("merge_pingpong_nonun_exec_times.txt", "w");
 
     for(int i = 0; i < n_elements_size; i++){
         fprintf(fp,"%d\t%lf \n", n_elements[i], exec_times[i]);

@@ -16,3 +16,7 @@ add_executable(bubble_insertion_sort
 add_executable(merge_sort
     src/merge_sort.c
 )
+
+add_executable(sort_unified
+    src/sort_unified.c
+)
