@@ -5,7 +5,7 @@ Array size: 10
 
 
 Bubble Sort
-Execution time: 0.000003
+Execution time: 0.000001
 
 
 Insertion Sort
@@ -13,7 +13,15 @@ Execution time: 0.000001
 
 
 Merge Sort
-Execution time: 0.000004
+Execution time: 0.000003
+
+
+Merge Sort Ping Pong
+Execution time: 0.000002
+
+
+Merge Sort Threads
+Execution time: 0.000001
 
 
 
@@ -21,7 +29,7 @@ Array size: 20
 
 
 Bubble Sort
-Execution time: 0.000005
+Execution time: 0.000004
 
 
 Insertion Sort
@@ -29,7 +37,15 @@ Execution time: 0.000003
 
 
 Merge Sort
-Execution time: 0.000005
+Execution time: 0.000004
+
+
+Merge Sort Ping Pong
+Execution time: 0.000003
+
+
+Merge Sort Threads
+Execution time: 0.000002
 
 
 
@@ -37,15 +53,23 @@ Array size: 50
 
 
 Bubble Sort
-Execution time: 0.000019
+Execution time: 0.000018
 
 
 Insertion Sort
-Execution time: 0.000009
+Execution time: 0.000008
 
 
 Merge Sort
-Execution time: 0.000011
+Execution time: 0.000010
+
+
+Merge Sort Ping Pong
+Execution time: 0.000009
+
+
+Merge Sort Threads
+Execution time: 0.000006
 
 
 
@@ -53,15 +77,23 @@ Array size: 100
 
 
 Bubble Sort
-Execution time: 0.000059
+Execution time: 0.000064
 
 
 Insertion Sort
-Execution time: 0.000028
+Execution time: 0.000031
 
 
 Merge Sort
-Execution time: 0.000019
+Execution time: 0.000020
+
+
+Merge Sort Ping Pong
+Execution time: 0.000018
+
+
+Merge Sort Threads
+Execution time: 0.000015
 
 
 
@@ -69,15 +101,23 @@ Array size: 200
 
 
 Bubble Sort
-Execution time: 0.000300
+Execution time: 0.000235
 
 
 Insertion Sort
-Execution time: 0.000103
+Execution time: 0.000113
 
 
 Merge Sort
-Execution time: 0.000042
+Execution time: 0.000043
+
+
+Merge Sort Ping Pong
+Execution time: 0.000043
+
+
+Merge Sort Threads
+Execution time: 0.000034
 
 
 
@@ -85,15 +125,23 @@ Array size: 500
 
 
 Bubble Sort
-Execution time: 0.001213
+Execution time: 0.001337
 
 
 Insertion Sort
-Execution time: 0.000643
+Execution time: 0.000762
 
 
 Merge Sort
-Execution time: 0.000114
+Execution time: 0.000137
+
+
+Merge Sort Ping Pong
+Execution time: 0.000113
+
+
+Merge Sort Threads
+Execution time: 0.000108
 
 
 
@@ -101,12 +149,92 @@ Array size: 1000
 
 
 Bubble Sort
-Execution time: 0.004468
+Execution time: 0.005082
 
 
 Insertion Sort
-Execution time: 0.002428
+Execution time: 0.002704
 
 
 Merge Sort
-Execution time: 0.000248
+Execution time: 0.000272
+
+
+Merge Sort Ping Pong
+Execution time: 0.000255
+
+
+Merge Sort Threads
+Execution time: 0.000250
+
+
+
+Array size: 10000
+
+
+Bubble Sort
+Execution time: 0.222233
+
+
+Insertion Sort
+Execution time: 0.099982
+
+
+Merge Sort
+Execution time: 0.001327
+
+
+Merge Sort Ping Pong
+Execution time: 0.001245
+
+
+Merge Sort Threads
+Execution time: 0.001097
+
+
+
+Array size: 100000
+
+
+Bubble Sort
+Execution time: 31.752333
+
+
+Insertion Sort
+Execution time: 10.111856
+
+
+Merge Sort
+Execution time: 0.016127
+
+
+Merge Sort Ping Pong
+Execution time: 0.015288
+
+
+Merge Sort Threads
+Execution time: 0.006194
+
+
+
+Array size: 1000000
+
+
+Bubble Sort
+Skipped (O(n^2), too slow)
+
+
+Insertion Sort
+Skipped (O(n^2), too slow)
+
+
+Merge Sort
+Execution time: 0.209209
+
+
+Merge Sort Ping Pong
+Execution time: 0.183964
+
+
+Merge Sort Threads
+Execution time: 0.051899

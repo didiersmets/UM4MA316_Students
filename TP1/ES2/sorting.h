@@ -1,3 +1,6 @@
+#ifndef SORTING_H
+#define SORTING_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +34,7 @@ void insertionSort(int* arr, int n){
     }
 }
 
+//merge sort
 void merge(int* T, int p, int q, int r){
     int *S = malloc((r+1-p)*sizeof(int));
     int idx1 = p;
@@ -58,7 +62,7 @@ void mergeSort(int* arr, int p, int r){
 }
 
 
-//MergeSort faster
+//MergeSort ping pong
 void mergeR(int* unsorted, int p, int q, int r, int* sorted){
     int idx1 = p;
     int mid = q;
@@ -90,3 +94,5 @@ void mergeSortUser(int *A, int n){
     mergeSortRecursive(B,0,n-1,A);
     free(B);
 }
+
+#endif
