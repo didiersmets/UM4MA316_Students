@@ -1,0 +1,112 @@
+
+
+
+Array size: 10
+
+
+Bubble Sort
+Execution time: 0.000003
+
+
+Insertion Sort
+Execution time: 0.000001
+
+
+Merge Sort
+Execution time: 0.000004
+
+
+
+Array size: 20
+
+
+Bubble Sort
+Execution time: 0.000005
+
+
+Insertion Sort
+Execution time: 0.000003
+
+
+Merge Sort
+Execution time: 0.000005
+
+
+
+Array size: 50
+
+
+Bubble Sort
+Execution time: 0.000019
+
+
+Insertion Sort
+Execution time: 0.000009
+
+
+Merge Sort
+Execution time: 0.000011
+
+
+
+Array size: 100
+
+
+Bubble Sort
+Execution time: 0.000059
+
+
+Insertion Sort
+Execution time: 0.000028
+
+
+Merge Sort
+Execution time: 0.000019
+
+
+
+Array size: 200
+
+
+Bubble Sort
+Execution time: 0.000300
+
+
+Insertion Sort
+Execution time: 0.000103
+
+
+Merge Sort
+Execution time: 0.000042
+
+
+
+Array size: 500
+
+
+Bubble Sort
+Execution time: 0.001213
+
+
+Insertion Sort
+Execution time: 0.000643
+
+
+Merge Sort
+Execution time: 0.000114
+
+
+
+Array size: 1000
+
+
+Bubble Sort
+Execution time: 0.004468
+
+
+Insertion Sort
+Execution time: 0.002428
+
+
+Merge Sort
+Execution time: 0.000248
