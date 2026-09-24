@@ -45,7 +45,7 @@ sorting array of length %d\n\
 
         // merge sort
 
-        mergeSort(arr2, 0, N[i] - 1);
+        mergeSort(arr2, N[i]);
 
         // sorted array and check that the sorting is the same using all three algorithms
 

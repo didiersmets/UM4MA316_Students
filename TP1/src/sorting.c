@@ -41,14 +41,12 @@ void insertionSort(int *array, int n) {
     }
 }
 
-void merge(int *T, int p, int q, int r) {
-    // printf("%d, %d\n", p, r);
-    int *S = malloc((r - p + 1) * sizeof(int));
+void merge(int *T, int p, int q, int r, int *S) {
 
     int p1 = p;
     int p2 = q + 1;
 
-    for(int i = 0; i < r - p + 1; i++) {
+    for(int i = p; i < r + 1; i++) {
         if(p2 == r + 1 || (p1 != q + 1 && T[p1] <= T[p2])) {
             S[i] = T[p1++];
         }
@@ -57,16 +55,23 @@ void merge(int *T, int p, int q, int r) {
         }
     }
 
-    memcpy(T + p, S, (r - p + 1) * sizeof(int));
-    free(S);
+    memcpy(T + p, S + p, (r - p + 1) * sizeof(int));
 }
 
-void mergeSort(int *T, int p, int r) {
+void mergeSortRecursive(int *T, int p, int r, int *S) {
     if(p<r) {
         int q = (p + r) / 2;
-        mergeSort(T, p, q);
-        mergeSort(T, q + 1, r);
-        merge(T, p, q, r);
+        mergeSortRecursive(T, p, q, S);
+        mergeSortRecursive(T, q + 1, r, S);
+        merge(T, p, q, r, S);
     }
+}
+
+void mergeSort(int *T, int n) {
+    int *S = malloc(n * sizeof(int));
+    // memcpy(S, T, n * sizeof(int));
+    mergeSortRecursive(T, 0, n-1, S);
+    // memcpy(T, S, n*sizeof(int));
+    free(S);
 }
  

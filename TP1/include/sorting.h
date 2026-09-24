@@ -5,4 +5,4 @@ void bubbleSort(int *array, int length);
 
 void insertionSort(int *array, int length);
 
-void mergeSort(int *T, int p, int r);
+void mergeSort(int *T, int n);
