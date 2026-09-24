@@ -87,6 +87,8 @@ void insertion_sort(int* input_vector, int vector_size){
                     int tmp = input_vector[k];
                     input_vector[k] = input_vector[k+1];
                     input_vector[k+1] = tmp;
+                } else {
+                    break;
                 }
             }
         }
@@ -147,7 +149,27 @@ void merge_sort_noalloc(int* unsorted, int p, int r, int* sorted){
             merge_noalloc(unsorted, p, q, r, sorted);
         }
     }
+}
 
+void merge_sort_noalloc_opt(int* unsorted, int p, int r, int* sorted){
+    if (unsorted == NULL || sorted == NULL){
+        printf("provide a valid vector or a size > 0 \n");
+    }else{
+        if ((r+1-p) < 16){ //if the vector is smaller than 20 elements call insertion sort instead of the recursive function
+            for(int i = p; i <= r; i++) {
+                sorted[i] = unsorted[i];
+            }
+            insertion_sort(sorted + p, r + 1 - p);
+        }else{
+            if(p<r){
+                int q = (p+r)/2;
+                merge_sort_noalloc_opt(sorted, p, q, unsorted);
+                merge_sort_noalloc_opt(sorted, q+1, r, unsorted);
+                merge_noalloc(unsorted, p, q, r, sorted);
+            }
+        }
+
+    }
 }
 
 void merge_noalloc(int *unsorted, int p, int q, int r, int* sorted){

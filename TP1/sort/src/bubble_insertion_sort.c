@@ -101,6 +101,8 @@ void insertion_sort(int* input_vector, int vector_size){
                     int tmp = input_vector[k];
                     input_vector[k] = input_vector[k+1];
                     input_vector[k+1] = tmp;
+                } else {
+                    break;
                 }
             }
         }

@@ -11,6 +11,7 @@ void merge(int *T, int p, int q, int r);
 void merge_pingpong(int* vector, int n);
 void merge_sort_noalloc(int* unsorted, int p, int r, int* sorted);
 void merge_noalloc(int *unsorted, int p, int q, int r, int* sorted);
+void merge_sort_noalloc_opt(int* unsorted, int p, int r, int* sorted);
 
 
 void print_vector(int* input_vector, int vector_size);
@@ -20,8 +21,8 @@ int* generate_random_vector(int size);
 int main(int argc, char *argv[]){
     srand(time(NULL));
     
-    int n_elements[] = {10, 20, 50, 100, 200, 500, 1000};
-    int n_elements_size = 7;
+    int n_elements[] = {10, 20, 50, 100, 200, 500, 1000, 10000};
+    int n_elements_size = 8;
 
     double exec_times_bubble[n_elements_size];
     memset(exec_times_bubble, 0, sizeof(exec_times_bubble));
@@ -33,6 +34,8 @@ int main(int argc, char *argv[]){
     memset(exec_times_merge_noalloc, 0, sizeof(exec_times_merge_noalloc));
     double exec_times_pingpong[n_elements_size];
     memset(exec_times_pingpong, 0, sizeof(exec_times_pingpong));
+    double exec_times_merge_noalloc_opt[n_elements_size];
+    memset(exec_times_merge_noalloc_opt, 0, sizeof(exec_times_merge_noalloc_opt));
 
     // --- Random Array Generation ---
     int curr_vector_size = 0;
@@ -93,6 +96,19 @@ int main(int argc, char *argv[]){
         print_vector(sorted_temp, curr_vector_size);
         printf("\n");
 
+        // --- MERGE NOALLOC OPT ---
+        memcpy(unsorted, vector, curr_vector_size * sizeof(int));
+        memcpy(sorted_temp, vector, curr_vector_size * sizeof(int));
+        clock_t start_noalloc_opt = clock();
+        merge_sort_noalloc_opt(unsorted, 0, curr_vector_size-1, sorted_temp);
+        clock_t end_noalloc_opt = clock();
+        verifier(sorted_temp, curr_vector_size);
+        exec_times_merge_noalloc_opt[i] = (double)(end_noalloc_opt - start_noalloc_opt) / CLOCKS_PER_SEC;
+        printf("Execution of merge_noalloc_opt sort with %d elements took %lf \n", curr_vector_size, exec_times_merge_noalloc_opt[i]);
+        printf("Merge Noalloc Opt Sorted vector \n");
+        print_vector(sorted_temp, curr_vector_size);
+        printf("\n");
+
         // --- PINGPONG ---
         clock_t start_pingpong = clock();
         merge_pingpong(vector, curr_vector_size);
@@ -114,6 +130,7 @@ int main(int argc, char *argv[]){
     FILE *fp3 = fopen("merge_exec_times.txt", "w");
     FILE *fp4 = fopen("merge_noalloc_exec_times.txt", "w");
     FILE *fp5 = fopen("merge_pingpong_exec_times.txt", "w");
+    FILE *fp6 = fopen("merge_noalloc_opt_exec_times.txt", "w");
 
     for(int i = 0; i < n_elements_size; i++){
         fprintf(fp1,"%d\t%lf \n", n_elements[i], exec_times_bubble[i]);
@@ -121,6 +138,7 @@ int main(int argc, char *argv[]){
         fprintf(fp3,"%d\t%lf \n", n_elements[i], exec_times_merge[i]);
         fprintf(fp4,"%d\t%lf \n", n_elements[i], exec_times_merge_noalloc[i]);
         fprintf(fp5,"%d\t%lf \n", n_elements[i], exec_times_pingpong[i]);
+        fprintf(fp6,"%d\t%lf \n", n_elements[i], exec_times_merge_noalloc_opt[i]);
     }
 
     fclose(fp1);
@@ -128,6 +146,7 @@ int main(int argc, char *argv[]){
     fclose(fp3);
     fclose(fp4);
     fclose(fp5);
+    fclose(fp6);
 
     system("gnuplot merge_plot.gp");
 
@@ -166,6 +185,8 @@ void insertion_sort(int* input_vector, int vector_size){
                     int tmp = input_vector[k];
                     input_vector[k] = input_vector[k+1];
                     input_vector[k+1] = tmp;
+                } else {
+                    break;
                 }
             }
         }
@@ -244,6 +265,27 @@ void merge_noalloc(int *unsorted, int p, int q, int r, int* sorted){
     }
 }
 
+void merge_sort_noalloc_opt(int* unsorted, int p, int r, int* sorted){
+    if (unsorted == NULL || sorted == NULL){
+        printf("provide a valid vector or a size > 0 \n");
+    }else{
+        if ((r+1-p) < 16){ //if the vector is smaller than 20 elements call insertion sort instead of the recursive function
+            for(int i = p; i <= r; i++) {
+                sorted[i] = unsorted[i];
+            }
+            insertion_sort(sorted + p, r + 1 - p);
+        }else{
+            if(p<r){
+                int q = (p+r)/2;
+                merge_sort_noalloc_opt(sorted, p, q, unsorted);
+                merge_sort_noalloc_opt(sorted, q+1, r, unsorted);
+                merge_noalloc(unsorted, p, q, r, sorted);
+            }
+        }
+
+    }
+}
+
 
 
 void print_vector(int* input_vector, int vector_size){
@@ -267,7 +309,7 @@ void verifier(int* input_vector, int vector_size){
 int* generate_random_vector(int size) {
     int *vector = malloc(size * sizeof(int));
     for (int j = 0; j < size; j++){
-        vector[j] = rand() % 101;
+        vector[j] = rand() % 10001;
     }
     printf("Unsorted vector \n");
     print_vector(vector, size);
