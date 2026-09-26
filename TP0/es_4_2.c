@@ -18,12 +18,15 @@ int main(int argc, char *argv[]) {
 
     double pi = acos(-1.0);
 
-    double xmin = -6.0 * pi;
-    double xmax =  6.0 * pi;
+    float xmin = -6 * M_PI;
+    float xmax =  6.0 * M_PI;
 
-    double dx = (xmax - xmin) / (n - 1);
+    float delta = (xmax - xmin) / (n - 1);
+    float x[n];
+    float y[n];
 
-    FILE *file = fopen("output.txt", "w");
+    FILE *file;
+    file = fopen("output.txt", "w");
 
     if (file == NULL) {
         printf("Error opening file\n");
@@ -32,16 +35,13 @@ int main(int argc, char *argv[]) {
 
     for (int j = 0; j < n; j++) {
 
-        double x = xmin + j * dx;
-        double y;
+        x[j] = xmin + j * delta;
+        if(x[j]==0)
+            y[j]=1;
+        else
+            y[j]= sin(x[j]/x[j]);
 
-        if (fabs(x) < 1e-12) {
-            y = 1.0;
-        } else {
-            y = sin(x) / x;
-        }
-
-        fprintf(file, "%f\t%f\n", x, y);
+        fprintf(file, "%f\t%f\n", x[j], y[j]);
     }
 
     fclose(file);
