@@ -20,3 +20,7 @@ add_executable(merge_sort
 add_executable(sort_unified
     src/sort_unified.c
 )
+
+add_executable(merge_sort_parallel
+    src/merge_sort_parallel.c
+)
