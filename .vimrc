@@ -10,7 +10,7 @@ set hlsearch
 set incsearch
 " showmatch fait clignoter les accolades/parentheses associees quand on les ferme
 set showmatch
-set matchtime=0.5
+set matchtime=1
 set number
 syntax on
 filetype plugin on
