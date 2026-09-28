@@ -50,4 +50,4 @@ double area_mesh2D(struct Mesh2D* m){
 
 	}
 	return area;
-}
+}//Penser a stocker les capacités (le nombre actuellement présent) des triangles et des vertices
