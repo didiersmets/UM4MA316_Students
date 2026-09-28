@@ -4,7 +4,7 @@
 #include <stdlib.h>  // Used for malloc and free
 #include <string.h>  // Used for strcmp
 
-#include "mesh.h"
+#include "../include/mesh.h"
 
 #define LINE 128
 
@@ -14,11 +14,11 @@ int read_mesh_from_medit_file(struct Mesh *m, const char *filename) {
 	do {
 		fgets(line, LINE, f);
 	} while (strncmp(line, "Vertices", 8) != 0);
-	fgets(line, LINE, f);
+	fgets(line, LINE, f); //stock le nombre à la ligne suivante de Vertices
 	sscanf(line, "%d", &m->nvert);
 	m->vertices = malloc(m->nvert * sizeof(struct Vertex));
 	for (int i = 0; i < m->nvert; ++i) {
-		fgets(line, LINE, f);
+		fgets(line, LINE, f); //stock la ligne suivante où se trouve un point
 		sscanf(line, "%lf %lf %lf", &m->vertices[i].x,
 		       &m->vertices[i].y, &m->vertices[i].z);
 	}
@@ -46,10 +46,11 @@ int write_mesh_to_medit_file(const struct Mesh *m, const char *filename) {
 	FILE *f;
 	f = fopen(filename, "w");
 	if (f == NULL) return -1;
-	fprintf(f, "MeshVersionFormatted 1\n");
+	fprintf(f, "MeshVersionFormatted 1\n"); 
 	fprintf(f, "Dimension 3\n\n");
 	fprintf(f, "Vertices\n");
-	fprintf(f, "%d\n", m->nvert);
+
+	fprintf(f, "%d\n", m->nvert); //vaut 0 si le mesh vient tout juste d'être initialisé
 	for (int i = 0; i < m->nvert; ++i) {
 		fprintf(f, "%lf %lf %lf 0\n", m->vertices[i].x,
 			m->vertices[i].y, m->vertices[i].z);

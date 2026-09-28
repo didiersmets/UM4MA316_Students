@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define FREE_SLOT 0
 #define OCCUPIED_SLOT 1
@@ -17,9 +18,9 @@ struct HashTable *hash_table_init(size_t capacity, size_t key_len,
 	ht->key_len = key_len;
 	ht->val_len = val_len;
 	ht->size = 0;
-	unsigned slot_len = 1 + key_len + val_len;
+	unsigned slot_len = 1 + key_len + val_len; //1 byte ajouté pour dire si la case est occupé ou non etc
 	ht->data = malloc(capacity * slot_len);
-	ht->capacity = h->data ? capacity : 0;
+	ht->capacity = ht->data ? capacity : 0;
 	for (unsigned i = 0; i < ht->capacity; i++) {
 		unsigned char *p = (unsigned char *)ht->data + i * slot_len;
 		p[0] = FREE_SLOT;
