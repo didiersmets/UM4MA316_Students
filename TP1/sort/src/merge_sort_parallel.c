@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L
 #include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +19,12 @@ void* merge_sort_thread_worker(void* arg);
 
 void print_vector(int* input_vector, int vector_size);
 void verifier(int* input_vector, int vector_size);
+
+double get_wall_time() {
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return (double)time.tv_sec + (double)time.tv_nsec * 1e-9;
+}
 
 
 typedef struct{
@@ -53,10 +60,12 @@ int main(int argc, char *argv[]){
 
         // --- SORTING ---
 
-        clock_t start = clock();
+        clock_t start = get_wall_time();
 
         //merge_sort(vector, 0, curr_vector_size-1);
         merge_pingpong(vector, curr_vector_size);
+
+        clock_t end = get_wall_time();
 
         verifier(vector,curr_vector_size);
         double seconds = (double)(end - start) / CLOCKS_PER_SEC;
