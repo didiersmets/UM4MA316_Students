@@ -1,59 +1,49 @@
-#include <stdio.h>
+#include "circular_buffer_queue.h"
 #include <stdlib.h>
 #include <string.h>
-
-static void enlarge_queue_capacity(struct Queue *q);
-
-static void enlarge_queue_capacity(struct Queue *q){
-
-    if((q->capacity)==(q->length)){
-        size_t new_cap = q->capacity == 0 ? 1 : 2 * q->capacity;
-        q->data = realloc(q->data, new_cap * q->elem_size);
-        q->capacity = new_cap;    
+static void enlarge_queue_capacity(struct Queue *q) {
+    size_t new_capacity = q->capacity ? q->capacity * 2 : 1;
+    void *new_data = malloc(new_capacity * q->elem_size);
+    if (!new_data) exit(EXIT_FAILURE);
+    for (size_t i = 0; i < q->length; ++i) {
+        size_t idx = (q->front + i) % q->capacity;
+        memcpy((char*)new_data + i * q->elem_size,
+               (char*)q->data + idx * q->elem_size,
+               q->elem_size);
     }
+    free(q->data);
+    q->data = new_data;
+    q->front = 0;
+    q->capacity = new_capacity;
 }
-
-
-
-bool is_empty(const struct Queue *q){
-
-    return q->length==0;
-}
-
-size_t queue_length(const struct Queue *q){
-
-    return  q->length;
-}
-
-struct Queue *queue_init(size_t elem_size, size_t capacity)
-{
-    struct Queue *q = malloc(sizeof(struct Queue));
-    q->elem_size = elem_size;
-    if (capacity > 0) {
-        q->data = malloc(capacity * elem_size);
-    }
-    q->capacity = capacity;
-    q->elem_size = elem_size;
+void queue_init(struct Queue *q, size_t elem_size) {
     q->front = 0;
     q->length = 0;
-    return q;
+    q->capacity = 0;
+    q->elem_size = elem_size;
+    q->data = NULL;
 }
-
-void queue_dispose(struct Queue *q){
+void queue_free(struct Queue *q) {
     free(q->data);
-    free(q)
+    q->data = NULL;
+    q->front = q->length = q->capacity = 0;
 }
-
-void queue_enqueue(struct Queue *q, const void *src){
-    void *dest = (char *)q->data + ((q->front + q->size) % q-capacity)*q->elem_size;
-    memcpy(dest, src, q->elem_size);
+void queue_enqueue(struct Queue *q, const void *elem) {
+    if (q->length == q->capacity)
+        enlarge_queue_capacity(q);
+    size_t idx = (q->front + q->length) % q->capacity;
+    memcpy((char*)q->data + idx * q->elem_size, elem, q->elem_size);
     q->length++;
 }
-
-void queue_dequeue(struct Queue *q, void *dest){
-    if (q->length == 0)
-        return;
-    void *src = ;
-    memcpy(dest,src,q->elem_size);
+void queue_dequeue(struct Queue *q, void *elem) {
+    if (q->length == 0) return;
+    memcpy(elem, (char*)q->data + q->front * q->elem_size, q->elem_size);
+    q->front = (q->front + 1) % q->capacity;
     q->length--;
+}
+int queue_is_empty(const struct Queue *q){
+    return q->length == 0;
+}
+size_t queue_length(const struct Queue *q){
+    return q->length;
 }
