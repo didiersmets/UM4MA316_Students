@@ -4,6 +4,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <math.h>
+
 typedef struct Vertex{
     double x;
     double y;
@@ -70,7 +72,7 @@ double area_mesh2D(struct Mesh2D* m){ //je comprends que c'est la somme de l'air
         double normeAC = AC.x*AC.x + AC.y*AC.y;
         double cosABAC = (AB.x*AC.x + AB.y*AC.y)/ (normeAB*normeAC);
         aire = (normeAB*normeAC)*0.5 * sqrt(1-cosABAC*cosABAC);
-        printf("aire sans deter %lf\n", aire);
+        printf("aire sans deter mais pas signe %lf\n", aire);
     
     }
 
