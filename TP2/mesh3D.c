@@ -15,9 +15,8 @@ void dispose_mesh3D(struct Mesh3D* m){
     free(m->tri);
 }
 
-
-//div(X) = 3 so left integral equal to 3V
-//so V = 1/3 * ∫X*n dS, which, as said in pdf: for an affine vector field : 
+// div(X) = 3 so left integral equal to 3V
+// so V = 1/3 * ∫X*n dS, which, as said in pdf: for an affine vector field : 
 // flux = triangle area * scalar product of the normal vector and the vector field at the barycentre
 
 
@@ -41,24 +40,24 @@ double volume_mesh3D(struct Mesh3D* m){
         double ny = v1z*v2x - v1x*v2z;
         double nz = v1x*v2y - v1y*v2x;
 
-        //norm of N
+        // norm of N
         double norm = sqrt(nx*nx + ny*ny + nz*nz);
 
-        //area triangle ||N|| / 2
+        // area triangle ||N|| / 2
         double area = norm / 2.0;
 
-        //n = N / ||N||
+        // n = N / ||N||
         double normalx = nx / norm;
         double normaly = ny / norm;
         double normalz = nz / norm;
 
-        //triangle barycentre
+        // triangle barycentre
         double baryx = (A.x + B.x + C.x)/3.0;
         double baryy = (A.y + B.y + C.y)/3.0;
         double baryz = (A.z + B.z + C.z)/3.0;
 
-        //X(x,y,z) = (x,y,z) and X(G) = G
-        //scalar product n · X(G)
+        // X(x,y,z) = (x,y,z) and X(G) = G
+        // scalar product n · X(G)
         double scalar = normalx * baryx + normaly * baryy + normalz * baryz;
 
         // flux = triangle area * < normal | bary >

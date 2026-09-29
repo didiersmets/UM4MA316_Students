@@ -9,7 +9,6 @@ struct Vertex{
     double z;
 };
 
-
 struct Triangle{
     int nA;
     int nB;
