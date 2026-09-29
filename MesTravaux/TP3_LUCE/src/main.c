@@ -9,6 +9,10 @@
 //gcc hash_tables.c main.c mesh_adjacency.c mesh_io.c mesh.c -o test
 //ne pas oublier : soit i un nombre du mesh représentant l'indice d'un des triangles
 //alors le point correspondant sera vertices[i-1]
+//On suppose que deux points de vertices ne possèdent pas les mêmes coordonnées
+//On suppose que deux points d'un même triangle ne sont pas identiques
+
+
 
 
 
@@ -20,7 +24,7 @@ int main(){
     read_mesh_from_medit_file(Tableau, "Test1.mesh");
 
     /*démonstration du ne pas oublier :                         CONCLUSION : C'est bon
-    (3 == Tableau->triangles[0].v3) ? printf("C'est bon \n") : printf("C'est pas bon");
+    (3 == Tableau->triangles[0].idx[2]) ? printf("C'est bon \n") : printf("C'est pas bon");
     (2 == Tableau->triangles[0].v2) ? printf("C'est bon \n") : printf("C'est pas bon");
     */
 
@@ -30,6 +34,15 @@ int main(){
     fprintf(stdout, "%d \n",edge_pos_in_tri(Tableau->triangles[1].v1,Tableau->triangles[1].v2,Tableau->triangles[1]));
     fprintf(stdout, "%d \n",edge_pos_in_tri(Tableau->triangles[0].v2,Tableau->triangles[0].v3,Tableau->triangles[0]));
     fprintf(stdout, "%d \n",edge_pos_in_tri(Tableau->triangles[4].v3,Tableau->triangles[4].v1,Tableau->triangles[4]));*/
+
+
+    //testons tris_are_neighbors
+    //j'ai rajouté  un triangle dans le mesh de sorte à ce qu'il soit voisin 
+    //avec le premier
+
+    int pos = tris_are_neighbors(0,5,Tableau);
+
+    ( pos == -1) ? printf("pas voisin\n") : printf("voisin\n");
 
 
 
