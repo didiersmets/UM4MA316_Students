@@ -3,8 +3,10 @@
 #include "mesh3D.h"
 
 void initialize_mesh3D(struct Mesh3D* m, int vtx_capacity, int tri_capacity){
-    m->nv = vtx_capacity;
-    m->nt = tri_capacity;
+    m->vtx_capacity = vtx_capacity;
+    m->tri_capacity = tri_capacity;
+    m->nv = 0;
+    m->nt = 0;
     m->vert = malloc(sizeof(struct Vertex)*m->nv);
     m->tri = malloc(sizeof(struct Triangle)*m->nt);
     return 1;
@@ -22,7 +24,7 @@ void dispose_mesh3D(struct Mesh3D* m){
 
 double volume_mesh3D(struct Mesh3D* m){
     double sum = 0;
-    for (int i=0; i < m->nt; i++){
+    for (int i = 0; i < m->nt; i++){
         struct Vertex A = m->vert[m->tri[i].nA];
         struct Vertex B = m->vert[m->tri[i].nB];
         struct Vertex C = m->vert[m->tri[i].nC];

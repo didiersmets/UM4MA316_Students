@@ -16,8 +16,10 @@ struct Triangle{
 };
 
 struct Mesh3D{
-    int nv;    
+    int nv;
     int nt;
+    int vtx_capacity;
+    int tri_capacity;
     struct Triangle* tri;
     struct Vertex* vert;
 
