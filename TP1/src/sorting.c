@@ -70,10 +70,13 @@ void merge_sort(int *T, int N){
 
 int main(void){
 	int size[]={10, 20, 50, 100, 200, 500, 1000};
-	int s=sizeof(size)/size[0];
+	int s=sizeof(size)/sizeof(int);
 	FILE *fb=fopen("bubble_sorting.dat", "w");
 	FILE *fi=fopen("insertion_sorting.dat", "w");
 	FILE *fm=fopen("merge_sorting.dat", "w");
+	
+	clock_t t;
+	double time_taken;
 
 	for(int i=0; i<s; ++i){
 		int N=size[i];
@@ -86,11 +89,11 @@ int main(void){
 			B[j]=x;
 			C[j]=x;
 		}
-		clock_t t;
+		
 		t=clock();
 		bubble_sort(A,N);
 		t=clock()-t;
-		double time_taken=((double)t)/CLOCKS_PER_SEC;
+		time_taken=((double)t)/CLOCKS_PER_SEC;
 		fprintf(fb, "%d %.10f\n", N, time_taken);
 
                 t=clock();
