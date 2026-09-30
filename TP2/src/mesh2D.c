@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "../include/meshes.h"
 
@@ -41,4 +43,88 @@ double area_mesh2D(Mesh2D *m)
 double tri_area(Vertex v1, Vertex v2, Vertex v3)
 {
     return 0.5 * (v1.x * (v2.y - v3.y) + v2.x * (v3.y - v1.y) + v3.x * (v1.y - v2.y));
+}
+
+int read_mesh2D(Mesh2D *m, const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        printf("Error: file %s failed to open\n", filename);
+        return EXIT_FAILURE;
+    }
+    char keyword[256];
+    int nv = 0;
+    int nt = 0;
+
+    while (fscanf(file, "%255s", keyword) != EOF) //end of file 
+    {
+        if (strcmp(keyword, "Vertices") == 0) //find the word Vertices
+        {
+            fscanf(file, "%d", &nv); //the immediate number after that word is the number of vertices 
+        }
+        else if (strcmp(keyword, "Triangles") == 0) //find the word Triangles
+        {
+            fscanf(file, "%d", &nt); //the immediate number after that word is the number of triangles
+        }
+    }
+
+    if (initialize_mesh2D(m, nv, nt) == EXIT_FAILURE) //note this initializes the mesh 
+    {
+        printf("Failed to allocate memory for mesh\n");
+        fclose(file);
+        return EXIT_FAILURE;
+    }
+    
+    m->nv = nv; //set the capacyties
+    m->nt = nt;
+
+    rewind(file); //the fscanf has pointed to the end of the file so we need to go back to the beginning
+
+    while (fscanf(file, "%255s", keyword) != EOF) //scan the file again
+    {
+        if (strcmp(keyword, "Vertices") == 0)
+        {
+            int dummy;
+            fscanf(file, "%d", &dummy); // remove nv number 
+            
+            for (int i = 0; i < m->nv; i++)
+            {
+                int bin; 
+                double z;
+                fscanf(file, "%lf %lf %lf %d", &m->vert[i].x, &m->vert[i].y, &z, &bin); //dispose of z
+            }
+        }
+        else if (strcmp(keyword, "Triangles") == 0)
+        {
+            int dummy;
+            fscanf(file, "%d", &dummy); // don't need nt
+            
+            for (int i = 0; i < m->nt; i++)
+            {
+                int v1, v2, v3, bin;
+                
+                fscanf(file, "%d %d %d %d", &v1, &v2, &v3, &bin); 
+                
+                m->tri[i].na = v1 - 1;
+                m->tri[i].nb = v2 - 1;
+                m->tri[i].nc = v3 - 1; 
+            }
+        }
+    }
+
+    fclose(file);
+    return EXIT_SUCCESS;
+}
+
+
+
+int mesh2D_to_gnuplot(Mesh2D *m, const char *filename)
+{
+return EXIT_SUCCESS;
+}
+
+int write_mesh2D(Mesh2D *m, const char *filename)
+{
+return EXIT_SUCCESS;
 }

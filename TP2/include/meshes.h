@@ -26,11 +26,16 @@ typedef struct
 
 int initialize_mesh2D(Mesh2D *m, int vtx_capacity, int tri_capacity);
 
-
 void dispose_mesh2D(Mesh2D *m);
+
+double tri_area(Vertex v1, Vertex v2, Vertex v3);
 
 double area_mesh2D(Mesh2D *m);
 
-double tri_area(Vertex v1, Vertex v2, Vertex v3);
+int read_mesh2D(Mesh2D *m, const char *filename);
+
+int mesh2D_to_gnuplot(Mesh2D *m, const char *filename);
+
+int write_mesh2D(Mesh2D *m, const char *filename);
 
 #endif
