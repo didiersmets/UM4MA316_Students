@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdbool.h>
 void bubbleSort(int* array, int n){
     int tmp, k;
     k=n;
@@ -31,14 +33,13 @@ void insertionSort(int* array, int n){
     }
 }
 
-
 void merge(int *T, int p, int q, int r) {
     int n = r - p + 1;
     int temp[n];
 
-    int i = p;       // scorre la parte sinistra
-    int j = q + 1;   // scorre la parte destra
-    int k = 0;       // scorre temp
+    int i = p;      
+    int j = q + 1;   
+    int k = 0;      
 
     while (i <= q && j <= r) {
         if (T[i] <= T[j]) {
@@ -72,8 +73,8 @@ void mergSort(int* array, int p, int r){
     if(p<r){
         int q;
         q = (p+r)/2;
-        MergSort(array,p,q);
-        MergSort(array,p+1,q);
+        mergSort(array,p,q);
+        mergSort(array,q+1,r);
         merge(array,p,q,r);
     }
 }

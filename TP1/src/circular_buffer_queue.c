@@ -5,7 +5,7 @@
 static void enlarge_queue_capacity (struct Queue * q){
     size_t newCapacity = q->capacity * 2;
 
-    void *newData = malloc(q->elem_size * new_capacity);
+    void *newData = malloc(q->elem_size * newCapacity);
     if(newData == NULL){
         printf("Erorr allocating memory!");
         return;
