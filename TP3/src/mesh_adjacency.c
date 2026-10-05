@@ -6,6 +6,10 @@
 #include <string.h>  // Used for strcmp
 
 #include "mesh.h"
+#include "hash_tables.h"
+#include "mesh_adjacency.h"
+
+
 
 int edge_pos_in_tri(int v1, int v2, struct Triangle t){
     if (t.v1==v1 && t.v2==v2){return 0;}
@@ -28,7 +32,7 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
 }
 
 int *build_adjacency_table1(const struct Mesh *m){
-    int * adj = malloc(sizeof(int)*(3 * m->ntri));
+    int *adj = malloc(sizeof(int)*(3 * m->ntri));
     for (int i = 0; i < 3*(m->ntri); i++){ adj[i] = -1;}
 
     for (int t1 = 0; t1 < m->ntri; t1++){
@@ -36,12 +40,34 @@ int *build_adjacency_table1(const struct Mesh *m){
             int res = tris_are_neighbors(t1, t2, m);
             if(res != -1){
                 adj[3*t1 + res] = t2;
-            }
+            } 
         }
     }
     return adj;
 }
 
+struct HashTable *build_edge_table1(const struct Mesh *m){
+    struct HashTable *hash = hash_table_init(3*(m->ntri), sizeof(struct Edge), sizeof(int));
+
+    for (int tri = 0; tri < m->ntri; tri++){
+        struct Edge key1;
+        key1.v1 = m->triangles[tri].v1;
+        key1.v2 = m->triangles[tri].v2;
+        hash_table_insert(hash, &key1, &tri);
+
+        struct Edge key2;
+        key2.v1 = m->triangles[tri].v1;
+        key2.v2 = m->triangles[tri].v2;
+        hash_table_insert(hash, &key2, &tri);
+
+        struct Edge key3;
+        key3.v1 = m->triangles[tri].v1;
+        key3.v2 = m->triangles[tri].v2;
+        hash_table_insert(hash, &key3, &tri);
+    }
+
+    return hash;
+}
 
 
 
