@@ -76,6 +76,6 @@ double volume_mesh3D(struct mesh3D* m)
 
 		volume += gx*nx + gy*ny + gz*nz;
 	}
-	 return volume
+	 return volume/6
 }
 
