@@ -1,7 +1,16 @@
 #include "../include/circular_buffer_queue.h"
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+
+struct Queue {
+	size_t front; // index of the first element in the queue
+	size_t length; // number of items presently in the queue
+	size_t capacity; // capacity of the queue (in nbr of items)
+	size_t elem_size; // length in bytes of each item in the queue
+	void *data; // address of the array
+};
 
 bool is_empty(const struct Queue *q) {
     return q->length == 0;
