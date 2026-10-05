@@ -78,12 +78,15 @@
 \item[3)] Implement a \texttt{Mesh2D} data structure that models a triangular 2D mesh. That structure should contain the following 4 pieces of information~:
   \begin{itemize}
   \item[$\bullet$] an integer \texttt{nv} representing the number of vertices in the mesh,
-  \item[$\bullet$] (the address of) an array of {\tt Vertex}, named \texttt{vert}, where actual vertices are to be found or loaded,
+  \item[$\bullet$] (the address of) a buffer/array of {\tt Vertex}, named \texttt{vtx}, where actual vertices are to be found or loaded,
+  \item[$\bullet$] the capacity, named \texttt{vtx\_capacity}, of that previous array,
   \item[$\bullet$] an integer \texttt{nt} which represents the number of triangles in the mesh,
-  \item[$\bullet$] (the address of) an array of \texttt{Triangle}, named \texttt{tri}, where actual triangles are to be found or loaded.\\[-5pt]
+  \item[$\bullet$] (the address of) an array of \texttt{Triangle}, named \texttt{tri}, where actual triangles are to be found or loaded.
+  \item[$\bullet$] the capacity, named \texttt{tri\_capacity}, of that previous array.\\[-5pt]
   \end{itemize}
 
-\item[4)] Write a function that initialises a {\tt Mesh2D} data structure able to load a given number of vertices and triangles, with the following prototype: \texttt{int initialize\_mesh2D(struct Mesh2D* m, int vtx\_capacity, int tri\_capacity)}. This function should allocate memory. Write a corresponding dispose function : \texttt{void dispose\_mesh2D(struct Mesh2D* m)}, which shall in particular release allocated memory.\\[-5pt]
+\item[4)] Write a function that initialises a {\tt Mesh2D} data structure able to load a given number of vertices and 
+	triangles, with the following prototype: \texttt{int initialize\_mesh2D(struct Mesh2D* m, int vtx\_capacity, int tri\_capacity)}. This function should allocate memory. Write a corresponding dispose function : \texttt{void dispose\_mesh2D(struct Mesh2D* m)}, which shall in particular release allocated memory.\\[-5pt]
 
 \item[5)] Write a function with prototype \texttt{double area\_mesh2D(struct Mesh2D* m)} that computes the (signed) area of a mesh.
 
