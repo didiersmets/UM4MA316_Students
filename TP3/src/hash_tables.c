@@ -8,12 +8,9 @@
 #define OCCUPIED_SLOT 1
 #define DELETED_SLOT 2
 
-struct HashTable *hash_table_init(size_t capacity, size_t key_len,
-				  size_t val_len)
-{
+struct HashTable *hash_table_init(size_t capacity, size_t key_len, size_t val_len){
 	struct HashTable *ht = malloc(sizeof(struct HashTable));
-	if (!ht)
-		return ht;
+	if (!ht) return ht;
 	ht->key_len = key_len;
 	ht->val_len = val_len;
 	ht->size = 0;
