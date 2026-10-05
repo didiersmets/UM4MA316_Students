@@ -63,9 +63,9 @@ double area_mesh3D(struct Mesh3D *m){
         int n = m->nt;
 	double v=0;
         for(int i=0; i<n; ++i){
-                struct Vertex A = m->tri[i].V[0];
-                struct Vertex B = m->tri[i].V[1];
-                struct Vertex C = m->tri[i].V[2];
+                struct Vertex_3D A = m->tri[i].V[0];
+                struct Vertex_3D B = m->tri[i].V[1];
+                struct Vertex_3D C = m->tri[i].V[2];
                 double Nx = ((B.y-A.y)*(C.z-A.z)+(B.z-A.z)*(C.y-A.y));
                 double Ny = ((B.z-A.z)*(C.x-A.x)+(B.x-A.x)*(C.z-A.z));
                 double Nz = ((B.x-A.x)*(C.y-A.y)+(B.y-A.y)*(C.x-A.x));
