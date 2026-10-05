@@ -18,6 +18,7 @@ int main(int argc, char* argv[]){
         printf("Your input no is: %d \n", n);
 
         //First initiate an empty queue q of integers,
+   
         struct Queue *q = queue_init(sizeof(int),n);
 
 
