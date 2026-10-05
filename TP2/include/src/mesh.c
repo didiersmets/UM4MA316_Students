@@ -154,33 +154,59 @@ double volume_mesh3D(struct Mesh3D* m){
 //     return 0;
 // }
 
-
 int read_mesh2D(struct Mesh2D* m, const char* filename){
     FILE *fp = fopen(filename, "r");
     if (!fp) return 1;
     char ligne [256];
     int j=0;
-    while (fgets(ligne, sizeof(ligne), filename)) {
-        j+=1;
-        if (j<3){
-            continue;
+    while (fgets(ligne, sizeof(ligne), fp)) {
+        int vtx_num;
+        int tri_num;
+        if (sscanf(ligne,"Vertices %d",&vtx_num) == 1) {
+            struct Vertex *vtx=malloc(sizeof(struct Vertex)*(vtx_num));
+            for(int i=0;i<vtx_num;i++){
+                fgets(ligne, sizeof(ligne), fp);
+                double vtx_x;
+                double vtx_y;
+                sscanf(ligne,"%lf %lf",&vtx_x,&vtx_y);
+                vtx[i].x=vtx_x;
+                vtx[i].y=vtx_y;
+            }
+            m->nv=vtx_num;
+            m->vert=vtx;
+            
         }
-        int nv_capacity;
-        sscanf(ligne,"Vertices %d",&nv_capacity);
-        m->nv=nv_capacity;
-        int attente=j+nv_capacity;
-        if(j<attente){
-            int x;
-            int y;
-            int z;
-            sscanf(ligne," %d",&x,&y,&z);
-            m[0].vert[0].x = x;
-            m[0].vert[0].y = y;
+        if (sscanf(ligne,"Triangles %d",&tri_num) == 1) {
+            struct Triangle *triv=malloc(sizeof(struct Triangle)*(tri_num));
+            for(int i=0;i<tri_num;i++){
+                fgets(ligne, sizeof(ligne), fp);
+                int tri_0;
+                int tri_1;
+                int tri_2;
+                sscanf(ligne,"%d %d %d",&tri_0,&tri_1,&tri_2);
+                (triv[i]).node[0]=tri_0;
+                (triv[i]).node[1]=tri_1;
+                (triv[i]).node[2]=tri_2;
+            }
+            m->tri=triv;
+            m->nt=tri_num;
         }
-
     }
+    fclose(fp);
+    
+}
 
+int main(void)
+{
+    struct Mesh2D m;
+    const char *filename="../../mesh1-tp2.mesh";
+    read_mesh2D(&m,filename);
 
+    printf("result for area = %f\n", area_mesh2D(&m));
+    printf("nv = %d\n", m.nv);
+    printf("nt = %d\n", m.nt);
 
+    dispose_mesh2D(&m);
 
+    return 0;
 }
