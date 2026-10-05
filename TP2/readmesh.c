@@ -14,6 +14,10 @@ int main()
     double area;
 
     read_mesh2D(m, "mesh2-tp2.mesh");
+
+    mesh2D_to_gnuplot(m, "mesh_gnu.dat");
+
+    write_mesh2D(m,"MyMesh.mesh");
     
     area = area_mesh2D(m);
 
