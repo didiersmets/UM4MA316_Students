@@ -23,6 +23,7 @@ typedef struct Mesh2D{
 
 int initialize_mesh2D(struct Mesh2D* m, int vtx_capacity, int tri_capacity); //should allocate memory
 void dispose_mesh2D(struct Mesh2D* m); //shall release allocated memory
+double area_mesh2D(struct Mesh2D* m); //computes the signed area of a mesh
 
 int main(int argc, char *argv[]){
     if(argc < 2){
@@ -41,8 +42,8 @@ int main(int argc, char *argv[]){
 
 int initialize_mesh2D(struct Mesh2D* m, int vtx_capacity, int tri_capacity){
 
-    m->vert = 0;
-    m->tri = 0;
+    m->nv = 0;
+    m->nt = 0;
 
     Vertex *vertices = malloc(vtx_capacity * sizeof(Vertex));
     if(vertices == NULL){
@@ -55,9 +56,10 @@ int initialize_mesh2D(struct Mesh2D* m, int vtx_capacity, int tri_capacity){
         return 1;
     }
 
+    m->vert = vertices;
+    m->tri = triangles;
+
     
-    m->nv = vtx_capacity;
-    m->nt = tri_capacity;
     
 }
 void dispose_mesh2D(struct Mesh2D* m){
@@ -67,3 +69,8 @@ void dispose_mesh2D(struct Mesh2D* m){
     free(m);
 
 }   
+
+
+double area_mesh2D(struct Mesh2D* m){
+
+}
