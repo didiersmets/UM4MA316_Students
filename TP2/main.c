@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "triangle.c"
+#include "triangle.h"
 
 
 int main(void) {
@@ -23,17 +23,20 @@ int main(void) {
     tri1.v3 = 2;
 
     struct Triangle tri[1];
-    triangle[0] = tri1;
+    tri[0] = tri1;
 
-    struct Mesh2D *test_mesh;
-    initialize_mesh2D(test_mesh, 3, 1);
+    struct Mesh2D test_mesh;
+    // TODO check if the int in the output is correct or not
+    int success = initialize_mesh2D(&test_mesh, 3, 1);
     
-    test_mesh->vert = vert;
-    test_mesh->tri = tri;
+    test_mesh.vert[0] = vert[0];
+    test_mesh.vert[1] = vert[1];
+    test_mesh.vert[2] = vert[2];
+    test_mesh.tri[0] = tri[0];
 
     double area = 0;
-    area = area_mesh2D(m);
-    printf("Triangle Area = %d\n", area);
+    area = area_mesh2D(&test_mesh);
+    printf("Triangle Area = %f\n", area);
 
    return 0;
 }
