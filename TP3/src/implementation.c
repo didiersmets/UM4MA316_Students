@@ -72,4 +72,27 @@ struct HashTable *build_edge_table1(const struct Mesh *m){
             hash_table_insert(hash,(void *)&clé,&valeur);
         }
     }
+    return hash;
+}
+
+
+int *build_adjacency_table2(const struct Mesh *m){
+    int *adjacency=malloc(sizeof(int)*(3*m->ntri));
+    struct HashTable *hash=malloc(sizeof(struct HashTable));
+    struct HashTable *ht=build_edge_table1(hash);
+    for(int i=0;i<3*m->ntri;i++){
+        adjacency[i]=-1;
+    }
+    for(int i=0;i<m->ntri;i++){
+            struct Triangle t=m->triangles[i];
+            for(int j=0;j<3;j++){
+                struct Edge edge;
+                edge.v1=t.idx[j/3];
+                edge.v1=t.idx[(j+1)/3];
+                int *value = hash_table_find(ht,(void *)&edge);
+                adjacency[3*i+*value]=j;
+            }
+
+    }
+    return adjacency;
 }
