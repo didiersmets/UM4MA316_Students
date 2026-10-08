@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include "mesh.h"
+#include "hash_tables.h"
 
+
+struct Edge {
+    int v1;
+    int v2;
+};
 
 int edge_pos_in_tri(int v1, int v2, struct Triangle t){
     if(t.idx[0]==v1 && t.idx[1]==v2)
@@ -46,7 +52,24 @@ int *build_adjacency_table1(const struct Mesh *m){
     return adjacency;
 }
 
-
 struct HashTable *build_edge_table1(const struct Mesh *m){
+    struct HashTable *hash=malloc(sizeof(struct HashTable));
+    for(int i=0;i<m->ntri;i++){
+        struct Triangle t=m->triangles[i];
+        struct Edge edge[3];
 
+        edge[0].v1 = t.idx[0];
+        edge[0].v2 = t.idx[1];
+
+        edge[1].v1 = t.idx[1];
+        edge[1].v2 = t.idx[2];
+
+        edge[2].v1 = t.idx[2];
+        edge[2].v2 = t.idx[0];
+        for(int j=0;j<3;j++){
+            struct Edge clé= edge[j];
+            int valeur = i;
+            hash_table_insert(hash,(void *)&clé,&valeur);
+        }
+    }
 }

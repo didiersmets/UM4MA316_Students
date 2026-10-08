@@ -19,7 +19,7 @@ struct HashTable *hash_table_init(size_t capacity, size_t key_len,
 	ht->size = 0;
 	unsigned slot_len = 1 + key_len + val_len;
 	ht->data = malloc(capacity * slot_len);
-	ht->capacity = h->data ? capacity : 0;
+	ht->capacity = ht->data ? capacity : 0;
 	for (unsigned i = 0; i < ht->capacity; i++) {
 		unsigned char *p = (unsigned char *)ht->data + i * slot_len;
 		p[0] = FREE_SLOT;
@@ -105,7 +105,24 @@ static void hash_table_grow(struct HashTable *ht, size_t new_cap)
 
 void hash_table_delete(const struct HashTable *ht, void *key)
 {
-	// Homework !
+	if (!ht || !ht->capacity)
+		return ;
+	uint32_t pos = hash_key(key, ht->key_len);
+	unsigned slot_len = 1 + ht->key_len + ht->val_len;
+	unsigned char *data = ht->data;
+	for (size_t probe = 0; probe < ht->capacity; probe++) {
+		pos = pos % ht->capacity;
+		unsigned char *p = data + pos * slot_len;
+		if (p[0] == FREE_SLOT) {
+			return ;
+		}
+		if ((p[0] != DELETED_SLOT) &&
+		    memcmp(key, p + 1, ht->key_len) == 0) {
+				p[0]=DELETED_SLOT;
+		} else {
+			pos++;
+		}
+	}
 }
 
 void hash_table_fini(struct HashTable *ht)
