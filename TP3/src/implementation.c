@@ -78,8 +78,7 @@ struct HashTable *build_edge_table1(const struct Mesh *m){
 
 int *build_adjacency_table2(const struct Mesh *m){
     int *adjacency=malloc(sizeof(int)*(3*m->ntri));
-    struct HashTable *hash=malloc(sizeof(struct HashTable));
-    struct HashTable *ht=build_edge_table1(hash);
+    struct HashTable *ht=build_edge_table1(m);
     for(int i=0;i<3*m->ntri;i++){
         adjacency[i]=-1;
     }
@@ -87,12 +86,18 @@ int *build_adjacency_table2(const struct Mesh *m){
             struct Triangle t=m->triangles[i];
             for(int j=0;j<3;j++){
                 struct Edge edge;
-                edge.v1=t.idx[j/3];
-                edge.v1=t.idx[(j+1)/3];
+                edge.v2=t.idx[j];
+                edge.v1=t.idx[(j+1)%3];
                 int *value = hash_table_find(ht,(void *)&edge);
-                adjacency[3*i+*value]=j;
+                if(value!=NULL){
+                    adjacency[3*i+j]=*value;
+                }
+                
             }
-
     }
+    free(ht->data);
+    free(ht);
     return adjacency;
 }
+
+

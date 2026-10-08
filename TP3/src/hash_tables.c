@@ -92,8 +92,32 @@ void hash_table_insert(struct HashTable *ht, void *key, void *val)
 	abort();
 }
 
+
+
+
 static void hash_table_grow(struct HashTable *ht, size_t new_cap)
 {
+    unsigned char *old_data = ht->data;
+    size_t old_capacity = ht->capacity;
+    unsigned old_key_len = ht->key_len;
+    unsigned old_val_len = ht->val_len;
+    struct HashTable *new_ht =hash_table_init(new_cap, old_key_len, old_val_len);
+    size_t slot_len = 1 + old_key_len + old_val_len;
+    for (size_t i = 0; i < old_capacity; i++) {
+        unsigned char *p = old_data + i * slot_len;
+        if (p[0] == OCCUPIED_SLOT) {
+            void *key = p + 1;
+            void *val = p + 1 + old_key_len;
+            hash_table_insert(new_ht, key, val);
+        }
+    }
+    free(old_data);
+    ht->capacity = new_ht->capacity;
+    ht->size = new_ht->size;
+    ht->key_len = new_ht->key_len;
+    ht->val_len = new_ht->val_len;
+    ht->data = new_ht->data;
+    free(new_ht);
 	// Homework ! Note: requires rehashing all keys.
 	// 1. Save the address ht->data for later use.
 	// 2. Init a new table with new_cap capacity (that will
