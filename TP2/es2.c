@@ -101,3 +101,49 @@ error:
     fclose(f);
     return 1;
 }
+
+int mesh2D_to_gnuplot(Mesh2D *m, const char *filename) {
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("Error opening the file %s\n", filename);
+        return 1;
+    }
+
+    for (int i = 0; i < m->nt; i++) {
+        int idx[4] = {m->tri[i].a, m->tri[i].b, m->tri[i].c, m->tri[i].a};
+        for (int j = 0; j < 4; j++) {
+            fprintf(f, "%.17g %.17g\n", m->vtx[idx[j]].x, m->vtx[idx[j]].y);
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
+    return 0;
+}
+
+int write_mesh2D(Mesh2D *m, const char *filename) {
+    FILE *f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("Error opening the file %s\n", filename);
+        return 1;
+    }
+
+    fprintf(f, "MeshVersionFormatted 2\n");
+    fprintf(f, "Dimension 2\n");
+
+    fprintf(f, "Vertices %d\n", m->nv);
+    for (int i = 0; i < m->nv; i++) {
+        fprintf(f, "%.17g %.17g 0\n", m->vtx[i].x, m->vtx[i].y);
+    }
+
+    fprintf(f, "Triangles %d\n", m->nt);
+    for (int i = 0; i < m->nt; i++) {
+        fprintf(f, "%d %d %d 0\n", m->tri[i].a + 1, m->tri[i].b + 1,
+                m->tri[i].c + 1);
+    }
+
+    fprintf(f, "End\n");
+
+    fclose(f);
+    return 0;
+}
