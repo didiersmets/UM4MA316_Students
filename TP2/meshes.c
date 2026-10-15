@@ -24,7 +24,9 @@ int initialize_mesh2D(Mesh2D* m, int vtx_capacity, int tri_capacity){
     Triangle* tri = malloc(tri_capacity*sizeof(Triangle));
 
     if(vtx==NULL || tri==NULL){
-        printf("Error allocating memory!\n");
+        fprintf(stderr, "Error allocating memory!\n");
+        free(vtx);
+        free(tri);
         return -1;
     }
 
@@ -198,7 +200,10 @@ int write_mesh2D(struct Mesh2D* m, const char* filename){
 int main(int argc, char* argv[]){
 
     Mesh2D m;
-    initialize_mesh2D(&m,10000,20000);
+
+    if(initialize_mesh2D(&m,10000,20000) != 0){
+        return 1;
+    }
     
    if(read_mesh2D(&m, "mesh2-tp2.mesh") != 0){
         dispose_mesh2D(&m);
