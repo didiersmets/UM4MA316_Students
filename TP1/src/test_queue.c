@@ -1,15 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <time.h>
 #include "../include/circular_buffer_queue.h"
+
+#define INITIAL_CAPACITY 1
 
 int main(int argc, char *argv[]){
 
-    if (argc < 2) { return 1; }
+    if (argc < 2) {
+        printf("Usage: %s n\n", argv[0]);
+        return 1;
+    }
 
     int n = atoi(argv[1]);
 
-    struct Queue * q = queue_init(sizeof(int),n);
+    srand(time(NULL));
+
+    // Start small so that enlarge_queue_capacity is actually exercised
+    struct Queue * q = queue_init(sizeof(int), INITIAL_CAPACITY);
+    if (q == NULL) {
+        return 1;
+    }
     size_t max_len = 0;
 
     for(int i = 0; i<n; i++){
@@ -19,7 +30,7 @@ int main(int argc, char *argv[]){
             if(max_len<queue_length(q)){
                 max_len = queue_length(q);
             }
-        }else{
+        }else if(!is_empty(q)){
             int waste;
             queue_dequeue(q, &waste);
         }

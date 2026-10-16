@@ -1,9 +1,12 @@
 #include <stdbool.h>
 #include <stddef.h> // for size_t
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "circular_buffer_queue.h"
 
 static void enlarge_queue_capacity (struct Queue * q){
-    size_t newCapacity = q->capacity * 2;
+    size_t newCapacity = q->capacity > 0 ? q->capacity * 2 : 1;
 
     void *newData = malloc(q->elem_size * newCapacity);
     if(newData == NULL){
@@ -46,8 +49,9 @@ struct Queue *queue_init(size_t elem_size, size_t capacity){
 
     q->data = malloc(elem_size * capacity);
     if (q->data == NULL) {
-        printf("Error allocating memory!");
-        return NULL; 
+        printf("Error allocating memory!\n");
+        free(q);
+        return NULL;
     }
     return q;   
 }
@@ -64,8 +68,11 @@ void queue_dispose(struct Queue *q){
 
 void queue_enqueue(struct Queue *q, const void *src){
     if (q->length == q->capacity) {
-        printf("The capacity is full: queue enlarged"); 
+        printf("The capacity is full: queue enlarged\n");
         enlarge_queue_capacity(q);
+        if (q->length == q->capacity) {
+            return; // enlargement failed, element not inserted
+        }
     }
 
     size_t index = (q->front + q->length) % q->capacity;
