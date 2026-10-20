@@ -40,8 +40,14 @@ int main(int argc, char *argv[]){
     int nv = atoi(argv[1]);
 
     Mesh2D mesh;
-    initialize_mesh2D(&mesh, nv, 3 * nv);
+    if(read_mesh2D(&mesh, argv[1]) != 0){
+        return 1;
+    }
+        
+    printf("%d vertices, %d triangles\n", mesh.nv, mesh.nt);
+    printf("Signed area: %g\n", area_mesh2D(&mesh));
     
+    dispose_mesh2D(&mesh);
     return 0;
 }
 
@@ -56,9 +62,10 @@ int initialize_mesh2D(struct Mesh2D* m, int vtx_capacity, int tri_capacity){
         printf("Vertex memory allocation failed.\n");
         return 1;
     }
-    struct Triangle *triangles = malloc(tri_capacity *sizeof(Vertex));
-        if(vertices == NULL){
+    struct Triangle *triangles = malloc(tri_capacity *sizeof(Triangle));
+    if(triangles == NULL){
         printf("Triangle memory allocation failed.\n");
+        free(vertices);
         return 1;
     }
 
@@ -68,7 +75,7 @@ int initialize_mesh2D(struct Mesh2D* m, int vtx_capacity, int tri_capacity){
     m->tri = triangles;
     m->tri_capacity = tri_capacity;
 
-    
+    printf("Succesfully initialzed mesh 2D with capacity %d vertices and %d triangles \n", m->vtx_capacity, m->tri_capacity);
     return 0;
 }
 void dispose_mesh2D(struct Mesh2D* m){
@@ -80,7 +87,7 @@ void dispose_mesh2D(struct Mesh2D* m){
 }   
 
 double area_triangle(Vertex * vertices, int v1, int v2, int v3){
-    double area = 1/2 * (vertices[v1].x * (vertices[v2].y - vertices[v3].y)
+    double area = 0.5 * (vertices[v1].x * (vertices[v2].y - vertices[v3].y)
                         + vertices[v2].x * (vertices[v3].y - vertices[v1].y)
                         + vertices[v3].x * (vertices[v1].y - vertices[v2].y));
     return area;
@@ -101,6 +108,10 @@ double area_mesh2D(struct Mesh2D* m){
 int read_mesh2D(struct Mesh2D* m, const char* filename){
     FILE *fp;
     fp = fopen(filename,"r");
+    if(fp == NULL){
+        printf("Error: cannot open %s\n", filename);
+        return 1;
+    }
 
     char line[256];
     int mesh_version;
@@ -108,6 +119,7 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
     int vertices;
     int triangles;
 
+    //read the information so we can allocate
     while(fgets(line, 256, fp)){
 
         if (sscanf(line, "MeshVersionFormatted %d", &mesh_version) == 1){
@@ -120,13 +132,41 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
         }
         if (sscanf(line, "Vertices %d", &vertices) == 1){
             printf("Found Vertices Count: %d\n", vertices);
-            int x;
-            int y;
-            int x; //ignored for mesh2D
+        }
+        if (sscanf(line, "Triangles %d", &triangles) == 1){
+            printf("Found Triangles Count: %d\n", triangles);
+        }
+    }
+    rewind(fp);
+
+    // initialize the mesh given the info
+    if(initialize_mesh2D(m, vertices,triangles) != 0){
+        return 1;
+    }
+
+    //read the info and fill the allocated mesh struct
+    while(fgets(line, 256, fp)){
+
+        if (sscanf(line, "MeshVersionFormatted %d", &mesh_version) == 1){
+            continue;
+        }
+        if (sscanf(line, "Dimension %d", &dimention) == 1){
+            continue;
+        }
+        if (sscanf(line, "Vertices %d", &vertices) == 1){
+
+            double x;
+            double y;
+            double z; //ignored for mesh2D
+            int ref;
             for(int i = 0; i < vertices; i++){
                 fgets(line, 256, fp);
-                if(sscanf(line, "%d %d %d", &x, &y, &x) == 1){
+                if(sscanf(line, "%lf %lf %lf %d", &x, &y, &z, &ref) == 4){//sscanf returns the no of values it reads
                     //insert vertices where they belong
+                    m->vert[i].x = x;
+                    m->vert[i].y = y;
+                    //ignore v3
+                    m->nv ++;
                     continue;
                 }
             }
@@ -140,14 +180,21 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
             int v4; //ignored for mesh2D
             for(int i = 0; i < triangles; i++){
                 fgets(line, 256, fp);
-                if(sscanf(line, "%d %d %d", &v1, &v2, &v3, &v4) == 1){
+                if(sscanf(line, "%d %d %d", &v1, &v2, &v3, &v4) == 3){
                     //insert triangles where they belong
+                    m->tri[i].v1 = v1;
+                    m->tri[i].v2 = v2;
+                    m->tri[i].v3 = v3;
+                    //ignore v4
+                    m->nt ++;
                     continue;
                 }
             }
         }
 
     }
+    printf("Succesfully imported mesh2D\n");
+    printf("%d vertices, %d triangles were added to the mesh\n", m->nv, m->nt);
 
     fclose(fp);
 }
