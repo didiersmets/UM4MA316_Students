@@ -31,6 +31,7 @@ double area_mesh2D(struct Mesh2D* m); //computes the signed area of a mesh
 
 int read_mesh2D(struct Mesh2D* m, const char* filename);
 int mesh2D_to_gnuplot(struct Mesh2D  *m, const char *filename);
+int write_mesh2D(struct Mesh2D* m, const char* filename);
 
 int main(int argc, char *argv[]){
     if(argc < 2){
@@ -49,6 +50,11 @@ int main(int argc, char *argv[]){
 
     if(mesh2D_to_gnuplot(&mesh,"mesh_to_plot.txt") == 0){
         system("gnuplot meshplot.gp");
+    }
+
+    if(write_mesh2D(&mesh, "output_mesh.mesh") != 0){
+        printf("Error writing the output mesh\n");
+        return 1;
     }
     
     dispose_mesh2D(&mesh);
@@ -221,6 +227,32 @@ int mesh2D_to_gnuplot(struct Mesh2D  *m, const char *filename){
         fprintf(fp,"\n"); //end of triangle
     }
     printf("Coordinates for plotting written to file %s\n", filename);
+    fclose(fp);
+    return 0;
+}
+
+int write_mesh2D(struct Mesh2D* m, const char* filename){
+    FILE *fp = fopen(filename, "w");
+    if(fp == NULL){
+        printf("Error: cannot create %s\n", filename);
+        return 1;
+    }
+
+    fprintf(fp, "MeshVersionFormatted 2\n");
+    fprintf(fp, "Dimension 3\n");   // z = 0, so read_mesh2D can read it back
+
+    fprintf(fp, "Vertices %d\n", m->nv);
+    for(int i = 0; i < m->nv; i++){
+        //writing z = 0 and ref = 0;
+        fprintf(fp, "%.15g %.15g 0 0\n", m->vert[i].x, m->vert[i].y);
+    }
+
+    fprintf(fp, "Triangles %d\n", m->nt);
+    for(int i = 0; i < m->nt; i++){
+        fprintf(fp, "%d %d %d 0\n", m->tri[i].v1 + 1, m->tri[i].v2 + 1, m->tri[i].v3 + 1);
+    }
+
+    fprintf(fp, "End\n");
     fclose(fp);
     return 0;
 }
