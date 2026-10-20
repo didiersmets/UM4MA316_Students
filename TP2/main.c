@@ -30,6 +30,7 @@ double area_triangle(Vertex* vertices,int v1, int v2, int v3);// computes the ar
 double area_mesh2D(struct Mesh2D* m); //computes the signed area of a mesh
 
 int read_mesh2D(struct Mesh2D* m, const char* filename);
+int mesh2D_to_gnuplot(struct Mesh2D  *m, const char *filename);
 
 int main(int argc, char *argv[]){
     if(argc < 2){
@@ -37,7 +38,6 @@ int main(int argc, char *argv[]){
         printf("Usage: %s <filename>\n", argv[0]);
         return 1;
     }
-    int nv = atoi(argv[1]);
 
     Mesh2D mesh;
     if(read_mesh2D(&mesh, argv[1]) != 0){
@@ -46,6 +46,10 @@ int main(int argc, char *argv[]){
         
     printf("%d vertices, %d triangles\n", mesh.nv, mesh.nt);
     printf("Signed area: %g\n", area_mesh2D(&mesh));
+
+    if(mesh2D_to_gnuplot(&mesh,"mesh_to_plot.txt") == 0){
+        system("gnuplot meshplot.gp");
+    }
     
     dispose_mesh2D(&mesh);
     return 0;
@@ -116,8 +120,8 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
     char line[256];
     int mesh_version;
     int dimention;
-    int vertices;
-    int triangles;
+    int vertices = 0;
+    int triangles = 0;
 
     //read the information so we can allocate
     while(fgets(line, 256, fp)){
@@ -141,6 +145,7 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
 
     // initialize the mesh given the info
     if(initialize_mesh2D(m, vertices,triangles) != 0){
+        fclose(fp);
         return 1;
     }
 
@@ -180,11 +185,11 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
             int v4; //ignored for mesh2D
             for(int i = 0; i < triangles; i++){
                 fgets(line, 256, fp);
-                if(sscanf(line, "%d %d %d", &v1, &v2, &v3, &v4) == 3){
+                if(sscanf(line, "%d %d %d", &v1, &v2, &v3) == 3){
                     //insert triangles where they belong
-                    m->tri[i].v1 = v1;
-                    m->tri[i].v2 = v2;
-                    m->tri[i].v3 = v3;
+                    m->tri[i].v1 = v1 - 1;
+                    m->tri[i].v2 = v2 - 1;
+                    m->tri[i].v3 = v3 - 1;
                     //ignore v4
                     m->nt ++;
                     continue;
@@ -197,4 +202,25 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
     printf("%d vertices, %d triangles were added to the mesh\n", m->nv, m->nt);
 
     fclose(fp);
+    return 0;
+}
+
+int mesh2D_to_gnuplot(struct Mesh2D  *m, const char *filename){
+    FILE *fp;
+    fp = fopen(filename, "w");
+    if(fp == NULL){
+        printf("Error creating output mesh plotting file\n");
+        return 1;
+    }
+    for(int i = 0; i < m->nt ; i++){
+        //float x1, y1, z1, x2, y2, x2, x3, y3, z3;
+        fprintf(fp, "%lf %lf\n", m->vert[m->tri[i].v1].x, m->vert[m->tri[i].v1].y);
+        fprintf(fp, "%lf %lf\n", m->vert[m->tri[i].v2].x, m->vert[m->tri[i].v2].y);
+        fprintf(fp, "%lf %lf\n", m->vert[m->tri[i].v3].x, m->vert[m->tri[i].v3].y);
+        fprintf(fp, "%lf %lf\n", m->vert[m->tri[i].v1].x, m->vert[m->tri[i].v1].y);
+        fprintf(fp,"\n"); //end of triangle
+    }
+    printf("Coordinates for plotting written to file %s\n", filename);
+    fclose(fp);
+    return 0;
 }
