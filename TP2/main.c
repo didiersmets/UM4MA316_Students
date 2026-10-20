@@ -243,7 +243,7 @@ int write_mesh2D(struct Mesh2D* m, const char* filename){
 
     fprintf(fp, "Vertices %d\n", m->nv);
     for(int i = 0; i < m->nv; i++){
-        //writing z = 0 and ref = 0;
+        //writing z = 0 and ref = 0, %.15g prints exactly 15 nums of precision
         fprintf(fp, "%.15g %.15g 0 0\n", m->vert[i].x, m->vert[i].y);
     }
 
