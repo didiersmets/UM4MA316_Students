@@ -12,7 +12,7 @@ int priority_queue_init(struct Priority_queue *q, int max_id) {
     q -> capacity = 1;
     q -> size = 0;
 
-    q -> pos_in_heap = malloc(max_id * sizeof(int));
+    q -> pos_in_heap = malloc((max_id + 1) * sizeof(int));
     if(q -> pos_in_heap == NULL) {
         return -1;
     }
@@ -24,9 +24,14 @@ int priority_queue_init(struct Priority_queue *q, int max_id) {
 }
 
 static void swap(struct Priority_queue *q, int pos1, int pos2) {
-    struct Priority_data tmp = q -> heap[pos1];
+
+    int tmp_pos = q -> pos_in_heap[q -> heap[pos1].id]; 
+    q -> pos_in_heap[q -> heap[pos1].id] = q -> pos_in_heap[q -> heap[pos2].id];
+    q -> pos_in_heap[q -> heap[pos2].id] = tmp_pos;
+
+    struct Priority_data tmp_data = q -> heap[pos1];
     q -> heap[pos1] = q -> heap[pos2];
-    q -> heap[pos2] = tmp;
+    q -> heap[pos2] = tmp_data;
 }
 
 static void sift_up(struct Priority_queue *q, int pos) {
@@ -83,6 +88,7 @@ void priority_queue_push(struct Priority_queue *q, int id, float val) {
 
     struct Priority_data new_node = { .id = id, .val = val };
     q -> heap[q -> size] = new_node;
+    q -> pos_in_heap[id] = q -> size;
 
     sift_up(q, q -> size);
     
@@ -92,8 +98,10 @@ void priority_queue_push(struct Priority_queue *q, int id, float val) {
 struct Priority_data priority_queue_pop(struct Priority_queue *q) {
 
     struct Priority_data extracted = q -> heap[0];
+    q -> pos_in_heap[extracted.id] = -1;
     q -> size--;
     q -> heap[0] = q -> heap[q -> size];
+    q -> pos_in_heap[q -> heap[0].id] = 0;
 
     sift_down(q, 0);
 
@@ -101,5 +109,11 @@ struct Priority_data priority_queue_pop(struct Priority_queue *q) {
 }
 
 void priority_queue_update(struct Priority_queue *q, int key, float new_val) {
-
+    if(new_val > q -> heap[q -> pos_in_heap[key]].val) {
+        q -> heap[q -> pos_in_heap[key]].val = new_val;
+        sift_up(q, q -> pos_in_heap[key]);
+    } else if(new_val < q -> heap[q -> pos_in_heap[key]].val) {
+        q -> heap[q -> pos_in_heap[key]].val = new_val;
+        sift_down(q, q -> pos_in_heap[key]);
+    }
 }
