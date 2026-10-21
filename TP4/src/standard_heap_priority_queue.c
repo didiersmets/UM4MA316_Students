@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-int priority_queue_init(struct Priority_queue *q) {
+int priority_queue_init(struct Priority_queue *q, int max_id) {
 
     q -> heap = malloc(sizeof(struct Priority_data));
     if(q -> heap == NULL) {
@@ -12,7 +12,59 @@ int priority_queue_init(struct Priority_queue *q) {
     q -> capacity = 1;
     q -> size = 0;
 
+    q -> pos_in_heap = malloc(max_id * sizeof(int));
+    if(q -> pos_in_heap == NULL) {
+        return -1;
+    }
+    for(int i = 0; i < max_id; i++){
+        q -> pos_in_heap[i] = -1;
+    }
+
     return 0;
+}
+
+static void swap(struct Priority_queue *q, int pos1, int pos2) {
+    struct Priority_data tmp = q -> heap[pos1];
+    q -> heap[pos1] = q -> heap[pos2];
+    q -> heap[pos2] = tmp;
+}
+
+static void sift_up(struct Priority_queue *q, int pos) {
+    int curr_idx = pos;
+    int tmp_idx = pos - 1;
+    int parent = (pos - 1) / 2;
+    
+    while(tmp_idx != -1 && q -> heap[curr_idx].val > q -> heap[parent].val) {
+        swap(q, curr_idx, parent);
+        curr_idx = parent;
+        tmp_idx = parent - 1;
+        parent = tmp_idx / 2;
+    }
+}
+
+static void sift_down(struct Priority_queue *q, int pos) {
+    int curr_idx = 0;
+    if(curr_idx * 2 + 1 >= q -> size) return;
+
+    int idx_max;
+    if(curr_idx * 2 + 2 >= q -> size) {
+        idx_max = curr_idx * 2 + 1;
+    } else {
+        idx_max = (q -> heap[curr_idx * 2 + 1].val > q -> heap[curr_idx * 2 + 2].val) ? 
+                    curr_idx * 2 + 1 : curr_idx * 2 + 2;
+    }
+
+    while(curr_idx * 2 + 2 < q -> size && q -> heap[curr_idx].val < q -> heap[idx_max].val) {
+        swap(q, curr_idx, idx_max);
+        curr_idx = idx_max;
+        if(curr_idx * 2 + 1 >= q -> size) return;
+        if(curr_idx * 2 + 2 >= q -> size) {
+            idx_max = curr_idx * 2 + 1;
+        } else {
+            idx_max = (q -> heap[curr_idx * 2 + 1].val > q -> heap[curr_idx * 2 + 2].val) ? 
+                        curr_idx * 2 + 1 : curr_idx * 2 + 2;
+        }
+    }
 }
 
 // bigger priority value = highest priority
@@ -32,18 +84,7 @@ void priority_queue_push(struct Priority_queue *q, int id, float val) {
     struct Priority_data new_node = { .id = id, .val = val };
     q -> heap[q -> size] = new_node;
 
-    int curr_idx = q -> size;
-    int tmp_idx = q -> size - 1;
-    int parent = (q -> size - 1) / 2;
-    
-    while(tmp_idx != -1 && new_node.val > q -> heap[parent].val) {
-        struct Priority_data tmp = q -> heap[parent];
-        q -> heap[parent] = new_node;
-        q -> heap[curr_idx] = tmp;
-        curr_idx = parent;
-        tmp_idx = parent - 1;
-        parent = tmp_idx / 2;
-    }
+    sift_up(q, q -> size);
     
     q -> size++;
 }
@@ -54,34 +95,11 @@ struct Priority_data priority_queue_pop(struct Priority_queue *q) {
     q -> size--;
     q -> heap[0] = q -> heap[q -> size];
 
-    int curr_idx = 0;
-    if(curr_idx * 2 + 1 >= q -> size) return extracted;
-
-    int idx_max;
-    if(curr_idx * 2 + 2 >= q -> size) {
-        idx_max = curr_idx * 2 + 1;
-    } else {
-        idx_max = (q -> heap[curr_idx * 2 + 1].val > q -> heap[curr_idx * 2 + 2].val) ? 
-                    curr_idx * 2 + 1 : curr_idx * 2 + 2;
-    }
-
-    while(curr_idx * 2 + 2 < q -> size && q -> heap[curr_idx].val < q -> heap[idx_max].val) {
-        struct Priority_data tmp = q -> heap[idx_max];
-        q -> heap[idx_max] = q -> heap[curr_idx];
-        q -> heap[curr_idx] = tmp;
-        curr_idx = idx_max;
-        if(curr_idx * 2 + 1 >= q -> size) return extracted;
-        if(curr_idx * 2 + 2 >= q -> size) {
-            idx_max = curr_idx * 2 + 1;
-        } else {
-            idx_max = (q -> heap[curr_idx * 2 + 1].val > q -> heap[curr_idx * 2 + 2].val) ? 
-                        curr_idx * 2 + 1 : curr_idx * 2 + 2;
-        }
-    }
+    sift_down(q, 0);
 
     return extracted;
 }
 
 void priority_queue_update(struct Priority_queue *q, int key, float new_val) {
-    
+
 }

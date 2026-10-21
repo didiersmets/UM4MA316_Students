@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 
 
     struct Priority_queue *pq = malloc(sizeof(struct Priority_queue));
-    if(priority_queue_init(pq)) {
+    if(priority_queue_init(pq, 1)) {
         printf("error initializing the priority queue\n");
         free(pq);
         return 1;
@@ -28,9 +28,7 @@ int main(int argc, char *argv[]) {
     priority_queue_push(pq, 2, 10);
 
     printf("popped value: %.17g\n", priority_queue_pop(pq).val);
-    printf("popped value: %.17g\n", priority_queue_pop(pq).val);
-    printf("popped value: %.17g\n", priority_queue_pop(pq).val);
-    printf("popped value: %.17g\n", priority_queue_pop(pq).val);
+    
     for(int i = 0; i < pq -> size; i++) {
         printf("%d element in the queue has value %.17g\n", i, pq -> heap[i].val);
     }
