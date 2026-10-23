@@ -1,4 +1,5 @@
 #pragma once
+
 #include "mesh.h"
 
 /* Charge un maillage à partir d'un fichier au format Medit .mesh.

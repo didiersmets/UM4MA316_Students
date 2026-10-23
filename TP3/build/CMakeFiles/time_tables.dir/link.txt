@@ -1,0 +1,1 @@
+/usr/bin/cc  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/time_tables.dir/src/tp3.c.o CMakeFiles/time_tables.dir/src/mesh_adjacency.c.o CMakeFiles/time_tables.dir/src/hash_tables.c.o CMakeFiles/time_tables.dir/src/mesh_io.c.o CMakeFiles/time_tables.dir/src/mesh.c.o -o time_tables

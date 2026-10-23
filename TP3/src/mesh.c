@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "mesh.h"
+#include "../include/mesh.h"
 
 void initialize_mesh(struct Mesh *m)
 {

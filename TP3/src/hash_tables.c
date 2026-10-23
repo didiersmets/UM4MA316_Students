@@ -1,8 +1,9 @@
-#include "hash_tables.h"
+#include "../include/hash_tables.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define FREE_SLOT 0
 #define OCCUPIED_SLOT 1
@@ -19,7 +20,7 @@ struct HashTable *hash_table_init(size_t capacity, size_t key_len,
 	ht->size = 0;
 	unsigned slot_len = 1 + key_len + val_len;
 	ht->data = malloc(capacity * slot_len);
-	ht->capacity = h->data ? capacity : 0;
+	ht->capacity = ht->data ? capacity : 0;
 	for (unsigned i = 0; i < ht->capacity; i++) {
 		unsigned char *p = (unsigned char *)ht->data + i * slot_len;
 		p[0] = FREE_SLOT;
@@ -64,6 +65,8 @@ void *hash_table_find(const struct HashTable *ht, void *key)
 	return NULL;
 }
 
+static void hash_table_grow(struct HashTable *ht, size_t new_cap);
+
 void hash_table_insert(struct HashTable *ht, void *key, void *val)
 {
 	if (ht->size >= 2 * ht->capacity / 3) {
@@ -93,6 +96,8 @@ void hash_table_insert(struct HashTable *ht, void *key, void *val)
 	abort();
 }
 
+// we assume new_cap > capacity (de l'ordre de la croissance quadratique comme vu en cours)
+
 static void hash_table_grow(struct HashTable *ht, size_t new_cap)
 {
 	// Homework ! Note: requires rehashing all keys.
@@ -102,6 +107,30 @@ static void hash_table_grow(struct HashTable *ht, size_t new_cap)
 	// 3. Traverse the old table, read its data and insert it
 	//    (e.g. through hash_table_insert) into the new table.
 	// 4. When done, free the old data
+  // (done)
+  
+  // (1)
+  unsigned char *old_data = ht->data;
+  unsigned old_cap = ht->capacity;
+  
+  // (2)
+  struct HashTable *new_ht = hash_table_init(new_cap, ht->key_len, ht->val_len);
+  
+  // (3)
+  unsigned slot_len = 1 + ht->key_len + ht->val_len;
+
+  for(size_t i=0; i<old_cap; i++) {
+
+    unsigned char *p = old_data + i * slot_len;
+    if (p[0] == OCCUPIED_SLOT) {
+      hash_table_insert(new_ht, p+1, p+1+ht->key_len);
+    }
+  }
+
+  // (4)
+  *ht = *new_ht;
+  free(new_ht);
+  free(old_data);
 }
 
 // changed from const struct to struct bc I change ht->size.
@@ -125,6 +154,8 @@ void hash_table_delete(struct HashTable *ht, void *key)
       ht->size--;
       return;
     }
+
+    pos++;
   }
 }
 
