@@ -2,11 +2,14 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define FREE_SLOT 0
 #define OCCUPIED_SLOT 1
 #define DELETED_SLOT 2
+
+static void hash_table_grow(struct HashTable *ht, size_t new_cap);
 
 struct HashTable *hash_table_init(size_t capacity, size_t key_len,
 				  size_t val_len)
