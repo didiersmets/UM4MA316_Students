@@ -1,6 +1,8 @@
 #include <stdlib.h>
 
 #include "mesh.h"
+#include "mesh_adjacency.h"
+#include "hash_tables.h"
 
 void initialize_mesh(struct Mesh *m)
 {
@@ -80,5 +82,56 @@ int *build_adjacency_table1(const struct Mesh *m)
 				adj[3 * i + pos] = k;
 		}
 	}
+	return adj;
+}
+
+struct HashTable *build_edge_table1(const struct Mesh *m)
+{
+	struct HashTable *edge_table = hash_table_init(6*m->ntri, sizeof(struct Edge), sizeof(int));
+	if(!edge_table){
+		printf("failed to allocate memory\n");
+		return NULL;
+	}
+	//we just need a cycle of inserts for every edge, we can cycle on triangles
+	for(int i = 0; i < m->ntri; i++){
+		struct Triangle tri = m->triangles[i];
+		for(size_t vertex = 0; vertex < 3; vertex++){
+			struct Edge key_edge = {.v1 = tri.idx[vertex], .v2 = tri.idx[(vertex+1)%3]};
+			hash_table_insert(edge_table, &key_edge, &i);
+		}
+	}
+	return edge_table;
+}
+
+int *build_adjacency_table2(const struct Mesh *m)
+{
+	int *adj = malloc(3 * (size_t)m->ntri * sizeof *adj);
+	if (adj == NULL){
+	    printf("failed to allocate memory\n");
+		return NULL;
+	}
+	struct HashTable *edge_table = build_edge_table1(m);
+	if (edge_table==NULL){
+		printf("failed to allocate memory\n");
+		free(adj);
+		return NULL;
+	}
+	for (int i = 0; i < 3 * m->ntri; i++)
+		adj[i] = -1;
+    //loop on the triangles look up for the opposing edge in the HashTable
+	for (int i = 0; i < m->ntri; i++){
+		struct Triangle tri = m->triangles[i];
+		for(size_t vertex = 0; vertex < 3; vertex++){
+			struct Edge opposing_key_edge = {.v2 = tri.idx[vertex], .v1 = tri.idx[(vertex+1)%3]};
+			void *found = hash_table_find(edge_table, &opposing_key_edge);
+			if(found != NULL){
+			    int check;
+			    memcpy(&check,found,sizeof(int));  
+			    adj[3 * i + vertex] = check;
+			}
+		}
+	}
+	hash_table_fini(edge_table);
+	free(edge_table);
 	return adj;
 }
