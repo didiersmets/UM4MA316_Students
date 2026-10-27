@@ -9,9 +9,11 @@ int initialize_mesh2D(Mesh2D *m, int vtx_capacity, int tri_capacity)
 {
     m->nv = 0;
     m->nt = 0;
-    m->vert = (Vertex *)malloc(vtx_capacity * sizeof(Vertex));
+    m->vtx_capacity = vtx_capacity;
+    m->tri_capacity = tri_capacity;
+    m->vtx =(Vertex *)malloc(vtx_capacity * sizeof(Vertex));
     m->tri = (Triangle *)malloc(tri_capacity * sizeof(Triangle));
-    if (m->vert == NULL || m->tri == NULL)
+    if (m->vtx == NULL || m->tri == NULL)
         return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
@@ -23,7 +25,7 @@ void dispose_mesh2D(Mesh2D *m)
         return;
     }
 
-    free(m->vert);
+    free(m->vtx);
     free(m->tri);
     free(m);
 }
@@ -32,13 +34,13 @@ double area_mesh2D(Mesh2D *m)
 {
     double areaTot = 0.0;
 
-    if (m->vert == NULL || m->tri == NULL)
+    if (m->vtx == NULL || m->tri == NULL)
     {
         return 0.0;
     }
     for (int i = 0; i < m->nt; i++)
     {
-        areaTot += tri_area(m->vert[m->tri[i].na], m->vert[m->tri[i].nb], m->vert[m->tri[i].nc]);
+        areaTot += tri_area(m->vtx[m->tri[i].na], m->vtx[m->tri[i].nb], m->vtx[m->tri[i].nc]);
     }
 
     return areaTot;
@@ -96,7 +98,7 @@ int read_mesh2D(Mesh2D *m, const char *filename)
             {
                 int bin;
                 double z;
-                fscanf(file, "%lf %lf %lf %d", &m->vert[i].x, &m->vert[i].y, &z, &bin); // dispose of z
+                fscanf(file, "%lf %lf %lf %d", &m->vtx[i].x, &m->vtx[i].y, &z, &bin); // dispose of z
             }
         }
         else if (strcmp(keyword, "Triangles") == 0)
@@ -133,9 +135,9 @@ int mesh2D_to_gnuplot(Mesh2D *m, const char *filename)
     }
     for (int tri_i = 0; tri_i < m->nt; tri_i++)
     {
-        Vertex va = m->vert[m->tri[tri_i].na];
-        Vertex vb = m->vert[m->tri[tri_i].nb];
-        Vertex vc = m->vert[m->tri[tri_i].nc];
+        Vertex va = m->vtx[m->tri[tri_i].na];
+        Vertex vb = m->vtx[m->tri[tri_i].nb];
+        Vertex vc = m->vtx[m->tri[tri_i].nc];
 
         fprintf(f, "%lf %lf\n", va.x, va.y);
         fprintf(f, "%lf %lf\n", vb.x, vb.y);
@@ -166,7 +168,7 @@ int write_mesh2D(Mesh2D *m, const char *filename)
     for (int vtx_i=0; vtx_i < m->nv; vtx_i++)
     {
 
-        fprintf(f, "%20.14g %25.14g\n", m->vert[vtx_i].x,m->vert[vtx_i].y);
+        fprintf(f, "%20.14g %25.14g\n", m->vtx[vtx_i].x,m->vtx[vtx_i].y);
     }
 
     fprintf(f, "Triangles %d\n", m->nt);

@@ -21,11 +21,11 @@ int main()
         return EXIT_FAILURE;
     }
 
-    m->vert[0] = (Vertex){.x = 0, .y = 0};
-    m->vert[1] = (Vertex){.x = 3, .y = 0};
-    m->vert[2] = (Vertex){.x = 0, .y = 3};
-    m->vert[3] = (Vertex){.x = 3, .y = 3};
-    m->vert[4] = (Vertex){.x = 3, .y = 6};
+    m->vtx[0] = (Vertex){.x = 0, .y = 0};
+    m->vtx[1] = (Vertex){.x = 3, .y = 0};
+    m->vtx[2] = (Vertex){.x = 0, .y = 3};
+    m->vtx[3] = (Vertex){.x = 3, .y = 3};
+    m->vtx[4] = (Vertex){.x = 3, .y = 6};
     m->nv = 5;
 
     m->tri[0] = (Triangle){.na = 0, .nb = 1, .nc = 2};

@@ -19,9 +19,11 @@ typedef struct
 typedef struct 
 {
     int nv;
-    Vertex *vert;
+    Vertex *vtx;
+    int vtx_capacity;
     int nt;
     Triangle *tri;
+    int tri_capacity;
 }Mesh2D;
 
 int initialize_mesh2D(Mesh2D *m, int vtx_capacity, int tri_capacity);
