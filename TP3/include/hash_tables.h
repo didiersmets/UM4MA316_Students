@@ -17,8 +17,7 @@ struct HashTable {
 	void *data;
 };
 
-struct HashTable *hash_table_init(size_t capacity, size_t key_len,
-				  size_t val_len);
+struct HashTable *hash_table_init(size_t capacity, size_t key_len, size_t val_len);
 
 void *hash_table_find(const struct HashTable *ht, void *key);
 
@@ -27,5 +26,7 @@ void hash_table_insert(struct HashTable *ht, void *key, void *val);
 void hash_table_delete(const struct HashTable *ht, void *key);
 
 void hash_table_fini(struct HashTable *ht);
+
+static void hash_table_grow(struct HashTable *ht, size_t new_cap);
 
 #endif
