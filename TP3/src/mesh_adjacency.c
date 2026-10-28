@@ -59,3 +59,55 @@ int *build_adjacency_table1(const struct Mesh *m)
 	}
 	return adj;
 }
+
+/* Exercise 4: dictionary (v1, v2) -> index of the triangle containing v1 -> v2 */
+struct HashTable *build_edge_table1(const struct Mesh *m)
+{
+	// capacity 2x the number of edges keeps the load factor below 1/2
+	struct HashTable *ht =
+		hash_table_init(2 * 3 * m->ntri, sizeof(struct Edge), sizeof(int));
+	if (ht == NULL || ht->capacity == 0) {
+		printf("Error allocating the edge hash table\n");
+		if (ht)
+			free(ht);
+		return NULL;
+	}
+
+	for (int i = 0; i < m->ntri; i++) {
+		for (int j = 0; j < 3; j++) {
+			struct Edge e = { m->triangles[i].idx[j],
+					  m->triangles[i].idx[(j + 1) % 3] };
+			hash_table_insert(ht, &e, &i);
+		}
+	}
+	return ht;
+}
+
+/* Exercise 5: O(ntri) on average, with the generic hash table */
+int *build_adjacency_table2(const struct Mesh *m)
+{
+	int *adj = new_adjacency_table(m->ntri);
+	if (adj == NULL)
+		return NULL;
+
+	struct HashTable *ht = build_edge_table1(m);
+	if (ht == NULL) {
+		free(adj);
+		return NULL;
+	}
+
+	for (int i = 0; i < m->ntri; i++) {
+		for (int j = 0; j < 3; j++) {
+			// look for the opposite edge b -> a
+			struct Edge e = { m->triangles[i].idx[(j + 1) % 3],
+					  m->triangles[i].idx[j] };
+			int *neighbor = hash_table_find(ht, &e);
+			if (neighbor != NULL)
+				adj[3 * i + j] = *neighbor;
+		}
+	}
+
+	hash_table_fini(ht);
+	free(ht);
+	return adj;
+}
