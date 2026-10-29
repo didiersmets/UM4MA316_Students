@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define FREE_SLOT 0
 #define OCCUPIED_SLOT 1
@@ -19,7 +20,7 @@ struct HashTable *hash_table_init(size_t capacity, size_t key_len,
 	ht->size = 0;
 	unsigned slot_len = 1 + key_len + val_len;
 	ht->data = malloc(capacity * slot_len);
-	ht->capacity = h->data ? capacity : 0;
+	ht->capacity = ht->data ? capacity : 0;
 	for (unsigned i = 0; i < ht->capacity; i++) {
 		unsigned char *p = (unsigned char *)ht->data + i * slot_len;
 		p[0] = FREE_SLOT;
@@ -96,16 +97,62 @@ static void hash_table_grow(struct HashTable *ht, size_t new_cap)
 {
 	// Homework ! Note: requires rehashing all keys.
 	// 1. Save the address ht->data for later use.
+	void *old_data = ht->data;
+	int old_capacity = ht->capacity;
 	// 2. Init a new table with new_cap capacity (that will
 	//    overwrite	ht->data)
+	struct HashTable *ht_new  = hash_table_init(new_cap,ht->key_len, ht->val_len);
+	if (!ht_new || !ht_new->capacity){
+		return NULL;
+	}
+	// since we cannot return the ht_new
+	ht->data = ht_new->data;
+	ht->capacity = ht_new->capacity;
+	ht->size = ht_new->size;
+	free(ht_new);
 	// 3. Traverse the old table, read its data and insert it
 	//    (e.g. through hash_table_insert) into the new table.
+    unsigned slot_len = 1 + ht->key_len + ht->val_len;
+    unsigned char *old_bytes = old_data;   // so that + counts in bytes
+
+    for (unsigned i = 0; i < old_capacity; i++) {
+        unsigned char *slot = old_bytes + i * slot_len;
+        if (slot[0] == OCCUPIED_SLOT) {
+            void *key = slot + 1;
+            void *val = slot + 1 + ht->key_len;
+            hash_table_insert(ht, key, val);
+        }
+    }
 	// 4. When done, free the old data
+	 free(old_data);
 }
 
-void hash_table_delete(const struct HashTable *ht, void *key)
+void hash_table_delete(struct HashTable *ht, void *key)
 {
+
+
 	// Homework !
+
+	if (!ht || !ht->capacity)
+			return;
+	uint32_t pos = hash_key(key, ht->key_len);
+	unsigned slot_len = 1 + ht->key_len + ht->val_len;
+	unsigned char *data = ht->data;
+	for (size_t probe = 0; probe < ht->capacity; probe++) {
+		pos = pos % ht->capacity;
+		unsigned char *p = data + pos * slot_len;
+		if (p[0] == FREE_SLOT) {
+			return;
+		}
+		if ((p[0] != DELETED_SLOT) &&
+			memcmp(key, p + 1, ht->key_len) == 0) {
+				p[0] = DELETED_SLOT;
+				ht->size--;
+				return;
+		} else {
+				pos++;
+		}
+	}
 }
 
 void hash_table_fini(struct HashTable *ht)
