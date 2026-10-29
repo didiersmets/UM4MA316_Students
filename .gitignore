@@ -4,5 +4,6 @@
 *.out
 *.exe
 build/
+.gitkeep
 .vscode/
 .gitignore
