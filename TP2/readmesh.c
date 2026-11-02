@@ -104,3 +104,52 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
     fclose(f);
     return 0;
 }
+
+
+int mesh2D_to_gnuplot(struct Mesh2D* m, const char* filename){
+
+    
+    FILE * f = fopen(filename, "w");
+    if (f == NULL) {
+        return -1;
+    }
+
+    for (int i = 0 ; i<m->nt ; i++){
+        struct Vertex a =m->vert[m->tri[i].idx[0]];
+        struct Vertex b =m->vert[m->tri[i].idx[1]];
+        struct Vertex c =m->vert[m->tri[i].idx[2]];
+
+        fprintf(f, "%f %f \n", a.x , a.y);
+        fprintf(f, "%f %f \n", b.x , b.y);
+        fprintf(f, "%f %f \n", c.x , c.y);
+
+    }
+
+    fclose(f);
+
+    return 0;
+
+}
+
+
+int write_mesh2D(struct Mesh2D* m, const char* filename){
+
+    FILE * f = fopen(filename, "w");
+    if (f == NULL) {
+        return -1;
+    }
+
+    fprintf(f, "Vertices %d\n", m->nv);
+    for (int i = 0 ; i<m->nv ; i++){ 
+        fprintf(f, "%g %g \n", m->vert[i].x , m->vert[i].y);
+    }
+
+    fprintf(f, "Triangles %d\n", m->nt);
+    for (int i = 0 ; i<m->nt ; i++){ 
+        fprintf(f, "%d %d %d \n", m->tri[i].idx[0] + 1, m->tri[i].idx[1] +1 , m->tri[i].idx[2]);
+    }
+
+    fclose(f);
+    return 0;
+
+}

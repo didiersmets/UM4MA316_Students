@@ -28,8 +28,39 @@ int main(void) {
 
     printf("Aire inversee : %f (attendu : -1.000000)\n", area_mesh2D(&m));
 
-
     dispose_mesh2D(&m);
+
+
+    struct Mesh2D lu;
+
+    if(read_mesh2D(&lu, "mesh2-tp2.mesh") != 0){
+        printf("Erreur : lecture du fichier impossible\n");
+            return 1;
+        }
+
+    printf("Aire lue : %f \n", area_mesh2D(&lu));
+
+
+    if(mesh2D_to_gnuplot(&lu, "mesh2.dat") != 0){
+        printf("Erreur : ecriture du fichier impossible\n");
+        }
+
+
+    if (write_mesh2D(&lu, "copie.mesh") != 0){
+        printf("Erreur : ecriture du fichier format mesh impossible\n");
+        }
+
+    dispose_mesh2D(&lu);
+
+    // on relit la copie pour trouver le meme aire
+    if(read_mesh2D(&lu, "mesh2-tp2.mesh") != 0){
+        printf("Erreur : lecture du fichier impossible\n");
+            return 1;
+        }
+
+    printf("Aire copie : %f \n", area_mesh2D(&lu));
+
+    dispose_mesh2D(&lu);
     return 0;
 
 }

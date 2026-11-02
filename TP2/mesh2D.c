@@ -57,7 +57,3 @@ double area_mesh2D(struct Mesh2D* m) {
     return area;
 }
 
-int read_mesh2D(struct Mesh2D *m, const char *filename);
-
-
-
