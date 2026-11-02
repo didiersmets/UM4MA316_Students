@@ -1,35 +1,43 @@
-int read_mesh2D(struct Mesh2D* m, const char* filename);
+#include <stdio.h>
+#include <stdlib.h>
+#include "mesh2D.h"
 
-File * f = fopen( );
-char line[256];
+int read_mesh2D(struct Mesh2D* m, const char* filename){
 
-while (fgets(line, 256, f)){
-    int nv;
-    if (sscanf(line, "Vertices %d", &nv)==1){
+    FILE * f = fopen(filename, "r");
+    char line[256];
 
-        // reserver memoire
-        m -> vert = malloc(nv * sizeof(struct Vertex));
-        if (m ->vert == NULL) {
-            break;
-        }
+    while (fgets(line, 256, f)){
+        int nv;
+        if (sscanf(line, " Vertices %d", &nv)==1){
 
-        // lire les vtx
-        int 
+            // reserver memoire
+            m -> vert = malloc(nv * sizeof(struct Vertex));
+            if (m ->vert == NULL) {
+                break;
+            }
+            m->nv = nv;
+
+            // lire les vtx
 
 
-        for (int i =0; i < nv; i++) {
-            fgets(line, 256, f);
-            double x, y;
-            sscanf(line, "%lf %lf", &x, &y);
-            m->vert[i].x = x;
-            m->vert[i].y = y;
-            m->vert[i].z = z;
 
+            for (int i =0; i < nv; i++) {
+                fgets(line, 256, f);
+                double x, y;
+                sscanf(line, "%lf %lf", &x, &y);
+                m->vert[i].x = x;
+                m->vert[i].y = y;
+
+
+            }
 
         }
 
     }
 
+    fclose(f);
+    return 0;
+
 }
 
-fclose(f);
