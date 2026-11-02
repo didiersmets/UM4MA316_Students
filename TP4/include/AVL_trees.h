@@ -9,7 +9,7 @@ struct avl_node{
 
 struct avl_tree{
     struct avl_node *root;
-    int (*cmp)(const void *, const void *);
+    int (*cmp)(const void *, const void *);//compare must return negative zero positive fro < = >
     int offset;
 };
 
