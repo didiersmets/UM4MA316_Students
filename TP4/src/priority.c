@@ -26,7 +26,9 @@ static void swap(struct priority_queue *q, int pos1, int pos2){
 static void sift_up(struct priority_queue *q, int pos){   
     while (pos > 0){
         int parent = (pos-1)/2;
-        if (q->heap[parent].val <= q->heap[pos].val){ return;}
+        if (q->heap[parent].val <= q->heap[pos].val){ 
+            return;
+        }
         swap(q, parent, pos);
         pos = parent;
     }
@@ -34,16 +36,22 @@ static void sift_up(struct priority_queue *q, int pos){
 
 static void sift_down(struct priority_queue *q, int pos){
     while (1){
-        int left = 2 * pos + 1;
-        int right = 2 * pos + 2;
-        int little = pos;
+        int left = 2*pos + 1;
+        int right = 2*pos + 2;
+        int old = pos;
 
-        if (left < q->size && q->heap[left].val < q->heap[little].val){ little = left;}
-        if (right < q->size && q->heap[right].val < q->heap[little].val){ little = right;}
-        if (little == pos){ return;}
+        if (left < q->size && q->heap[left].val < q->heap[old].val){ 
+            old = left;
+        }
+        if (right < q->size && q->heap[right].val < q->heap[old].val){
+            old = right;
+        }
+        if (old == pos){ 
+            return;
+        }
 
-        swap(q, pos, little);
-        pos = little;
+        swap(q, pos, old);
+        pos = old;
     }
 }
 
@@ -67,7 +75,9 @@ struct priority_data priority_queue_pop(struct priority_queue *q){
     struct priority_data result;
     result.id = -1;
     result.val = 0.0;
-    if (q->size == 0){ return result;}
+    if (q->size == 0){ 
+        return result;
+    }
     result = q->heap[0];
     q->pos_in_heap[result.id] = -1;
     q->size--;
@@ -76,12 +86,14 @@ struct priority_data priority_queue_pop(struct priority_queue *q){
         q->pos_in_heap[q->heap[0].id] = 0;
         sift_down(q, 0);
     }
-    return result;
+    return result; 
 }
 
 void priority_queue_update(struct priority_queue *q, int key, float new_val){
     int pos = q->pos_in_heap[key];
-    if (pos == -1){ return;}
+    if (pos == -1){ 
+        return;
+    }
 
     float old_val = q->heap[pos].val;
     q->heap[pos].val = new_val;
