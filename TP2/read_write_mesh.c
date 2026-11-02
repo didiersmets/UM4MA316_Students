@@ -86,4 +86,37 @@ int mesh2D_to_gnuplot(struct Mesh2D* m, const char* filename)
 }
 
 
-	
+int write_mesh2D(struct Mesh2D* m, const char* filename)
+{
+        FILE* fichier = fopen(filename, "w");
+
+        if (ficher == NULL)
+                return 0;
+
+        fprintf(fichier, "Mesh_Version_Formated 1\n");
+        fprintf(fichier, "Dimention 2\n\n");
+
+        fprintf(fichier, "Vecteur \n");
+        fprintf(fichier, "%d\n", m->mv);
+
+        for(int i=0; i<m->mv; i++) {
+                fprintf(fichier, "%lf%lf 0\n", m->vtx[i].x, m->vtx[i].y);
+        }
+
+        fprintf(fichier, "\n Triangles \n");
+        fprintf(fichier, "%d\n", m->nt);
+
+        for (int i=0; i<m-nt; i++) {
+                fprintf(fichier, "%d%d%d 0\n", 
+                                m->tri[i].idx[0]+1, 
+                                m->tri[i].idx[1]+1, 
+                                m-> tri[i].idx[2]+1);
+        }
+
+        fprintf(fichier, "\n End \n");
+        
+        fclose(fichier);
+
+        return 1;
+}
+
