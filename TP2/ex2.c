@@ -43,4 +43,49 @@ int read_mesh2D(struct Mesh2D* m, const char* filename){
 	return 1;
 }
 
-	
+int mesh2D_to_gnuplot(struct Mesh2D* m, const char* filename){
+	FILE *f = fopen(filename, "w");
+
+	if (f == NULL)
+		return 0;
+
+	for (int i = 0; i < m->nt; i++){
+		struct Triangle t = m->tri[i];
+		for (int j = 0; j < 4; j++) {
+			struct Vertex p = m->vtx[t.v[j%3]];
+
+			fprintf(f, "%lf %lf\n", p.x, p.y);
+		}
+		fprintf(f, "\n");
+	}
+
+	return fclose(f) = 0;
+}
+
+int write_mesh2D (struct Mesh2D *m, const char* filename) {
+	FILE *f = fopen(filename, "w");
+
+	if (f == NULL)
+		return 0;
+
+	fprintf(f, "MeshVersionFormatted 2\n");
+	fprintf(f, "Dimension 2\n");
+	fprintf(f, "Vertices %d\n", m->nv);
+
+	for (int i = 0; i < m->nv; i++){
+		fprintf(f, "%lf %lf 0\n", m->vtx[i].x, m->vtx[i].y);
+	}
+
+	fprintf(f, "Triangles %d\n", m->nt);
+
+	for (int i = 0, i < m-nt; i++) {
+		fprintf(f, "%d %d %d 0\n", m->tri[i].v[0]+1, m->tri[i].v[1]+1, m->tri[i].v[2]+1);
+	}
+
+	fprintf(f, "End");
+	fclose(f);
+	return 1;
+}
+
+
+
