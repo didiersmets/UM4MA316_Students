@@ -2,42 +2,105 @@
 #include <stdlib.h>
 #include "mesh2D.h"
 
+// lit un fichier .mesh et remplit m:
 int read_mesh2D(struct Mesh2D* m, const char* filename){
 
+    m->nv = 0;
+    m->nt = 0;
+    m->vert = NULL;
+    m->tri = NULL;
+
+    //  1 parcourt le fichier pour compter les sommets et les triangles
     FILE * f = fopen(filename, "r");
+    if (f == NULL) {
+        return -1;
+    }
+
     char line[256];
 
-    while (fgets(line, 256, f)){
-        int nv;
-        if (sscanf(line, " Vertices %d", &nv)==1){
+    int nv = 0;
+    int nt = 0;
 
-            // reserver memoire
-            m -> vert = malloc(nv * sizeof(struct Vertex));
-            if (m ->vert == NULL) {
-                break;
-            }
-            m->nv = nv;
+    while (fgets(line, 256, f)){
+        if (sscanf(line, " Vertices %d", &nv) == 1){
+            continue;
+        }
+        sscanf(line, " Triangles %d", &nt);
+    }
+
+    // sans sommets-triangles pas un maillage utilisable.
+    if (nv <= 0 || nt <= 0) {
+        fclose(f);
+        return -1;
+    }
+
+    // reserver la memoire
+    // en cas d'echec initialize_mesh2D a deja libere ce qu'elle avait reserve.
+    if (initialize_mesh2D(m, nv, nt) != 0) {
+        fclose(f);
+        return -1;
+    }
+
+    // remplir
+    // on ferme puis on rouvre pour reprendre la lecture au debut
+    fclose(f);
+    f = fopen(filename, "r");
+    if (f == NULL) {
+        dispose_mesh2D(m);
+        return -1;
+    }
+
+    while (fgets(line, 256, f)){
+        int n;
+
+        if (sscanf(line, " Vertices %d", &n) == 1){
 
             // lire les vtx
-
-
-
-            for (int i =0; i < nv; i++) {
-                fgets(line, 256, f);
-                double x, y;
-                sscanf(line, "%lf %lf", &x, &y);
+            for (int i = 0; i < nv; i++) {
+                double x, y; // z est ignoré
+                if (fgets(line, 256, f) == NULL || sscanf(line, "%lf %lf", &x, &y) != 2) {
+                    fclose(f);
+                    dispose_mesh2D(m);
+                    return -1;
+                }
                 m->vert[i].x = x;
                 m->vert[i].y = y;
+            }
+            m->nv = nv;
+        }
+        else if (sscanf(line, " Triangles %d", &n) == 1){
 
-
+            if (n != nt) {
+                fclose(f);
+                dispose_mesh2D(m);
+                return -1;
             }
 
-        }
+            // lire les triangles
+            for (int i = 0; i < nt; i++) {
+                int a, b, c;
 
+                if (fgets(line, 256, f) == NULL || sscanf(line, "%d %d %d", &a, &b, &c) != 3) {
+                    fclose(f);
+                    dispose_mesh2D(m);
+                    return -1;
+                }
+                // les indices vont de 1 a nv
+                if (a < 1 || a > nv || b < 1 || b > nv
+                    || c < 1 || c > nv) {
+                    fclose(f);
+                    dispose_mesh2D(m);
+                    return -1;
+                }
+                // dans c : indices vont de 0 a nv - 1 : on enleve 1
+                m->tri[i].idx[0] = a - 1;
+                m->tri[i].idx[1] = b - 1;
+                m->tri[i].idx[2] = c - 1;
+            }
+            m->nt = nt;
+        }
     }
 
     fclose(f);
     return 0;
-
 }
-
