@@ -8,7 +8,8 @@ static int get_balance(struct avl_node *root);
 static void update_height(struct avl_node *root);
 static struct avl_node *rotate(struct avl_node *root, bool dir);
 static struct avl_node *fix_balance(struct avl_node *root);
-static void * get_data_address(const struct avl_node *node, int offset);
+static void *get_data_address(const struct avl_node *node, int offset);
+static struct avl_node *insert_rec(struct avl_tree *t, struct avl_node *root, struct avl_node *to_insert, void *data);
 
 void avl_tree_initialize(struct avl_tree *t, int (*cmp)(const void *, const void *), int offset)
 {
@@ -37,9 +38,33 @@ void *avl_tree_find(struct avl_tree *t, const void *data)
     return NULL;
 }
 
+static struct avl_node *insert_rec(struct avl_tree *t, struct avl_node *root, struct avl_node *to_insert, void *data)
+{
+    if (!root)
+        return to_insert;
+
+    int c = t->cmp(data, get_data_address(root, t->offset));
+
+    if (c < 0)
+        root->left = insert_rec(t, root->left, to_insert, data);
+    else if (c > 0)
+        root->right = insert_rec(t, root->right, to_insert, data);
+    else
+        return root; //for now a duplicate key is ignored 
+
+    update_height(root);
+    return fix_balance(root);
+}
 
 void avl_tree_insert(struct avl_tree *t, void *data)
 {
+    assert(t);
+    assert(data);
+    struct avl_node *to_insert = (struct avl_node *)((char *)data + t->offset);
+    to_insert->left = NULL;
+    to_insert->right = NULL;
+    to_insert->height = 1;
+    t->root = insert_rec(t, t->root, to_insert, data);
 }
 
 static int get_balance(struct avl_node *root)
@@ -87,22 +112,23 @@ static struct avl_node *fix_balance(struct avl_node *root)
 {
     int b = get_balance(root);
 
-    if (b > 1) //right heavy
+    if (b > 1) // right heavy
     {
         if (get_balance(root->right) < 0)
-            root->right = rotate(root->right, true); 
-        root = rotate(root, false);                  
+            root->right = rotate(root->right, true);
+        root = rotate(root, false);
     }
-    else if (b < -1) //left heavy
+    else if (b < -1) // left heavy
     {
         if (get_balance(root->left) > 0)
             root->left = rotate(root->left, false);
-        root = rotate(root, true);                  
+        root = rotate(root, true);
     }
     return root;
 }
 
-static void * get_data_address(const struct avl_node *node, int offset){
+static void *get_data_address(const struct avl_node *node, int offset)
+{
     char *node_pos = (char *)node;
     return node_pos - offset;
 }
