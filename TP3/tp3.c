@@ -1,18 +1,57 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "mesh_adjacency.h"
 #include "mesh_io.h"
 #include "mesh.h"
 #include "hash_tables.h"
 
+double get_wall_time() {
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return (double)time.tv_sec + (double)time.tv_nsec * 1e-9;
+}
 
 
+int main(int argc, char *argv[]){
 
-int main(int argc, char **argv[]){
 
+    int *at1, *at2, *at3;
+    struct Mesh m;
+    initialize_mesh(&m);
 
-    
+    const char *path = argc > 1 ? argv[1] : "data/bunny.obj";
+    if (read_mesh_from_wavefront_file(&m, path) != 0) {
+        fprintf(stderr, "cannot read %s\n", path);
+        return 1;
+    }
+
+    // --- TIMING ---
+
+    double start_1 = get_wall_time();
+    at1 = build_adjacency_table1(&m);
+    double end_1 = get_wall_time();
+
+    double start_2 = get_wall_time();
+    at2 = build_adjacency_table2(&m);
+    double end_2 = get_wall_time();
+
+    double start_3 = get_wall_time();
+    at3 = build_adjacency_table3(&m);
+    double end_3 = get_wall_time();
+
+    double time_1 = end_1 - start_1;
+    double time_2 = end_2 - start_2;
+    double time_3 = end_3 - start_3;
+
+    printf(" --- Time for building adjacency tables ----\n");
+    printf("table1: %lf \n", time_1);
+    printf("table2: %lf \n", time_2);
+    printf("table3: %lf \n", time_3);
+
+    free(at1); free(at2); free(at3);
+    dispose_mesh(&m);
 
     
 
@@ -60,7 +99,7 @@ int main(int argc, char **argv[]){
 
     printf("Edge Position: %d \n", pos);
 
-
+    free(adjacency_table);
     dispose_mesh(&sq);
     return 0;
 }

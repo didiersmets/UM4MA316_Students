@@ -65,6 +65,40 @@ void *hash_table_find(const struct HashTable *ht, void *key)
 	return NULL;
 }
 
+static void hash_table_grow(struct HashTable *ht, size_t new_cap)
+{
+	// Homework ! Note: requires rehashing all keys.
+	// 1. Save the address ht->data for later use.
+	void *old_data = ht->data;
+	unsigned int old_capacity = ht->capacity;
+	// 2. Init a new table with new_cap capacity (that will
+	//    overwrite	ht->data)
+	struct HashTable *ht_new  = hash_table_init(new_cap,ht->key_len, ht->val_len);
+	if (!ht_new || !ht_new->capacity){
+		return;
+	}
+	// since we cannot return the ht_new
+	ht->data = ht_new->data;
+	ht->capacity = ht_new->capacity;
+	ht->size = ht_new->size;
+	free(ht_new);
+	// 3. Traverse the old table, read its data and insert it
+	//    (e.g. through hash_table_insert) into the new table.
+    unsigned slot_len = 1 + ht->key_len + ht->val_len;
+    unsigned char *old_bytes = old_data;   // so that + counts in bytes
+
+    for (unsigned i = 0; i < old_capacity; i++) {
+        unsigned char *slot = old_bytes + i * slot_len;
+        if (slot[0] == OCCUPIED_SLOT) {
+            void *key = slot + 1;
+            void *val = slot + 1 + ht->key_len;
+            hash_table_insert(ht, key, val);
+        }
+    }
+	// 4. When done, free the old data
+	 free(old_data);
+}
+
 void hash_table_insert(struct HashTable *ht, void *key, void *val)
 {
 	if (ht->size >= 2 * ht->capacity / 3) {
@@ -93,39 +127,7 @@ void hash_table_insert(struct HashTable *ht, void *key, void *val)
 	abort();
 }
 
-static void hash_table_grow(struct HashTable *ht, size_t new_cap)
-{
-	// Homework ! Note: requires rehashing all keys.
-	// 1. Save the address ht->data for later use.
-	void *old_data = ht->data;
-	int old_capacity = ht->capacity;
-	// 2. Init a new table with new_cap capacity (that will
-	//    overwrite	ht->data)
-	struct HashTable *ht_new  = hash_table_init(new_cap,ht->key_len, ht->val_len);
-	if (!ht_new || !ht_new->capacity){
-		return NULL;
-	}
-	// since we cannot return the ht_new
-	ht->data = ht_new->data;
-	ht->capacity = ht_new->capacity;
-	ht->size = ht_new->size;
-	free(ht_new);
-	// 3. Traverse the old table, read its data and insert it
-	//    (e.g. through hash_table_insert) into the new table.
-    unsigned slot_len = 1 + ht->key_len + ht->val_len;
-    unsigned char *old_bytes = old_data;   // so that + counts in bytes
 
-    for (unsigned i = 0; i < old_capacity; i++) {
-        unsigned char *slot = old_bytes + i * slot_len;
-        if (slot[0] == OCCUPIED_SLOT) {
-            void *key = slot + 1;
-            void *val = slot + 1 + ht->key_len;
-            hash_table_insert(ht, key, val);
-        }
-    }
-	// 4. When done, free the old data
-	 free(old_data);
-}
 
 void hash_table_delete(struct HashTable *ht, void *key)
 {

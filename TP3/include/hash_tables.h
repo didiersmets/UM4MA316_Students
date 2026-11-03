@@ -24,7 +24,7 @@ void *hash_table_find(const struct HashTable *ht, void *key);
 
 void hash_table_insert(struct HashTable *ht, void *key, void *val);
 
-void hash_table_delete(const struct HashTable *ht, void *key);
+void hash_table_delete(struct HashTable *ht, void *key);
 
 void hash_table_fini(struct HashTable *ht);
 

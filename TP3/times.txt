@@ -1,0 +1,8 @@
+ --- Time for building adjacency tables ----
+table1: 0.333774 
+table2: 0.001153 
+table3: 0.000699 
+----- TESTS -----
+Triangles are neighbours on edge of t1 no: 2 
+-1 -1 1 0 -1 -1 
+Edge Position: 0 

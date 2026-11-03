@@ -7,6 +7,8 @@ project(TP1
 # C settings
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
+
 
 #shared code gets compiled into a library file
 add_library(mesh_lib
@@ -18,7 +20,7 @@ add_library(mesh_lib
 
 # tell where the includes are
 target_include_directories(mesh_lib PUBLIC include)
-target_compile_options(mesh_lib PRIVATE -Wall -Wextra)
+target_compile_options(mesh_lib PRIVATE -Wall -Wextra )
 
 
 # c code
