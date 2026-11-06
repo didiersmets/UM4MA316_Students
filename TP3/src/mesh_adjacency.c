@@ -126,16 +126,78 @@ struct EdgeTable {
 	int *next;
 };
 
-void edge_table_initialize(struct EdgeTable *et, int nvert, int ntri);
+void edge_table_initialize(struct EdgeTable *et, int nvert, int ntri) {
+    et->head = malloc(sizeof(int) * nvert);
+    et->next = malloc(sizeof(int) * ntri * 3);
+    for (size_t i = 0 ; i < nvert ; i++) {
+	et->head[i] = -1;
+    }
+    for (size_t i = 0 ; i < ntri * 3; i++) {
+	et->next[i] = -1;
+    }
+    
+}
 
-void edge_table_dispose(struct EdgeTable *et);
+void edge_table_dispose(struct EdgeTable *et) {
+    free(et->head);
+    free(et->next);
+    free(et);
+}
 
-void edge_table_insert(int v1, int edge_code, struct EdgeTable *et);
+void edge_table_insert(int v1, int edge_code, struct EdgeTable *et) {
+    int tmp = et->head[v1];
+    if (tmp != -1) {
+	head[v1] = edge_code; 
+	et->next[edge_code] = tmp;
+    }
+    else {
+	head[v1] = edge_code;
+    }
+}
 
-int  edge_table_find(int v1, int v2, const struct EdgeTable *et, 
-                                                const struct Mesh *m);
+int  edge_table_find(int v1, int v2, const struct EdgeTable *et, const struct Mesh *m) {
+    int val = et->head[v1];
+    size_t i = 0;
+    while (next[val] != -1 && i < m->ntri) {
+	if (m->triangles[val].v1 != v2) {
+	    val = et->next[val];
+	    i++;
+	}
+	else {
+	    return val;
+	}
+    }
+    return -1;
+}
 
-struct EdgeTable *build_edge_table3(const struct Mesh *m);
+struct EdgeTable *build_edge_table3(const struct Mesh *m) {
+    struct EdgeTable *et = malloc(sizeof(struct EdgeTable));
+    edge_table_initialize(et, m->nvert, m->ntri);
+    for (size_t i = 0 ; i < m->ntri ; i++) {
+	struct Triangle t = m->triangles[i];
+	int v1 = t.v1;
+	int v2 = t.v2;
+	
+	int edge_code = 3 * i + edge_pos_in_tri(v1, v2, t);
+	edge_table_insert(v1, edge_code, et); 
+    }
+    return et;
+}
 
-int *build_adjacency_table3(const struct Mesh *m);
+int *build_adjacency_table3(const struct Mesh *m) {
+    int *adj = malloc(sizeof(int) * m->ntri * 3);
+    struct EdgeTable *et = build_edge_table3(m);
+    for (size_t i = 0 ; i < m->ntri ; i++) {
+	struct Triangle t = m->triangles[i];
+	
+	for (size_t j = 0 ; j < 3 ; j++) {
+	    int v1 = t.v[(j + 1) % 3];
+	    int v2 = t.v[j];
+	    int neighbour = edge_table_find(v2, v1, et, m);
+	    adj[3 * i + j] = neighbour;
+	}
+    }
+
+    return m;
+}
 
