@@ -146,8 +146,61 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
   /* TODO: 1) call initialize_mesh2D with the right numbers of vertices and triangles,
    *       2) loop over (i,j) to fill m->vert. Careful with integer division: i / nx * L
    *          gives 0 for i < nx, write i * L / nx instead;
-   *       3) loop over the cells to fill m->tri.                                        */
-  return -1;
+   *       3) loop over the cells to fill m->tri.                                        
+   * */
+
+  int n_vert = (nx + 1) * (ny + 1); // + 1 because nx ny is number of cells along that direction
+  int n_tri = 2 * nx * ny; //two triangles per cell
+
+  int init = initialize_mesh2D(m, n_vert, n_tri);
+  if(init != 0){
+    printf("Error in initialization of mesh\n");
+    return -1;
+  }
+
+  // iterate over vertices
+  for(int i = 0; i < nx + 1; i++){ // vertex x coordinate: columns
+    for(int j = 0; j < ny + 1; j++){ // vertex y coordinate: rows
+      //j * (nx + 1) + i is the same as n * i + 1 but with the inversion and +1 explained a few lines above
+      m->vert[j * (nx + 1) + i].x = i * L / nx;
+      m->vert[j * (nx + 1) + i].y = j * H / ny;
+    }
+  }
+  int t = 0; // triangles_counter
+  //iterate
+  for(int i = 0; i < nx; i++){
+    for(int j = 0; j < ny; j++){
+
+      int v_00 = j * (nx + 1) + i;  // lower left
+      int v_10 = v_00 + 1;          // lower right
+      int v_01 = v_00 + nx + 1;     // lower right
+      int v_11 = v_01 + 1;          // upper right
+
+      if( (i + j) % 2 == 0){        //even
+        m->tri[t].v[0] = v_00;
+        m->tri[t].v[1] = v_10;
+        m->tri[t].v[2] = v_11;
+
+        m->tri[t + 1].v[0] = v_00;
+        m->tri[t + 1].v[1] = v_11;
+        m->tri[t + 1].v[2] = v_01;
+      }else{                        //odd
+        m->tri[t].v[0] = v_00;
+        m->tri[t].v[1] = v_10;
+        m->tri[t].v[2] = v_01;
+
+        m->tri[t + 1].v[0] = v_10;
+        m->tri[t + 1].v[1] = v_11;
+        m->tri[t + 1].v[2] = v_01;
+      }
+      t += 2; //increment triangle index
+      if (t > n_tri){
+        printf("Error: exceeded triangle number \n");
+        return -1;
+      }
+    }
+  }
+  return 0;
 }
 
 /* ======================================================================================
@@ -325,6 +378,9 @@ void print_vector(const char *name, const double *x, int n)
 int main(void)
 {
   /* Exercise 1 */
+  struct Mesh2D m;
+  plate_mesh2D(&m, 4, 2);
+  print_mesh(&m);
 
   /* Exercise 2 */
 
