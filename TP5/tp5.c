@@ -211,8 +211,19 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
  * An edge a -> b lies on the boundary if the opposite edge b -> a does not exist. */
 int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 {
-  /* TODO */
-  return NULL;
+  int *on_bdry = calloc(m->nv, sizeof(int));
+  for(int i = 0; i < m->nt; i++){
+    for(int j = 0; j < 3; j++){
+      int a = m->tri[i].v[j];
+      int b = m->tri[i].v[(j + 1) % 3];
+      int found = edge_table_find(b, a, et, m);
+      if(found == -1){// if it's a boundary edge
+        on_bdry[a] = 1; //change value for vertex a to 1
+        on_bdry[b] = 1; //change value for vertex b to 1
+      }
+    }
+  }
+  return on_bdry;
 }
 
 /* Writes the neighbours of v into nbrs, each one once, and returns their number (the degree
@@ -222,8 +233,38 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
  * The array nbrs must be large enough. */
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
-  /* TODO */
-  return 0;
+  int num_neib = 0;
+  for (int e = et->head[v]; e != -1; e = et->next[e]) { // loops through all vn neighbouring v
+    int i = e / 3, j = e % 3; /* e is in triangle i, and v = m->tri[i].v[j] */
+    //int v_n = m->tri[i].v[j] // this is v
+
+    int v_n1 = m->tri[i].v[(j + 1) % 3];
+    int v_n2 = m->tri[i].v[(j + 2) % 3];
+
+    int k;
+    //check if v1 is duplicate, else add it
+    for(k = 0; k < num_neib; k++){
+      if(nbrs[k] == v_n1){
+        break;
+      }
+    }
+    if(k == num_neib){//no duplicate found
+      nbrs[num_neib] = v_n1;
+      num_neib++;
+    }
+
+    //check if v2 is duplicate, else add it
+    for(k = 0; k < num_neib; k++){
+      if(nbrs[k] == v_n2){
+        break;
+      }
+    }
+    if(k == num_neib){//no duplicate found
+      nbrs[num_neib] = v_n2;
+      num_neib++;
+    }
+  }
+  return num_neib;
 }
 
 /* ======================================================================================
@@ -381,9 +422,13 @@ int main(void)
   struct Mesh2D m;
   plate_mesh2D(&m, 4, 2);
   print_mesh(&m);
+  mesh2D_to_gnuplot(&m, "mesh.dat");
 
   /* Exercise 2 */
 
+  struct EdgeTable et = build_edge_table(&m);
+  int *on_bdry = boundary_vertices(&m, &et);
+  print_neighbours(&m, &et, on_bdry);
   /* Exercise 3 */
 
   /* Exercise 4 */
