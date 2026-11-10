@@ -305,15 +305,37 @@ void csr_print(const struct CSRMatrix *A)
 int number_unknowns(const int *on_bdry, int nv, int *num)
 {
   /* TODO */
-  return 0;
+  int N = 0;
+  for (int v =0 ; v <nv ; v++) {
+    if (on_bdry[v]) {
+      num[v] = -1 ;
+    }
+    else {
+      num[v] = N; N++ ;
+    }
+  } 
+  return N;
 }
 
 /* Number of nonzero entries of A: for each interior vertex, 1 (diagonal) plus the number
  * of its interior neighbours. */
 int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num)
 {
-  /* TODO */
-  return 0;
+  int nnz = 0 ;
+  for (int v =0; v< m->nv; v++) {
+    if (num[v] == -1) {
+      continue;
+    }
+    int nbrs[MAX_NBRS];
+    int d = vertex_neighbours(v, et, m, nbrs);
+    nnz ++;
+    for (int k = 0 ; k < d ; k++) {
+      if (num[nbrs[k]] != -1) {
+        nnz ++;
+      }
+    }
+  } 
+  return nnz;
 }
 
 /* Builds A (with csr_initialize) and fills b (allocated by the caller, size N).
@@ -325,13 +347,46 @@ int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int
 int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int *num, int N,
                    struct CSRMatrix *A, double *b)
 {
-  /* TODO: 1) call csr_initialize with n = N and nnz = count_nonzeros(m, et, num),
-   *       2) set A->row_ptr[0] = 0 and int pos = 0 (next free position in val, col_ind),
-   *       3) loop over the vertices; for each interior vertex v, with i = num[v]:
-   *          write the diagonal entry, then the entries of the interior neighbours,
-   *          set b[i] = 0 and add g(w) for each boundary neighbour w,
-   *          and set A->row_ptr[i+1] = pos at the end of the row.                       */
-  return -1;
+  /* TODO: 1) call csr_initialize with n = N and nnz = count_nonzeros(m, et, num),*/
+  csr_initialize(A, N, count_nonzeros(m, et, num)) ;
+
+  /*       2) set A->row_ptr[0] = 0 and int pos = 0 (next free position in val, col_ind),*/
+  A->row_ptr[0] = 0 ;
+  int pos = 0;
+
+  /*       3) loop over the vertices; for each interior vertex v, with i = num[v]:*/
+  for (int v = 0 ; v < m->nv ; v++) {
+    if (num [v] != -1) {
+      int i = num[v];
+      int nbrs[MAX_NBRS];
+      int d = vertex_neighbours(v, et, m, nbrs);
+
+  /*          write the diagonal entry, then the entries of the interior neighbours,*/
+      A->val[pos] = d;
+      A ->col_ind[pos] = i;
+      pos++;
+
+  /*          set b[i] = 0 and add g(w) for each boundary neighbour w,*/
+      b[i] = 0;
+      for (int k =0 ; k <d; k++) {
+        int w = nbrs[k];
+        if (num[w] != -1) {
+          A->val[pos] = -1;
+          A->col_ind[pos] = num[w];
+          pos++;
+        }
+        else {
+          double xw = m->vert[w].x;
+          double yw = m->vert[w].y;
+          double temp = g(xw, yw);
+          b[i] = b[i] + temp;
+        }
+      }
+    /*          and set A->row_ptr[i+1] = pos at the end of the row. */
+      A->row_ptr[i+1] = pos;
+    }
+  }
+  return 0;
 }
 
 /* ======================================================================================
@@ -342,6 +397,12 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
 void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 {
   /* TODO */
+  for (int i =0 ; i < A->n ; i++) {
+    y[i] = 0 ;
+    for (int k = A->row_ptr[i]; k < A->row_ptr[i+1]; k++) {
+      y[i] = y[i] + A->val[k] * x[A->col_ind[k]];
+    }
+  }
 }
 
 /* ======================================================================================
@@ -417,8 +478,22 @@ int main(void)
   print_neighbours(&m, &et, on_bdry);
 
   /* Exercise 3 */
+  int num[15];
+  int N = number_unknowns(on_bdry, m.nv, num);
+  print_numbering(num, m.nv);
+  printf("  N = %d, nnz = %d\n", N, count_nonzeros(&m, &et, num));
+  struct CSRMatrix A;
+  double b[3];
+  assemble_plate(&m, &et, num, N, &A, b);
+  print_system(&A, b);
 
   /* Exercise 4 */
+  double ones[3] = {1, 1, 1}, y[3];
+  csr_matvec(&A, ones, y);
+  print_vector("A * (1, 1, 1)", y, 3);
+
+  free(on_bdry); csr_dispose(&A); dispose_edge_table(&et); dispose_mesh2D(&m);
+
 
   return 0;
 }
