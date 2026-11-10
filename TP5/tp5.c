@@ -178,8 +178,18 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
  * An edge a -> b lies on the boundary if the opposite edge b -> a does not exist. */
 int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 {
-  /* TODO */
-  return NULL;
+  int *on_bdry = calloc(m->nv, sizeof(int));
+  if (!on_bdry) return NULL;
+  for (int i = 0; i < m->nt; ++i)
+    for (int j = 0; j < 3; ++j) {
+      int a = m->tri[i].v[j];
+      int b = m->tri[i].v[(j + 1) % 3];
+      if (edge_table_find(b, a, et, m) == -1) {
+        on_bdry[a] = 1;
+        on_bdry[b] = 1;
+      }
+    }
+  return on_bdry;
 }
 
 /* Writes the neighbours of v into nbrs, each one once, and returns their number (the degree
@@ -189,8 +199,18 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
  * The array nbrs must be large enough. */
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
-  /* TODO */
-  return 0;
+  int deg = 0;
+  for (int e = et->head[v]; e != -1; e = et->next[e]) {
+    int i = e / 3, j = e % 3;
+    for (int k = 1; k <= 2; ++k) {
+      int w = m->tri[i].v[(j + k) % 3];
+      int found = 0;
+      for (int l = 0; l < deg; ++l)
+        if (nbrs[l] == w) { found = 1; break; }
+      if (!found) nbrs[deg++] = w;
+    }
+  }
+  return deg;
 }
 
 /* ======================================================================================
@@ -350,6 +370,9 @@ int main(void)
   print_mesh(&m);
 
   /* Exercise 2 */
+  struct EdgeTable et = build_edge_table(&m);
+  int *on_bdry = boundary_vertices(&m, &et);
+  print_neighbours(&m, &et, on_bdry);
 
   /* Exercise 3 */
 
