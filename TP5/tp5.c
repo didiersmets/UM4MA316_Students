@@ -317,8 +317,16 @@ void csr_print(const struct CSRMatrix *A)
  * the interior vertices are numbered 0, 1, ..., N-1 in increasing order. Returns N. */
 int number_unknowns(const int *on_bdry, int nv, int *num)
 {
-  /* TODO */
-  return 0;
+  int numbering = 0;
+  for(int i = 0; i < nv; i++){
+    if(on_bdry[i]){
+      num[i] = -1;
+    }else{
+      num[i] = numbering;
+      numbering ++;
+    }
+  }
+  return numbering;
 }
 
 /* Number of nonzero entries of A: for each interior vertex, 1 (diagonal) plus the number
@@ -326,7 +334,21 @@ int number_unknowns(const int *on_bdry, int nv, int *num)
 int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num)
 {
   /* TODO */
-  return 0;
+  int nnz = 0;
+  for(int i = 0; i < m->nv; i++){
+   if (num[i] != -1){ // it is an interior vertex
+    //find out interior neighbours
+    int nbrs[MAX_NBRS];
+    int d = vertex_neighbours(i, et, m, nbrs);
+    for(int j = 0; j < d; j++){
+      if(num[nbrs[j]] != -1){
+        nnz++; // +1 for each internal neighbour
+      }
+    }
+    nnz ++; // +1 for diagonal
+   }
+  }
+  return nnz;
 }
 
 /* Builds A (with csr_initialize) and fills b (allocated by the caller, size N).
@@ -344,7 +366,37 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
    *          write the diagonal entry, then the entries of the interior neighbours,
    *          set b[i] = 0 and add g(w) for each boundary neighbour w,
    *          and set A->row_ptr[i+1] = pos at the end of the row.                       */
-  return -1;
+  if (csr_initialize(A, N, count_nonzeros(m, et, num)) == -1){
+    return -1;
+  }
+  A->row_ptr[0] = 0;
+  int pos = 0;
+  for(int v = 0; v < m->nv; v++){
+    if(num[v] != -1){ // non boundary vertex
+      int i = num[v];
+      int nbrs[MAX_NBRS];
+      int deg_v = vertex_neighbours(v,et,m,nbrs);
+      A->val[pos] = deg_v;
+      A->col_ind[pos] = i;
+      pos++;
+      b[i] = 0;
+      for(int w = 0; w < deg_v; w++){ // loop across neighbours
+        int neib = nbrs[w]; //extract number of neighbouring vertex
+        if(num[neib] != -1){ // non boundary neighbour
+          A->val[pos] = -1;
+          A->col_ind[pos] = num[neib];
+          pos++;
+        }else{
+          double x = m->vert[neib].x;
+          double y = m->vert[neib].y;
+          b[i] += g(x,y);
+        }
+      }
+      A->row_ptr[i+1] = pos;
+      
+    }
+  }
+   return 0;
 }
 
 /* ======================================================================================
@@ -354,7 +406,15 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
 /* y must have room for A->n values. */
 void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 {
-  /* TODO */
+  for(int i = 0; i < A->n; i++){
+    y[i] = 0;
+    int ptr_start = A->row_ptr[i];
+    int ptr_end = A->row_ptr[i+1];
+    for(int j = ptr_start; j < ptr_end; j++){
+      y[i] += A->val[j] * x[A->col_ind[j]];
+    }
+  }
+
 }
 
 /* ======================================================================================
@@ -419,19 +479,41 @@ void print_vector(const char *name, const double *x, int n)
 int main(void)
 {
   /* Exercise 1 */
+  printf("--- Exercise 1 ---\n");
+
   struct Mesh2D m;
-  plate_mesh2D(&m, 4, 2);
+  plate_mesh2D(&m, 4, 2); //construct the coordinates for the 4x2 mesh calculating vertex coordinates and adding them to m.vert
   print_mesh(&m);
   mesh2D_to_gnuplot(&m, "mesh.dat");
 
   /* Exercise 2 */
+  printf("--- Exercise 2 ---\n");
 
-  struct EdgeTable et = build_edge_table(&m);
-  int *on_bdry = boundary_vertices(&m, &et);
+  struct EdgeTable et = build_edge_table(&m); // construct adjacency list of directed edges. head, next contain all edges for a given vertex
+  int *on_bdry = boundary_vertices(&m, &et); // finds boundary vertices (checks if opposite edge is not in edge table) and puts them to -1
   print_neighbours(&m, &et, on_bdry);
+
   /* Exercise 3 */
+  printf("--- Exercise 3 ---\n");
+
+  int num[15];
+  int N = number_unknowns(on_bdry, m.nv, num);
+  print_numbering(num, m.nv);
+  printf(" N = %d, nnz = %d\n", N, count_nonzeros(&m, &et, num));
+  struct CSRMatrix A;
+  double b[3];
+  assemble_plate(&m, &et, num, N, &A, b);
+  print_system(&A, b);
+
+
 
   /* Exercise 4 */
+  printf("--- Exercise 4 ---\n");
+
+  double ones[3] = {1, 1, 1}, y[3];
+  csr_matvec(&A, ones, y);
+  print_vector("A * (1, 1, 1), y expected: (7, 2, 7)", y, 3);
+
 
   return 0;
 }
