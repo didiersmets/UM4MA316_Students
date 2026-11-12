@@ -182,8 +182,6 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
     }
   }
 
-  mesh2D_to_gnuplot(m, "mesh.dat");
-
   return 0;
 }
 
@@ -225,27 +223,23 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
   int cont = 0;
-  for(int t = 0; t < m->nt; t++){
-    for(int j = 0; j < 3; j++){
-      int vertex = m->tri[t].v[j];
+  for (int e = et->head[v]; e != -1; e = et->next[e]) {
+    int i = e / 3;
+    int j = e % 3;
+    int n1 = m->tri[i].v[(j + 1) % 3];
+    int n2 = m->tri[i].v[(j + 2) % 3];
 
-      if(v != vertex) continue;
-
-      int n1 = m->tri[t].v[(j + 1) % 3];
-      int n2 = m->tri[t].v[(j + 2) % 3];
-
-      bool found1 = false;
-      bool found2 = false;
-      for(int k = 0; k < cont; k++){
-        if(nbrs[k] == n1) found1 = true;
-        else if(nbrs[k] == n2) found2 = true;
-      }
-
-      if(!found1) nbrs[cont++] = n1;
-      if(!found2) nbrs[cont++] = n2;
+    bool found1 = false;
+    bool found2 = false;
+    for(int k = 0; k < cont; k++){
+      if(nbrs[k] == n1) found1 = true;
+      else if(nbrs[k] == n2) found2 = true;
     }
-  }
 
+    if(!found1) nbrs[cont++] = n1;
+    if(!found2) nbrs[cont++] = n2;
+  }
+  
   return cont;
 }
 
@@ -356,8 +350,7 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
       pos++;
 
       for(int k = 0; k < d; k++){
-        if(nbrs[k] == v) continue;
-        else if(num[nbrs[k]] != -1){
+        if(num[nbrs[k]] != -1){
           A->val[pos] = -1;
           A->col_ind[pos] = num[nbrs[k]];
           pos++;
@@ -382,8 +375,8 @@ void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 {
   for(int i = 0; i < A->n; i++){
     y[i] = 0;
-    for(int j = A->row_ptr[i]; j <= A->row_ptr[i + 1] - 1; j++){
-      y[i] += A->val[j] * x[A->col_ind[j]];
+    for(int k = A->row_ptr[i]; k < A->row_ptr[i + 1]; k++){
+      y[i] += A->val[k] * x[A->col_ind[k]];
     }
   }
 }
@@ -453,6 +446,8 @@ int main(void)
   struct Mesh2D m;
   plate_mesh2D(&m, 4, 2);
   //print_mesh(&m);
+  //mesh2D_to_gnuplot(&m, "mesh.dat");
+
 
   /* Exercise 2 */
   struct EdgeTable et = build_edge_table(&m);
