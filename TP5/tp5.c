@@ -299,8 +299,17 @@ void csr_print(const struct CSRMatrix *A)
  * the interior vertices are numbered 0, 1, ..., N-1 in increasing order. Returns N. */
 int number_unknowns(const int *on_bdry, int nv, int *num)
 {
-  /* TODO */
-  return 0;
+  int cont = 0;
+  for(int i = 0; i < nv; i++){
+    if(on_bdry[i] == 1){
+      num[i] = -1;
+    }else{
+      num[i] = cont;
+    }
+    cont++;
+  }
+
+  return cont;
 }
 
 /* Number of nonzero entries of A: for each interior vertex, 1 (diagonal) plus the number
