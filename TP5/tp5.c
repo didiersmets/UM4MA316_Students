@@ -11,6 +11,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /* Absolute value and maximum of two doubles (so that no math library is needed). */
 double absval(double a) { return a < 0 ? -a : a; }
@@ -223,8 +224,29 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
  * The array nbrs must be large enough. */
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
-  /* TODO */
-  return 0;
+  int cont = 0;
+  for(int t = 0; t < m->nt; t++){
+    for(int j = 0; j < 3; j++){
+      int vertex = m->tri[t].v[j];
+
+      if(v != vertex) continue;
+
+      int n1 = m->tri[t].v[(j + 1) % 3];
+      int n2 = m->tri[t].v[(j + 2) % 3];
+
+      bool found1 = false;
+      bool found2 = false;
+      for(int k = 0; k < cont; k++){
+        if(nbrs[k] == n1) found1 = true;
+        else if(nbrs[k] == n2) found2 = true;
+      }
+
+      if(!found1) nbrs[cont++] = n1;
+      if(!found2) nbrs[cont++] = n2;
+    }
+  }
+
+  return cont;
 }
 
 /* ======================================================================================
@@ -386,6 +408,7 @@ int main(void)
   /* Exercise 2 */
   struct EdgeTable et = build_edge_table(&m);
   int *on_bdry = boundary_vertices(&m, &et);
+  print_neighbours(&m, &et, on_bdry);
 
   /* Exercise 3 */
 
