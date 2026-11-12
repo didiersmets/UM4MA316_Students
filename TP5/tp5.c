@@ -143,10 +143,6 @@ double g(double x, double y)
  * Returns 0 on success, -1 otherwise. */
 int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
 {
-  /* TODO: 1) call initialize_mesh2D with the right numbers of vertices and triangles,
-   *       2) loop over (i,j) to fill m->vert. Careful with integer division: i / nx * L
-   *          gives 0 for i < nx, write i * L / nx instead;
-   *       3) loop over the cells to fill m->tri.                                        */
 
   int nv = (nx + 1) * (ny + 1);
   int nt = 2 * nx * ny;
@@ -185,6 +181,8 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
     }
   }
 
+  mesh2D_to_gnuplot(m, "mesh.dat");
+
   return 0;
 }
 
@@ -196,8 +194,26 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
  * An edge a -> b lies on the boundary if the opposite edge b -> a does not exist. */
 int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 {
-  /* TODO */
-  return NULL;
+  int *on_bdry = calloc(m->nv, sizeof(int));
+  
+  for(int t = 0; t < m->nt; t++){
+    for(int j = 0; j < 3; j++){
+      int a = m->tri[t].v[j];
+      int b = m->tri[t].v[(j + 1) % 3];
+
+      if(edge_table_find(b, a, et, m) == -1){
+        on_bdry[a] = 1;
+        on_bdry[b] = 1;
+      }
+    }
+  }
+
+  /*debug
+  for(int i = 0; i < m->nv; i++){
+    printf("vertice %d, boundary: %d\n", i, on_bdry[i]);
+  }*/
+
+  return on_bdry;
 }
 
 /* Writes the neighbours of v into nbrs, each one once, and returns their number (the degree
@@ -368,6 +384,8 @@ int main(void)
   print_mesh(&m);
 
   /* Exercise 2 */
+  struct EdgeTable et = build_edge_table(&m);
+  int *on_bdry = boundary_vertices(&m, &et);
 
   /* Exercise 3 */
 
