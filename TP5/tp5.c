@@ -380,7 +380,12 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
 /* y must have room for A->n values. */
 void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 {
-  /* TODO */
+  for(int i = 0; i < A->n; i++){
+    y[i] = 0;
+    for(int j = A->row_ptr[i]; j <= A->row_ptr[i + 1] - 1; j++){
+      y[i] += A->val[j] * x[A->col_ind[j]];
+    }
+  }
 }
 
 /* ======================================================================================
@@ -465,6 +470,14 @@ int main(void)
   print_system(&A, b);
 
   /* Exercise 4 */
+  double ones[3] = {1, 1, 1}, y[3];
+  csr_matvec(&A, ones, y);
+  print_vector("A * (1, 1, 1)", y, 3);
+
+  free(on_bdry);
+  csr_dispose(&A);
+  dispose_edge_table(&et);
+  dispose_mesh2D(&m);
 
   return 0;
 }
