@@ -305,8 +305,8 @@ int number_unknowns(const int *on_bdry, int nv, int *num)
       num[i] = -1;
     }else{
       num[i] = cont;
+      cont++;
     }
-    cont++;
   }
 
   return cont;
@@ -316,8 +316,20 @@ int number_unknowns(const int *on_bdry, int nv, int *num)
  * of its interior neighbours. */
 int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num)
 {
-  /* TODO */
-  return 0;
+  int nbrs [MAX_NBRS];
+  int nnz = 0;
+
+  for(int v = 0; v < m->nv; v++){
+    if(num[v] != -1){
+      int d = vertex_neighbours(v, et, m, nbrs);
+      for(int k = 0; k < d; k++){
+        if(num[nbrs[k]] != -1) nnz++;
+      }
+      nnz++;
+    }
+  }
+
+  return nnz;
 }
 
 /* Builds A (with csr_initialize) and fills b (allocated by the caller, size N).
@@ -412,14 +424,18 @@ int main(void)
   /* Exercise 1 */
   struct Mesh2D m;
   plate_mesh2D(&m, 4, 2);
-  print_mesh(&m);
+  //print_mesh(&m);
 
   /* Exercise 2 */
   struct EdgeTable et = build_edge_table(&m);
   int *on_bdry = boundary_vertices(&m, &et);
-  print_neighbours(&m, &et, on_bdry);
+  //print_neighbours(&m, &et, on_bdry);
 
   /* Exercise 3 */
+  int num[15];
+  int N = number_unknowns(on_bdry, m.nv, num);
+  print_numbering(num, m.nv);
+  printf(" N = %d, nnz = %d\n", N, count_nonzeros(&m, &et, num));
 
   /* Exercise 4 */
 
