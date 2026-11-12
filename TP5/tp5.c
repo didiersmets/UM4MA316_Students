@@ -161,8 +161,8 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
   }
 
   int t = 0;
-  for(int i = 0; i < nx; i++){
-    for(int j = 0; j < ny; j++){
+  for(int j = 0; j < ny; j++){
+    for(int i = 0; i < nx; i++){
       int v00 = j * (nx + 1) + i;
       if((i + j) % 2 == 0){
         m->tri[t].v[0]      = v00;
@@ -170,16 +170,16 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
         m->tri[t].v[2]      = v00 + nx + 2;
 
         m->tri[t + 1].v[0]  = v00;
-        m->tri[t + 1].v[1]  = v00 + nx + 1;
-        m->tri[t + 1].v[2]  = v00 + nx + 2;
+        m->tri[t + 1].v[1]  = v00 + nx + 2;
+        m->tri[t + 1].v[2]  = v00 + nx + 1;
       }else{
         m->tri[t].v[0]      = v00;
         m->tri[t].v[1]      = v00 + 1;
         m->tri[t].v[2]      = v00 + nx + 1;
 
         m->tri[t + 1].v[0]  = v00 + 1;
-        m->tri[t + 1].v[1]  = v00 + nx + 1;
-        m->tri[t + 1].v[2]  = v00 + nx + 2;
+        m->tri[t + 1].v[1]  = v00 + nx + 2;
+        m->tri[t + 1].v[2]  = v00 + nx + 1;
       }
       t += 2;
     }
@@ -363,6 +363,9 @@ void print_vector(const char *name, const double *x, int n)
 int main(void)
 {
   /* Exercise 1 */
+  struct Mesh2D m;
+  plate_mesh2D(&m, 4, 2);
+  print_mesh(&m);
 
   /* Exercise 2 */
 
