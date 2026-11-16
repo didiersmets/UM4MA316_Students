@@ -20,16 +20,19 @@ double maxval(double a, double b) { return a > b ? a : b; }
  * Part 0 (provided). Meshes (TP 2) and edge table (TP 3)
  * ====================================================================================== */
 
-struct Vertex {
+struct Vertex
+{
   double x;
   double y;
 };
 
-struct Triangle {
+struct Triangle
+{
   int v[3]; /* indices of the 3 vertices in the vertex array, counterclockwise */
 };
 
-struct Mesh2D {
+struct Mesh2D
+{
   int nv;               /* number of vertices  */
   struct Vertex *vert;  /* array of nv vertices */
   int nt;               /* number of triangles */
@@ -64,9 +67,12 @@ double triangle_area(const struct Mesh2D *m, int t)
 int mesh2D_to_gnuplot(const struct Mesh2D *m, const char *filename)
 {
   FILE *f = fopen(filename, "w");
-  if (!f) return -1;
-  for (int t = 0; t < m->nt; ++t) {
-    for (int k = 0; k <= 3; ++k) {
+  if (!f)
+    return -1;
+  for (int t = 0; t < m->nt; ++t)
+  {
+    for (int k = 0; k <= 3; ++k)
+    {
       struct Vertex p = m->vert[m->tri[t].v[k % 3]];
       fprintf(f, "%g %g\n", p.x, p.y);
     }
@@ -80,7 +86,8 @@ int mesh2D_to_gnuplot(const struct Mesh2D *m, const char *filename)
  * v[j] -> v[(j+1)%3]; its code is 3*i + j. All the edges starting at a vertex v are
  * obtained by following the chain
  *     e = head[v],  e = next[e],  e = next[e], ...   until e == -1.                     */
-struct EdgeTable {
+struct EdgeTable
+{
   int *head; /* size nv   */
   int *next; /* size 3*nt */
 };
@@ -90,9 +97,11 @@ struct EdgeTable build_edge_table(const struct Mesh2D *m)
   struct EdgeTable et;
   et.head = malloc(m->nv * sizeof(int));
   et.next = malloc(3 * m->nt * sizeof(int));
-  for (int v = 0; v < m->nv; ++v) et.head[v] = -1;
+  for (int v = 0; v < m->nv; ++v)
+    et.head[v] = -1;
   for (int i = 0; i < m->nt; ++i)
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 3; ++j)
+    {
       int v1 = m->tri[i].v[j];
       int code = 3 * i + j;
       et.next[code] = et.head[v1]; /* push the edge on the chain of v1 */
@@ -118,7 +127,8 @@ int edge_end(const struct Mesh2D *m, int code)
 int edge_table_find(int v1, int v2, const struct EdgeTable *et, const struct Mesh2D *m)
 {
   for (int e = et->head[v1]; e != -1; e = et->next[e])
-    if (edge_end(m, e) == v2) return e;
+    if (edge_end(m, e) == v2)
+      return e;
   return -1;
 }
 
@@ -143,11 +153,68 @@ double g(double x, double y)
  * Returns 0 on success, -1 otherwise. */
 int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
 {
-  /* TODO: 1) call initialize_mesh2D with the right numbers of vertices and triangles,
-   *       2) loop over (i,j) to fill m->vert. Careful with integer division: i / nx * L
-   *          gives 0 for i < nx, write i * L / nx instead;
-   *       3) loop over the cells to fill m->tri.                                        */
-  return -1;
+  int nv = (nx + 1) * (ny + 1);
+  int nt = 2 * nx * ny;
+  if (initialize_mesh2D(m, nv, nt) == -1)
+  {
+    dispose_mesh2D(m);
+    return -1;
+  }
+  // we must now fill the mesh correctly
+  // we populate the vertices
+  double dx = L / nx;
+  double dy = H / ny;
+
+  int k = 0;
+  for (int j = 0; j <= ny; j++)
+  {
+    double y = j * dy;
+    for (int i = 0; i <= nx; i++)
+    {
+      m->vert[k].x = i * dx;
+      m->vert[k].y = y;
+      k++;
+    }
+  }
+  int t = 0;
+
+  for (int j = 0; j < ny; j++)
+  {
+    for (int i = 0; i < nx; i++)
+    {
+      int v00 = j * (nx + 1) + i;
+      int v10 = v00 + 1;
+      int v01 = v00 + (nx + 1);
+      int v11 = v01 + 1;
+
+      if ((i + j) % 2 == 0)
+      {
+        m->tri[t].v[0] = v00;
+        m->tri[t].v[1] = v10;
+        m->tri[t].v[2] = v11;
+        t++;
+
+        m->tri[t].v[0] = v00;
+        m->tri[t].v[1] = v11;
+        m->tri[t].v[2] = v01;
+        t++;
+      }
+      else
+      {
+        m->tri[t].v[0] = v00;
+        m->tri[t].v[1] = v10;
+        m->tri[t].v[2] = v01;
+        t++;
+
+        m->tri[t].v[0] = v10;
+        m->tri[t].v[1] = v11;
+        m->tri[t].v[2] = v01;
+        t++;
+      }
+    }
+  }
+
+  return 0;
 }
 
 /* ======================================================================================
@@ -158,8 +225,23 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny)
  * An edge a -> b lies on the boundary if the opposite edge b -> a does not exist. */
 int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 {
-  /* TODO */
-  return NULL;
+  int *on_bdry = calloc(m->nv, sizeof(int));
+  if (!on_bdry)
+    return NULL;
+
+  for (int v = 0; v < m->nv; v++)
+  {
+    for (int e = et->head[v]; e != -1; e = et->next[e])
+    {
+      int w = edge_end(m, e);
+      if (edge_table_find(w, v, et, m) == -1) /*the inverted edge is w->v */
+      {
+        on_bdry[v] = 1;
+        on_bdry[w] = 1;
+      }
+    }
+  }
+  return on_bdry;
 }
 
 /* Writes the neighbours of v into nbrs, each one once, and returns their number (the degree
@@ -169,7 +251,8 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
  * The array nbrs must be large enough. */
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
-  /* TODO */
+  int count = 0;
+  
   return 0;
 }
 
@@ -180,7 +263,8 @@ int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m,
 #define MAX_NBRS 16 /* maximal number of neighbours of a vertex (8 on our meshes) */
 
 /* Compressed Row Storage (CRS), also called CSR. */
-struct CSRMatrix {
+struct CSRMatrix
+{
   int n;        /* the matrix is n x n */
   int nnz;      /* number of stored entries */
   double *val;  /* size nnz: the values, row after row */
@@ -211,11 +295,14 @@ void csr_dispose(struct CSRMatrix *A)
 void csr_print(const struct CSRMatrix *A)
 {
   printf("  n = %d, nnz = %d\n  val     =", A->n, A->nnz);
-  for (int k = 0; k < A->nnz; ++k) printf(" %g", A->val[k]);
+  for (int k = 0; k < A->nnz; ++k)
+    printf(" %g", A->val[k]);
   printf("\n  col_ind =");
-  for (int k = 0; k < A->nnz; ++k) printf(" %d", A->col_ind[k]);
+  for (int k = 0; k < A->nnz; ++k)
+    printf(" %d", A->col_ind[k]);
   printf("\n  row_ptr =");
-  for (int i = 0; i <= A->n; ++i) printf(" %d", A->row_ptr[i]);
+  for (int i = 0; i <= A->n; ++i)
+    printf(" %d", A->row_ptr[i]);
   printf("\n");
 }
 
@@ -270,7 +357,8 @@ void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 void print_mesh(const struct Mesh2D *m)
 {
   printf("%d vertices:\n", m->nv);
-  for (int v = 0; v < m->nv; ++v) printf("  vertex %2d = (%g, %g)\n", v, m->vert[v].x, m->vert[v].y);
+  for (int v = 0; v < m->nv; ++v)
+    printf("  vertex %2d = (%g, %g)\n", v, m->vert[v].x, m->vert[v].y);
   printf("%d triangles:\n", m->nt);
   for (int t = 0; t < m->nt; ++t)
     printf("  triangle %2d = (%d, %d, %d)\n", t, m->tri[t].v[0], m->tri[t].v[1], m->tri[t].v[2]);
@@ -279,11 +367,13 @@ void print_mesh(const struct Mesh2D *m)
 void print_neighbours(const struct Mesh2D *m, const struct EdgeTable *et, const int *on_bdry)
 {
   int nbrs[MAX_NBRS];
-  for (int v = 0; v < m->nv; ++v) {
+  for (int v = 0; v < m->nv; ++v)
+  {
     int d = vertex_neighbours(v, et, m, nbrs);
     const char *kind = (on_bdry == NULL) ? "?" : (on_bdry[v] ? "boundary" : "interior");
     printf("  vertex %2d (%s): %d neighbours:", v, kind, d);
-    for (int k = 0; k < d; ++k) printf(" %d", nbrs[k]);
+    for (int k = 0; k < d; ++k)
+      printf(" %d", nbrs[k]);
     printf("\n");
   }
 }
@@ -291,7 +381,8 @@ void print_neighbours(const struct Mesh2D *m, const struct EdgeTable *et, const 
 void print_numbering(const int *num, int nv)
 {
   printf("  num =");
-  for (int v = 0; v < nv; ++v) printf(" %d", num[v]);
+  for (int v = 0; v < nv; ++v)
+    printf(" %d", num[v]);
   printf("\n");
 }
 
@@ -299,13 +390,17 @@ void print_numbering(const int *num, int nv)
 void print_system(const struct CSRMatrix *A, const double *b)
 {
   csr_print(A);
-  if (A->n <= 10) {
+  if (A->n <= 10)
+  {
     printf("  as a full matrix, with b on the right:\n");
-    for (int i = 0; i < A->n; ++i) {
+    for (int i = 0; i < A->n; ++i)
+    {
       double row[10] = {0};
-      for (int k = A->row_ptr[i]; k < A->row_ptr[i + 1]; ++k) row[A->col_ind[k]] += A->val[k];
+      for (int k = A->row_ptr[i]; k < A->row_ptr[i + 1]; ++k)
+        row[A->col_ind[k]] += A->val[k];
       printf("   ");
-      for (int j = 0; j < A->n; ++j) printf(" %4g", row[j]);
+      for (int j = 0; j < A->n; ++j)
+        printf(" %4g", row[j]);
       printf("   | %g\n", b[i]);
     }
   }
@@ -314,7 +409,8 @@ void print_system(const struct CSRMatrix *A, const double *b)
 void print_vector(const char *name, const double *x, int n)
 {
   printf("  %s =", name);
-  for (int i = 0; i < n; ++i) printf(" %g", x[i]);
+  for (int i = 0; i < n; ++i)
+    printf(" %g", x[i]);
   printf("\n");
 }
 
@@ -324,7 +420,10 @@ void print_vector(const char *name, const double *x, int n)
 
 int main(void)
 {
-  /* Exercise 1 */
+  struct Mesh2D m;
+  plate_mesh2D(&m, 4, 2);
+  print_mesh(&m);
+  mesh2D_to_gnuplot(&m, "mesh.dat");
 
   /* Exercise 2 */
 
