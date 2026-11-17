@@ -164,14 +164,22 @@ int plate_mesh2D(struct Mesh2D *m, int nx, int ny){
       int v11 = v01 + 1;
 
       if ((i+j)%2 == 0) {
-        m->tri[t].v[0] = v00; m->tri[t].v[1] = v10; m->tri[t].v[2] = v11;
+        m->tri[t].v[0] = v00; 
+        m->tri[t].v[1] = v10; 
+        m->tri[t].v[2] = v11;
         t++;
-        m->tri[t].v[0] = v00; m->tri[t].v[1] = v11; m->tri[t].v[2] = v01;
+        m->tri[t].v[0] = v00; 
+        m->tri[t].v[1] = v11; 
+        m->tri[t].v[2] = v01;
         t++;
       } else {
-        m->tri[t].v[0] = v00; m->tri[t].v[1] = v10; m->tri[t].v[2] = v01;
+        m->tri[t].v[0] = v00; 
+        m->tri[t].v[1] = v10; 
+        m->tri[t].v[2] = v01;
         t++;
-        m->tri[t].v[0] = v10; m->tri[t].v[1] = v11; m->tri[t].v[2] = v01;
+        m->tri[t].v[0] = v10; 
+        m->tri[t].v[1] = v11; 
+        m->tri[t].v[2] = v01;
         t++;
         }
     }
@@ -283,18 +291,46 @@ void csr_print(const struct CSRMatrix *A)
 
 /* num[v] = -1 if v is a boundary vertex; otherwise num[v] is the number of the unknown at v:
  * the interior vertices are numbered 0, 1, ..., N-1 in increasing order. Returns N. */
-int number_unknowns(const int *on_bdry, int nv, int *num)
-{
-  /* TODO */
-  return 0;
+
+int number_unknowns(const int *on_bdry, int nv, int *num){
+  int n = 0;
+
+  for (int v = 0; v < nv; v++){
+    if (on_bdry[v]) {
+      num[v] = -1;
+    } else {
+      num[v] = n;
+      n++;
+    }
+  }
+    return n;
 }
 
 /* Number of nonzero entries of A: for each interior vertex, 1 (diagonal) plus the number
  * of its interior neighbours. */
-int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num)
-{
-  /* TODO */
-  return 0;
+
+
+int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num){
+  int nnz = 0;
+  int nbrs[MAX_NBRS];
+
+  for (int v = 0; v < m->nv; v++){
+    if (num[v] == -1){
+      continue;
+    }
+
+    int d = vertex_neighbours(v, et, m, nbrs);
+    nnz++;
+
+    for (int i = 0; i < d; i++){
+      int w = nbrs[i];
+      if (num[w] != -1){
+        nnz++;
+      }
+    }
+  }
+
+  return nnz;
 }
 
 /* Builds A (with csr_initialize) and fills b (allocated by the caller, size N).
@@ -303,16 +339,50 @@ int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int
  *   - then, the entry -1 in column num[w] for each interior neighbour w,
  * and b[i] is the sum of g(w) over the boundary neighbours w.
  * Returns 0 on success, -1 otherwise. */
-int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int *num, int N,
-                   struct CSRMatrix *A, double *b)
-{
-  /* TODO: 1) call csr_initialize with n = N and nnz = count_nonzeros(m, et, num),
-   *       2) set A->row_ptr[0] = 0 and int pos = 0 (next free position in val, col_ind),
-   *       3) loop over the vertices; for each interior vertex v, with i = num[v]:
-   *          write the diagonal entry, then the entries of the interior neighbours,
-   *          set b[i] = 0 and add g(w) for each boundary neighbour w,
-   *          and set A->row_ptr[i+1] = pos at the end of the row.                       */
-  return -1;
+
+
+int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int *num, int N, struct CSRMatrix *A, double *b){
+  int nnz = count_nonzeros(m, et, num);
+
+  if (csr_initialize(A, N, nnz) != 0){
+    csr_dispose(A);
+    return -1;
+  }
+
+  int nbrs[MAX_NBRS];
+  int pos = 0;
+  A->row_ptr[0] = 0;
+
+  for (int v = 0; v < m->nv; v++) {
+    int i = num[v];
+        
+    if (i == -1) {
+      continue;
+    }
+
+    int d = vertex_neighbours(v, et, m, nbrs);
+
+    A->val[pos] = d;
+    A->col_ind[pos] = i;
+    pos++;
+
+    b[i] = 0.0;
+    for (int k = 0; k < d; k++) {
+      int w = nbrs[k];
+
+      if (num[w] != -1) {
+        A->val[pos] = -1.0;
+        A->col_ind[pos] = num[w];
+        pos++;
+      } else {
+        b[i] += g(m->vert[w].x, m->vert[w].y);
+      }
+    }
+
+    A->row_ptr[i + 1] = pos;
+  }
+
+  return 0;
 }
 
 /* ======================================================================================
@@ -320,9 +390,18 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
  * ====================================================================================== */
 
 /* y must have room for A->n values. */
-void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
-{
-  /* TODO */
+
+void csr_matvec(const struct CSRMatrix *A, const double *x, double *y){
+  for (int i = 0; i < A->n; i++) {
+    double sum = 0.0;
+
+    for (int k = A->row_ptr[i]; k < A->row_ptr[i + 1]; k++) {
+      int j = A->col_ind[k];
+      sum += A->val[k] * x[j];
+    }
+
+    y[i] = sum;
+  }
 }
 
 /* ======================================================================================
@@ -384,28 +463,34 @@ void print_vector(const char *name, const double *x, int n)
  * main: add the lines given in each exercise of the sheet.
  * ====================================================================================== */
 
-int main(void)
-{
-  /* Exercise 1 */
+int main(void){
 
   struct Mesh2D m;
   plate_mesh2D(&m, 4, 2);
-  // print_mesh(&m);
-
-  /* Exercise 2 */
+  print_mesh(&m);
 
   struct EdgeTable et = build_edge_table(&m);
   int *on_bdry = boundary_vertices(&m, &et);
   print_neighbours(&m, &et, on_bdry);
 
-// Free allocated memory
-free(on_bdry);
-dispose_edge_table(&et);
-dispose_mesh2D(&m);
+  int num[15];
+  int N = number_unknowns(on_bdry, m.nv, num);
+  print_numbering(num, m.nv);
+  printf("    N = %d, nnz = %d\n", N, count_nonzeros(&m, &et, num));
 
-  /* Exercise 3 */
+  struct CSRMatrix A;
+  double b[3];
+  assemble_plate(&m, &et, num, N, &A, b);
+  print_system(&A, b);
+  
+  double ones[3] = {1, 1, 1}, y[3];
+  csr_matvec(&A, ones, y);
+  print_vector("A * (1, 1, 1)", y, 3);
 
-  /* Exercise 4 */
+  free(on_bdry);
+  csr_dispose(&A);
+  dispose_edge_table(&et);
+  dispose_mesh2D(&m);
 
   return 0;
 }
