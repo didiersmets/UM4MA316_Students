@@ -105,8 +105,7 @@ double seconds(void) { return (double)clock() / CLOCKS_PER_SEC; }
 /* In-place LU factorisation, Algorithm 2.2 of the lecture notes. On output, T contains
  * L below the diagonal (the diagonal of L, made of ones, is not stored) and U on and above
  * the diagonal. Returns 0 on success, and -1 if a pivot T(p,p) = 0 is met. */
-int lu_decompose(struct DenseMatrix *T)
-{
+
   /* TODO: translate Algorithm 2.2 into three nested loops (entry (i,j) is T->a[i*n + j]):
    *   for p = 0, ..., n-2:
    *     if T(p,p) == 0, return -1             (zero pivot: no LU without pivoting)
@@ -115,16 +114,59 @@ int lu_decompose(struct DenseMatrix *T)
    *       for each column j > p:
    *         T(i,j) = T(i,j) - T(i,p) * T(p,j)
    * Then check the last pivot T(n-1,n-1) in the same way, and return 0.                */
-  return -1;
+
+int lu_decompose(struct DenseMatrix *T){
+
+  int n = T->n;
+
+  for (int p = 0; p < n-1; p++){
+    double pivot = T->a[p * n + p];
+
+    if (pivot == 0.0) { return -1;}
+
+    for (int i = p+1; i < n; i++){
+      double m = T->a[i*n + p] / pivot;
+      T->a[i*n + p] = m;
+
+      for (int j = p+1; j < n; j++) {
+        T->a[i*n + j] =  T->a[i*n + j] - m * T->a[p*n + j];
+      }
+    }
+  }
+  if (T->a[(n - 1) * n + (n - 1)] == 0.0) {
+    return -1;
+  }
+
+  return 0;
 }
 
 /* Solves A x = b, where T contains the LU factorisation of A (Algorithm 2.3).
  * On input, x contains b; on output, x contains the solution. */
-void lu_solve(const struct DenseMatrix *T, double *x)
-{
+
   /* TODO: 1) forward substitution with L (ones on the diagonal),
    *       2) backward substitution with U.                                              */
+
+
+void lu_solve(const struct DenseMatrix *T, double *x){
+    int n = T->n;
+
+  // forward
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+        x[j] = x[j] - x[i] * T->a[j*n + i];
+    }
+  }
+
+  // backward
+  for (int i = n - 1; i >= 0; i--) {
+    x[i] = x[i] / T->a[i*n + i];
+
+    for (int j = i - 1; j >= 0; j--) {
+      x[j] = x[j] - x[i] * T->a[j*n + i];
+    }
+  }
 }
+
 
 /* ======================================================================================
  * Part 2 (Exercise 5). LU factorisation with partial pivoting.
@@ -176,7 +218,21 @@ int main(void)
 {
   /* Exercise 1 */
 
+  double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
+  struct DenseMatrix A, T;
+  dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
+  int ret = lu_decompose(&T);
+  printf(" lu_decompose returns %d, T =\n", ret);
+  dense_print(&T);
+
   /* Exercise 2 */
+
+  double x[3] = {7, 8, 7};
+  lu_solve(&T, x);
+  print_vector("x", x, 3);
+
+  dense_dispose(&A);
+  dense_dispose(&T);
 
   /* Exercise 3 */
 
