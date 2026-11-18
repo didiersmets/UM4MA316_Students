@@ -236,6 +236,28 @@ int main(void)
 
   /* Exercise 3 */
 
+  printf(" %6s %14s %14s\n", "n", "factorise (s)", "solve (s)");
+  for (int n = 100; n <= 1600; n *= 2) {
+    struct DenseMatrix B;
+    dense_initialize(&B, n); random_dd_matrix(&B);
+    double *y = malloc(n * sizeof(double));
+    
+    double t0 = seconds();
+    lu_decompose(&B);
+    double t1 = seconds();
+
+    for (int r = 0; r < 100; ++r) { /* 100 solves: one is too fast to measure */
+      for (int i = 0; i < n; ++i) y[i] = 1.0;
+      lu_solve(&B, y);
+    }
+
+    double t2 = seconds();
+    printf(" %6d %14.4f %14.6f\n", n, t1 - t0, (t2 - t1) / 100);
+    
+    free(y); 
+    dense_dispose(&B);
+  }
+
   /* Exercise 4 */
 
   /* Exercise 5 */
