@@ -30,3 +30,31 @@ solve(s): 0.013365 * 62.5^2 = 52.20703125
 3.2
 L and U are the same in each factorization of A, we only need to factorize it once.
 They don't depend on b but only on A
+
+
+4.1 
+it is invertible but the first pivot is a 0
+we could swap rows and try again
+
+4.2 
+but in (1 - 10^20)*x2 = 2 - 10^20 these two numbers get rounded up to 1 by the computer
+
+the eq are eps*x1 + x2 = 1 and x1 + x2 = 2, being eps = 10^-20
+exact solution:
+    x1 = 1/(1 - eps)
+    x2 = (1 - 2*eps)/(1 - eps)
+nearly (1, 1)
+
+computer solution:
+    eps is the 1st pivot, so 1/eps = 10^20,
+    so the new diagonal entry is u22 = 1 - 10^20.
+    forward substitution gives y1 = 1 and y2 = 2 - 10^20.
+    1 - 10^20 and 2 - 10^20 differ by 1 and both round to -10^20.
+    backward substitution gives x2 = y2/u22 = (-10^20)/(-10^20) = 1.
+    and the first equation x1 = (1 - x2)/eps = 0.
+so the computed solution is  (0, 1)
+
+4.3
+in 10^-13 I, both pivots are 10^-13 and the position (1,1) is 0 
+the multiplier is therefore zero, and LU succeeds with L = I and U = A
+with 10^-12 this matrix would be wrongly rejected this invertible matrix

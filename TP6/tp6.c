@@ -253,12 +253,27 @@ int main(void)
 
     double t2 = seconds();
     printf(" %6d %14.4f %14.6f\n", n, t1 - t0, (t2 - t1) / 100);
-    
+
     free(y); 
     dense_dispose(&B);
   }
 
   /* Exercise 4 */
+
+  double v1[4] = {0, 1, 1, 0};
+  dense_initialize(&T, 2);
+  dense_set(&T, v1);
+  ret = lu_decompose(&T);
+  printf(" [0 1; 1 0]: lu_decompose returns %d\n", ret);
+  dense_dispose(&T);
+
+  double eps = 1e-20, v2[4] = {eps, 1, 1, 1}, x2[2] = {1, 2};
+  dense_initialize(&T, 2);
+  dense_set(&T, v2);
+  lu_decompose(&T);
+  lu_solve(&T, x2);
+  print_vector("[eps 1; 1 1], without pivoting: x", x2, 2);
+  dense_dispose(&T);
 
   /* Exercise 5 */
 
