@@ -99,7 +99,7 @@ struct EdgeTable build_edge_table(const struct Mesh2D *m)
   et.next = malloc(3 * m->nt * sizeof(int));
   for (int v = 0; v < m->nv; ++v)
     et.head[v] = -1;
-  for (int i = 0; i < m->nt; ++i)
+  for (int i =0; i < m->nt; ++i)
     for (int j = 0; j < 3; ++j)
     {
       int v1 = m->tri[i].v[j];
@@ -252,8 +252,37 @@ int *boundary_vertices(const struct Mesh2D *m, const struct EdgeTable *et)
 int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m, int *nbrs)
 {
   int count = 0;
-  
-  return 0;
+
+  for (int e = et->head[v]; e != -1; e = et->next[e]) {
+    int i = e / 3; /* triangle index */
+    int j = e % 3; /* local vertex index */
+
+    int w1 = m->tri[i].v[(j + 1) % 3];
+    int flag = 0;
+    for (int k = 0; k < count; k++) {
+      if (nbrs[k] == w1) {
+        flag = 1;
+        break;
+      }
+    }
+    if (flag != 1) {
+      nbrs[count++] = w1;
+    }
+
+    int w2 = m->tri[i].v[(j + 2) % 3];
+    flag = 0;
+    for (int k = 0; k < count; k++) {
+      if (nbrs[k] == w2) {
+        flag = 1;
+        break;
+      }
+    }
+    if (flag != 1) {
+      nbrs[count++] = w2;
+    }
+  }
+
+  return count;
 }
 
 /* ======================================================================================
@@ -425,7 +454,9 @@ int main(void)
   print_mesh(&m);
   mesh2D_to_gnuplot(&m, "mesh.dat");
 
-  /* Exercise 2 */
+  struct EdgeTable et = build_edge_table(&m);
+  int *on_bdry = boundary_vertices(&m, &et);
+  print_neighbours(&m, &et, on_bdry);
 
   /* Exercise 3 */
 
