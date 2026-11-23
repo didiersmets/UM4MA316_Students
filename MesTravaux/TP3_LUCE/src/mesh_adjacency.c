@@ -90,6 +90,10 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
     m->triangles[tri1].idx[save_indice_vertices_tri1[0]], m->triangles[tri1]);
         }
     }
-    
-
 }
+
+
+int *build_adjacency_table1(const struct Mesh *m){
+    
+}
+

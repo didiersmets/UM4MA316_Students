@@ -42,7 +42,7 @@ int main(){
 
     int pos = tris_are_neighbors(0,5,Tableau);
 
-    ( pos == -1) ? printf("pas voisin\n") : printf("voisin\n");
+    ( pos == -1) ? printf("pas voisin\n") : printf("voisin\n"); //voisin comme prévu
 
 
 
