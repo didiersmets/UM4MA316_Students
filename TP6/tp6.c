@@ -253,7 +253,7 @@ int main(void)
   lu_solve(&T_3, x_3);
 
   double res = residual(&A_3, x_3, b_3);
-    printf("Residual (lf): %lf\n", res);
+  printf("Residual (lf): %lf\n", res);
   printf("Residual (e): %e\n", res);
 
 
