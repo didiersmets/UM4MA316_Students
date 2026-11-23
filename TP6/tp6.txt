@@ -14,17 +14,17 @@ A * (1, 1, 1) = (4+2+1, 2+4+2, 1+2+4) = (7, 8, 7)
    
 factorise time is approximately times 8 
 solve time is approx times 4
-compared with the costs (2/3)n^3 and 2*n^2 seen in the lecture, it makes sense
+compared with the costs (2/3)*n^3 and (2)*n^2 seen in the lecture, it makes sense
 
 using 1600 as our benchmark, for an increment of 10000 / 1600 = 6.25, then 
 
 factorise(s): 5.2289 * 6.25^3 = 1276.58691406, so 20min
-solve(s): 0.013365 * 6.25^2 = 0.5220703125
+solve(s): 0.013365 * 6.25^2 = 0.5220703125, so 0.52s
 
 same for 100000 / 1600 = 62.5 
 
 factorise(s): 5.2289 * 62.5^3 = 1276586.91406, so 15 days
-solve(s): 0.013365 * 62.5^2 = 52.20703125
+solve(s): 0.013365 * 62.5^2 = 52.20703125, so 52s
 
 
 3.2

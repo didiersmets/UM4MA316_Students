@@ -175,20 +175,79 @@ void lu_solve(const struct DenseMatrix *T, double *x){
 /* In-place PLU factorisation with partial pivoting, Algorithm 2.4 of the lecture notes.
  * perm (an array of n integers) describes P: on output, row i of PA is row perm[i] of A.
  * Returns 0 on success, and -1 if A is singular (all candidate pivots < TOL). */
-int lu_pivot(struct DenseMatrix *T, int *perm)
-{
+
   /* TODO: start with perm[i] = i. For each p: find the row q >= p with the largest
    * |T(q,p)|; if it is < TOL, return -1; swap rows p and q of T (all columns) and
    * perm[p], perm[q]; then eliminate below the pivot as in lu_decompose.               */
+  
+int lu_pivot(struct DenseMatrix *T, int *perm){
+  int n = T->n;
+
+  for (int i = 0; i < n; i++) {
+    perm[i] = i;
+  }
+
+  for (int p = 0; p < n; p++) {
+    int big = p;
+  
+    for (int i = p + 1; i < n; i++) {
+      if (absval(T->a[big*n + p]) < absval(T->a[i*n + p])) {
+        big = i;
+      }
+    }
+
+    if (absval(T->a[big*n + p]) < TOL) {
+      return -1;
+  
+    }
+
+    for (int i = 0; i < n; i++){
+      double temp = T->a[p*n + i];
+      T->a[p*n + 1] = T->a[big*n + 1];
+      T->a[big*n + 1] = temp;
+    }
+
+    int temp = perm[p];
+    perm[p] = perm[big];
+    perm[big] = temp;
+
+    double pivot = T->a[p*n + p];
+
+    for (int i = p + 1; i < n; i++) {
+      double m = T->a[i*n + p] / pivot;
+      T->a[i*n + p] = m;
+
+      for (int j = p + 1; j < n; j++) {
+        T->a[i*n + j] -= m * T->a[p*n + j];
+      }
+    }
+  }
   return -1;
 }
 
 /* Solves A x = b, where T and perm contain the PLU factorisation of A. On input, x contains
  * b; on output, x contains the solution. Since PA = LU, we solve L U x = P b. */
-void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
-{
+
   /* TODO: 1) compute P b in an auxiliary array (malloc), entry i being b[perm[i]],
    *       2) copy it into x and free the auxiliary array, 3) call lu_solve.             */
+
+void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x){
+  int n = T->n;
+
+  double* Pb = malloc(sizeof(double) * n);
+
+  for (int i; i < n; i++){
+    Pb[i] = x[perm[i]];
+  }
+
+  for (int i; i < n; i++){
+    x[i] = Pb[i];
+  }
+
+  lu_solve(&T, x);
+
+  free(Pb);
+
 }
 
 /* ======================================================================================
