@@ -94,7 +94,7 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
     if (sens_tri1 == sens_tri2){
         //même sens, donc pas voisins
         return -1;
-    } else {
+    } else { //rend le common edge du premier triangle
         if (sens_tri1 == 1){
             return edge_pos_in_tri(m->triangles[tri1].idx[save_indice_vertices_tri1[0]],
     m->triangles[tri1].idx[save_indice_vertices_tri1[1]], m->triangles[tri1]);

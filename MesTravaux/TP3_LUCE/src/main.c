@@ -54,13 +54,17 @@ int main(){
     printf("%d\n",pos3);
     */
 
-    /*test build_adjacency_table1
+    //test build_adjacency_table1
 
-    Tableau_ajdacence = build_adjacency_table1(Tableau);
+    int* Tableau_adjacence = build_adjacency_table1(Tableau);
 
-    //si ça fonctionne comme il faut comme triangle 0 et 5 sont voisins , 
-    */
-   
+    //si ça fonctionne comme il faut comme triangle 0 et 5 sont voisins,  
+    //le common edge est en position 1, donc on s'attend à Tableau_adjacence[0+1] = 5
+
+    //printf("Tableau_adjacence[1] = %d\n", Tableau_adjacence[1]);
+    //free(Tableau_adjacence);
+
+
 
     dispose_mesh(Tableau);
     return 0;
