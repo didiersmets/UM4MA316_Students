@@ -36,16 +36,31 @@ int main(){
     fprintf(stdout, "%d \n",edge_pos_in_tri(Tableau->triangles[4].v3,Tableau->triangles[4].v1,Tableau->triangles[4]));*/
 
 
-    //testons tris_are_neighbors
-    //j'ai rajouté  un triangle dans le mesh de sorte à ce qu'il soit voisin 
+    /*test  tris_are_neighbors OK
+    //j'ai rajouté  un 5e triangle dans le mesh de sorte à ce qu'il soit voisin 
     //avec le premier
 
     int pos = tris_are_neighbors(0,5,Tableau);
+    int pos2 = tris_are_neighbors(1,6,Tableau);
+    int pos3 = tris_are_neighbors(4,5,Tableau);
 
     ( pos == -1) ? printf("pas voisin\n") : printf("voisin\n"); //voisin comme prévu
+    printf("%d\n",pos);
 
+    ( pos2 == -1) ? printf("pas voisin\n") : printf("voisin\n"); //voisin comme prévu
+    printf("%d\n",pos2);
 
+    ( pos3 == -1) ? printf("pas voisin\n") : printf("voisin\n"); //pas voisin comme prévu
+    printf("%d\n",pos3);
+    */
 
+    /*test build_adjacency_table1
+
+    Tableau_ajdacence = build_adjacency_table1(Tableau);
+
+    //si ça fonctionne comme il faut comme triangle 0 et 5 sont voisins , 
+    */
+   
 
     dispose_mesh(Tableau);
     return 0;

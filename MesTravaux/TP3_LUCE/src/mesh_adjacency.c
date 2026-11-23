@@ -78,6 +78,19 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
 
     printf("sens1 = %d sens2 = %d\n",sens_tri1, sens_tri2);
 
+
+
+
+    /*test à supprimer
+    if ((edge_pos_in_tri(m->triangles[tri1].idx[save_indice_vertices_tri1[0]],
+    m->triangles[tri1].idx[save_indice_vertices_tri1[1]], m->triangles[tri1])) == edge_pos_in_tri(m->triangles[tri1].idx[save_indice_vertices_tri1[1]],
+    m->triangles[tri1].idx[save_indice_vertices_tri1[0]], m->triangles[tri1]) ){
+        printf("YOUPIIIIII");
+    } else {
+        printf("merde\n");
+    }
+    */
+
     if (sens_tri1 == sens_tri2){
         //même sens, donc pas voisins
         return -1;
@@ -94,6 +107,27 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
 
 
 int *build_adjacency_table1(const struct Mesh *m){
-    
+    int taille_adj = m->ntri * 3;
+    int* adj = malloc(taille_adj);
+
+    for(int i = 0; i<taille_adj; i++){
+        adj[i]=-1;
+    }
+
+    int i = 0;
+    int voisinOuNon = -1;
+
+    while(i<m->ntri){
+        adj[i*m->ntri] = i;
+        for(int j=0; j<m->ntri;j++){
+            voisinOuNon = tris_are_neighbors(i,j, m);
+            if(voisinOuNon !=1){
+                adj[i*m->ntri+voisinOuNon] = j;
+
+            }
+        }
+        i++;
+    }
+    return adj;
 }
 
