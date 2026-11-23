@@ -203,8 +203,8 @@ int lu_pivot(struct DenseMatrix *T, int *perm){
 
     for (int i = 0; i < n; i++){
       double temp = T->a[p*n + i];
-      T->a[p*n + 1] = T->a[big*n + 1];
-      T->a[big*n + 1] = temp;
+      T->a[p*n + i] = T->a[big*n + i];
+      T->a[big*n + i] = temp;
     }
 
     int temp = perm[p];
@@ -222,7 +222,7 @@ int lu_pivot(struct DenseMatrix *T, int *perm){
       }
     }
   }
-  return -1;
+  return 0;
 }
 
 /* Solves A x = b, where T and perm contain the PLU factorisation of A. On input, x contains
@@ -235,16 +235,16 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x){
   int n = T->n;
 
   double* Pb = malloc(sizeof(double) * n);
-
-  for (int i; i < n; i++){
+  int i;
+  for (i = 0; i < n; i++){
     Pb[i] = x[perm[i]];
   }
 
-  for (int i; i < n; i++){
+  for (i = 0; i < n; i++){
     x[i] = Pb[i];
   }
 
-  lu_solve(&T, x);
+  lu_solve(T, x);
 
   free(Pb);
 
@@ -335,6 +335,20 @@ int main(void)
   dense_dispose(&T);
 
   /* Exercise 5 */
+
+  double v3[9] = {1, 2, 3, 2, 4, 5, 3, 5, 6};
+  int perm[3];
+  dense_initialize(&A, 3); dense_set(&A, v3); dense_copy(&T, &A);
+  ret = lu_decompose(&T);
+  printf(" without pivoting: lu_decompose returns %d\n", ret);
+  dense_dispose(&T); dense_copy(&T, &A);
+  ret = lu_pivot(&T, perm);
+  printf(" with pivoting: lu_pivot returns %d, perm = %d %d %d, T =\n", ret,
+  perm[0], perm[1], perm[2]);
+  dense_print(&T);
+  double x3[3] = {6, 11, 14};
+  lu_pivot_solve(&T, perm, x3);
+  print_vector("x", x3, 3);
 
   /* Exercise 6 */
 
