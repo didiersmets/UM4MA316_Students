@@ -21,5 +21,25 @@ int tris_are_neighbors (int tri1, int tri2, const struct Mesh *m){
 	return v2;
 }
 
+int *build_adjacency_table1(const struct Mesh *m){
+	int* adj = malloc(3*m->ntri * sizeof(int));
+	for(int i = 0; i < 3*m->ntri; i++){
+		adj[i] = -1;
+	}
 
+	for(int i = 0; i < m->ntri; i++){
+		for(int j = 0; j < m->ntri; j++){
+			int edge = tris_are_neighbors(m->tri[i], m->tri[j], m);
+			adj[3*i+edge] = j;
+		}
+	}
+	return adj;
+}
 
+struct Edge {
+	int v1;
+	int v2;
+};
+
+struct HashTable *build_edge_table1(const struct Mesh *m){
+		
