@@ -170,7 +170,46 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
   /* TODO: start with perm[i] = i. For each p: find the row q >= p with the largest
    * |T(q,p)|; if it is < TOL, return -1; swap rows p and q of T (all columns) and
    * perm[p], perm[q]; then eliminate below the pivot as in lu_decompose.               */
-  return -1;
+
+  int n = T-> n;
+  double *a = T-> a;
+
+  for (int i = 0; i<n; i++) {
+    perm[i] = i;
+  }
+
+  for(int p =0; p< n; p++){
+    int q = p;
+    for (int i =p+1; i< n; i++) {
+      if (absval(a[i*n +p] > absval(a[q*n +p]))) {
+        q = i;
+      }
+    }
+
+    if (absval(a[q*n +p] < TOL)) {
+      return -1;
+    }
+
+    if (q != p) {
+      for (int j = 0; j<n; j++) {
+        double tmp = a[p*n +j];
+        a[p*n + j] = a[q*n +j];
+        a[q*n +j] = tmp;
+      }
+    }
+
+    int tmp = perm[p];
+    perm[p] = perm[q];
+    perm[q] = tmp;
+
+    for (int i = p+1 ; i < n; i++){
+      a[i*n +p] /= a[p*n +p];
+      for (int j = p + 1; j <n ; j++) {
+        a[i*n +j] -= a[i*n +p] * a[p*n +j];
+      }
+    }
+  }
+  return 0;
 }
 
 /* Solves A x = b, where T and perm contain the PLU factorisation of A. On input, x contains
@@ -179,6 +218,20 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
 {
   /* TODO: 1) compute P b in an auxiliary array (malloc), entry i being b[perm[i]],
    *       2) copy it into x and free the auxiliary array, 3) call lu_solve.             */
+  int n = T-> n;
+  double *pb = malloc(n * sizeof(double));
+
+  for(int i =0; i<n ; i++) {
+    pb[i] = x[perm[i]];
+  }
+
+  for (int i =0; i<n; i++){
+    x[i] = pb[i];
+  }
+
+  free(pb);
+  lu_solve(T, x);
+
 }
 
 /* ======================================================================================
@@ -264,8 +317,46 @@ int main(void)
   }
 
   /* Exercise 4 */
+  double v1[4] = {0, 1, 1, 0};
+  dense_initialize(&T, 2); dense_set(&T, v1);
+  ret = lu_decompose(&T);
+  printf(" [0 1; 1 0]: lu_decompose returns %d\n", ret);
+  dense_dispose(&T);
+  double eps = 1e-20, v2[4] = {eps, 1, 1, 1}, x2[2] = {1, 2};
+  dense_initialize(&T, 2); dense_set(&T, v2);
+  lu_decompose(&T); lu_solve(&T, x2);
+  print_vector("[eps 1; 1 1], without pivoting: x", x2, 2);
+  dense_dispose(&T);
 
   /* Exercise 5 */
+  double v3[9] = {1, 2, 3, 2, 4, 5, 3, 5, 6};
+  int perm[3];
+  dense_initialize(&A, 3); dense_set(&A, v3); dense_copy(&T, &A);
+  ret = lu_decompose(&T);
+  printf(" without pivoting: lu_decompose returns %d\n", ret);
+  dense_dispose(&T); dense_copy(&T, &A);
+  ret = lu_pivot(&T, perm);
+  printf(" with pivoting: lu_pivot returns %d, perm = %d %d %d, T =\n", ret,
+  perm[0], perm[1], perm[2]);
+  dense_print(&T);
+  double x3[3] = {6, 11, 14};
+  lu_pivot_solve(&T, perm, x3);
+  print_vector("x", x3, 3);
+
+  /* solve 2nd system of exercice 4 */
+  double v4[4] = {0, 1, 1, 0};
+  int perm2[2];
+  dense_initialize(&A, 2); dense_set(&A, v4); dense_copy(&T, &A);
+  ret = lu_decompose(&T);
+  print_vector("ex4 without pivoting: x", x2, 2);
+  dense_dispose(&T); dense_copy(&T, &A);
+  ret = lu_pivot(&T, perm2);
+  printf("ex4 with pivoting: lu_pivot returns %d, perm2 = %d %d, T =\n", ret,
+  perm2[0], perm2[1]);
+  dense_print(&T);
+  double x4[2] = {1,2};
+  lu_pivot_solve(&T, perm2, x4);
+  print_vector("x", x4, 2);
 
   /* Exercise 6 */
 
