@@ -6,3 +6,7 @@
 .vscode/
 build/
 .gitignore
+
+# executables
+TP5/tp5
+TP6/tp6
