@@ -122,9 +122,9 @@ int lu_decompose(struct DenseMatrix *T)
     if(m_T[p * n + p] == 0) //pivot is 0
       return -1;
     int T_pp = m_T[p * n + p];
-    for (int i = p + 1; i < n; i++){
+    for (int i = p + 1; i < n; i++){ // for each row i > p:
       m_T[i * n + p] = m_T[i * n + p] / T_pp;
-      for (int j = p + 1; j < n; j++){
+      for (int j = p + 1; j < n; j++){ // for each column j > p:
         m_T[i * n + j] = m_T[i * n + j] - m_T[i * n + p] * m_T[p * n + j];
       }
     }
@@ -142,6 +142,23 @@ void lu_solve(const struct DenseMatrix *T, double *x)
 {
   /* TODO: 1) forward substitution with L (ones on the diagonal),
    *       2) backward substitution with U.                                              */
+
+  int n = T->n;
+  double *m_T = T->a;
+  // L solve
+  for (int j = 0; j < n; j++){
+    for(int k = 0; k < j; k++){
+      x[j] = x[j] - m_T[j * n + k] * x[k];
+    }
+  }
+  // U solve
+  for(int p = 0; p < n; p++){
+    int j = (n - 1) - p;
+    for(int k = j + 1; k < n ; k++){
+      x[j] = x[j] - m_T[j * n + k] * x[k];
+    }
+    x[j] = x[j] / m_T[j * n + j];
+  }
 }
 
 /* ======================================================================================
@@ -193,6 +210,7 @@ void arrow_matrix(struct DenseMatrix *A, int first)
 int main(void)
 {
   /* Exercise 1 */
+  printf("--- EX1 ---\n");
   double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
   struct DenseMatrix A, T;
   dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
@@ -201,14 +219,25 @@ int main(void)
   dense_print(&T);
 
   /* Exercise 2 */
+  printf("--- EX2 ---\n");
+
+  double x[3] = {7, 8, 7};
+  lu_solve(&T, x);
+  print_vector("x", x, 3);
+  dense_dispose(&A);
+  dense_dispose(&T);
 
   /* Exercise 3 */
+  printf("--- EX3 ---\n");
 
   /* Exercise 4 */
+  printf("--- EX4 ---\n");
 
   /* Exercise 5 */
+  printf("--- EX5 ---\n");
 
   /* Exercise 6 */
+  printf("--- EX6 ---\n");
 
   return 0;
 }
