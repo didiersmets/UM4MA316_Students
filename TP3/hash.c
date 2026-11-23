@@ -38,7 +38,7 @@ int *build_adjacency_table1(const struct Mesh *m)
 	int *adj = malloc (3*m->ntri*sizeof(int));
 
 	if (adj==NULL)
-		return NULL;
+		return 0;
 
 	for (int i=0; i<3*m->ntri; i++) {
 		adj[i] = -1;
@@ -70,7 +70,7 @@ struct HashTable *build_edge_table1(const struct Mesh *m)
 	struct HashTable*ht = hash_table_int(6*m->ntri, sizeof(struct Edge), sizeof(int));
 	
 	if (ht == NULL)
-		return NULL;
+		return 0;
 
 	for (int i=0; i<m->ntri; i++) {
 
@@ -94,13 +94,13 @@ int *build_adjacency_table2(const struct Mesh *m)
 	struct HashTable *ht = build_edge_table1(m);
 
 	if (ht==NULL)
-		return NULL;
+		return 0;
 
 	int *adj = malloc(3*m -> ntri*sizeof(int));
 
 	if (adj==NULL) {
 		hash_table_fini(ht);
-		return NULL;
+		return 0;
 	}
 
 	for(int i=0; i<3*m->ntri; i++)
@@ -133,7 +133,7 @@ struct EdgeTable {
 	int *next;
 };
 
-void edge_table_initializa(struct EdgeTable *et, int nvert, int ntri)
+void edge_table_initialize(struct EdgeTable *et, int nvert, int ntri)
 {
 	et->head = malloc(nvert*sizeof(int));
 	et->next = malloc(3*ntri*sizeof(int));
@@ -144,7 +144,7 @@ void edge_table_initializa(struct EdgeTable *et, int nvert, int ntri)
 
 		et->head = NULL;
 		et->next = NULL;
-		return;
+		return 0;
 	}
 	for(inti=0; i<nvert; i++)
 		et->head[i] = -1;
@@ -187,8 +187,69 @@ int edge_table_find(int v1, int v2, const struct EdgeTable *et, const struct Mes
 }
 
 struct EdgeTable *build_edge_table3(const struct Mesh *m)
+{
+	struct EdgeTable *et = malloc(sizeof(struct EdgeTable));
+
+	if (et == NULL) {
+		return 0;
+	}
+
+	edge_table_initialize(et, m->nvert, m->ntri);
+
+	if (et->head == NULL || et->next == NULL) {
+		edge_table_dispose(et);
+		free(et);
+		return 0
+	}
+
+	for (int i=0; i < m->ntri; i++) {
+		
+		for (int j=0; j < m->nvert; j++){
+
+			int v1 = m->triangles[i].idx[j];
+			int edge_code = 3*i + j;
+			edge_table_insert(v1, edge_code, et);
+		}
+	}
+	return et;
+}
 
 int *build_adjacency_table3(const struct Mesh *m)
+{
+	struct EdgeTable *et = build_adjacency_table3(m);
+
+	if (et == NULL) {
+		return 0;
+	}
+
+	int *adj = malloc(3*m->ntri*sizeof(int));
+
+	if (adj == NULL) {
+		edge_table_dispose(et);
+		free(et);
+		return 0;
+	}
+
+	for (int i=0; i < m->ntri; i++) {
+
+		for (int j=0; j < 3; j++) {
+
+			int v1 = m->triangles[i].idx[j];
+			int v2 = m->triangles[i].idx[(j+1)%3];
+
+			int code = edge_table_find(v2, v1, et, m);
+
+			if (code != -1) {
+				int neighbor = code / 3;
+				adj[3*i+j] = neighbor;
+			}
+		}
+	}
+	edge_table_dispose(et);
+	free(et);
+	return adj;
+}
+
 
 
 
