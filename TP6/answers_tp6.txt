@@ -1,0 +1,7 @@
+ex 3:
+When doubling the size, factorisation takes 8 times the previous factorisation time (observed in the example) and the solving time takes 4 times the previous one.
+Therefore for 10^4 the factorisation time will be approx 100^3 times the factorisation time of a size 100 matrix and the solving time will be 100^2 times the solving time of a size 100 matrix.
+
+Ex 4:
+The determinant of the first matrix is negtive.
+

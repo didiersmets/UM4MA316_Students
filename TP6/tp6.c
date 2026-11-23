@@ -139,6 +139,23 @@ void lu_solve(const struct DenseMatrix *T, double *x)
 {
   /* TODO: 1) forward substitution with L (ones on the diagonal),
    *       2) backward substitution with U.                                              */
+    size_t n = T->n;
+    double sum = 0;
+    for (size_t i = 0 ; i < n ; i++) {
+	sum = 0;
+	for (size_t j = 0 ; j < i ; j++) {
+	    sum += T->a[i * n + j] * x[j];
+	}
+	x[i] -= sum;
+    }
+
+    for (size_t i = 0 ; i < n; i++) {
+	sum = 0;
+	for (size_t j = n - i ; j < n ; j++) {
+	    sum += T->a[(n - (i + 1)) * n + j] * x[j];
+	}
+	x[(n - (i + 1))] = (x[(n - (i + 1))] - sum) / T->a[(n - (i + 1)) * n + (n - (i + 1))];
+    }
 }
 
 /* ======================================================================================
@@ -153,6 +170,44 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
   /* TODO: start with perm[i] = i. For each p: find the row q >= p with the largest
    * |T(q,p)|; if it is < TOL, return -1; swap rows p and q of T (all columns) and
    * perm[p], perm[q]; then eliminate below the pivot as in lu_decompose.               */
+    size_t n = T->n;
+    for (size_t i = 0 ; i < n ; i++) {
+	perm[i] = i;
+    }
+
+    for (size_t k = 0 ; k < n - 1 ; k++) {
+	double max_pivot = abs(T->a[k * n + k]);
+	size_t max_row = k;
+	for (size_t p = k + 1 ; p < n ; p++) {
+	    max_row = (max_pivot < abs(T->a[p * n + k]))?p:max_row;
+	    max_pivot = (max_pivot < abs(T->a[p * n + k]))?abs(T->a[p * n + k]):max_pivot;
+	}
+	if (max_pivot <= TOL) {
+	    return -1;
+	}
+	if (max_row != k) {
+	    int buff = perm[k];
+	    perm[k] = perm[max_row];
+	    perm[max_row] = buff;
+
+	    for (size_t q = k ; q < n ; q++) {
+		double buff = T->a[k * n + q];
+		T->a[k * n + q] = T->a[q * n + q];
+		T->a[q * n + q] = buff;
+	    }
+	}
+	
+	dense_print(T);
+	for (size_t i = k + 1 ; i < n ; i++) {
+	    T->a[n * i + k] /= T->a[n * k + k];
+	    for (size_t j = k + 1 ; j < n ; j++) {
+		T->a[n * i + j] -= T->a[n * i + k] * T->a[n * k + j];
+	    }
+	}
+    }
+    if (T->a[n * (n - 1) + (n - 1)] != 0) { // normalement abs() > eps = qqch de tres petit
+	return 0;
+    }
   return -1;
 }
 
@@ -162,6 +217,14 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
 {
   /* TODO: 1) compute P b in an auxiliary array (malloc), entry i being b[perm[i]],
    *       2) copy it into x and free the auxiliary array, 3) call lu_solve.             */
+    double *pb = malloc(sizeof(double) * T->n);
+    for (size_t i = 0 ; i < T->n ; i++) {
+	pb[i] = x[perm[i]];
+    }
+    for (size_t i = 0 ; i < T->n ; i++) {
+	x[i] = pb[i];
+    }
+    lu_solve(T, x);
 }
 
 /* ======================================================================================
@@ -200,13 +263,59 @@ int main(void)
     dense_print(&T);
 
   /* Exercise 2 */
+    double x[3] = {7, 8, 7};
+    lu_solve(&T, x);
+    print_vector("x", x, 3);
+
+    dense_dispose(&T);
+    dense_dispose(&A);
 
   /* Exercise 3 */
+    /* 
+    printf(" %6s %14s %14s\n", "n", "factorise (s)", "solve (s)");
+    for (int n = 100; n <= 1600; n *= 2) {
+	struct DenseMatrix B;
+	dense_initialize(&B, n); random_dd_matrix(&B);
+	double *y = malloc(n * sizeof(double));
+	double t0 = seconds();
+	lu_decompose(&B);
+	double t1 = seconds();
+	for (int r = 0; r < 100; ++r) {
+	    // 100 solves: one is too fast to measure
+	    for (int i = 0; i < n; ++i) y[i] = 1.0;
+	    lu_solve(&B, y);
+	}
+	double t2 = seconds();
+	printf(" %6d %14.4f %14.6f\n", n, t1 - t0, (t2 - t1) / 100);
+	free(y); dense_dispose(&B);
+    } */
 
   /* Exercise 4 */
+    double v1[4] = {0, 1, 1, 0};
+    dense_initialize(&T, 2); dense_set(&T, v1);
+    ret = lu_decompose(&T);
+    printf(" [0 1; 1 0]: lu_decompose returns %d\n", ret);
+    dense_dispose(&T);
+    double eps = 1e-20, v2[4] = {eps, 1, 1, 1}, x2[2] = {1, 2};
+    dense_initialize(&T, 2); dense_set(&T, v2);
+    lu_decompose(&T); lu_solve(&T, x2);
+    print_vector("[eps 1; 1 1], without pivoting: x", x2, 2);
+    dense_dispose(&T);
 
   /* Exercise 5 */
-
+    double v3[9] = {1, 2, 3, 2, 4, 5, 3, 5, 6};
+    int perm[3];
+    dense_initialize(&A, 3); dense_set(&A, v3); dense_copy(&T, &A);
+    ret = lu_decompose(&T);
+    printf(" without pivoting: lu_decompose returns %d\n", ret);
+    dense_dispose(&T); dense_copy(&T, &A);
+    ret = lu_pivot(&T, perm);
+    printf(" with pivoting: lu_pivot returns %d, perm = %d %d %d, T =\n", ret,
+    perm[0], perm[1], perm[2]);
+    dense_print(&T);
+    double x3[3] = {6, 11, 14};
+    lu_pivot_solve(&T, perm, x3);
+    print_vector("x", x3, 3);
   /* Exercise 6 */
 
   return 0;
