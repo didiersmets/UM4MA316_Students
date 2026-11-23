@@ -465,9 +465,31 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
  * ====================================================================================== */
 
 /* y must have room for A->n values. */
+/*Exercise 4. Matrix–vector product.
+1) Complete csr_matvec, which computes y = Ax, i.e. yi = ∑
+j aij xj , using only the stored
+entries: for each row i, sum val[k] * x[col_ind[k]] over the positions k of row i. How
+many multiplications does it perform? How many would a product with the full N × N
+matrix need?
+2) Add to main:
+double ones[3] = {1, 1, 1}, y[3];
+csr_matvec(&A, ones, y);
+print_vector("A * (1, 1, 1)", y, 3);
+You should get (7, 2, 7). Explain why (Ax)i, for x = (1, . . . , 1), is the number of boundary
+neighbours of interior vertex i.
+At the end of main, release the memory:
+free(on_bdry); csr_dispose(&A); dispose_edge_table(&et); dispose_mesh2D(&m);*/
+
 void csr_matvec(const struct CSRMatrix *A, const double *x, double *y)
 {
-  /* TODO */
+  for (int i = 0; i<A->n; i++)
+  {
+    y[i] = 0;
+    for (int j = A->row_ptr[i]; j<A->row_ptr[i+1]; j++)
+    {
+      y[i] = y[i] + A->val[j] * x[A->col_ind[j]];
+    }
+  }
 }
 
 /* ======================================================================================
@@ -558,7 +580,25 @@ int main(void)
   assemble_plate(&m, &et, num, N, &A, b);
   print_system(&A, b);
 
-  /* Exercise 4 */
+  /* 5) For nx = 2000, ny = 1000:
+ *    - Interior vertices: N = (nx - 1) * (ny - 1) = 1999 * 999 = 1,997,001 (~2.00e6).
+ *    - Full dense matrix: 8 * N^2 = 8 * (1,997,001)^2 ≈ 3.19e13 bytes (~31.9 TB / 29.0 TiB).
+ *    - CSR format (nnz <= 9N): 8 * nnz + 4 * nnz + 4 * (N + 1) <= 112N + 4 bytes
+ *      ≈ 2.24e8 bytes (~223.7 MB / 213.3 MiB). */
+
+  double ones[3] = {1, 1, 1}, y[3];
+  csr_matvec(&A, ones, y);
+  print_vector("A * (1, 1, 1)", y, 3);
+
+/* 1) Multiplications:
+ *    - CSR matvec performs nnz multiplications (one per stored nonzero entry).
+ *    - Full N x N dense matvec performs N^2 multiplications.
+ *
+ * 2) For x = (1, ..., 1), (Ax)_i is the sum of row i:
+ *    - Diagonal entry is deg(v) (total neighbours), each interior neighbour contributes -1.
+ *    - Thus (Ax)_i = deg(v) - (number of interior neighbours) = number of boundary neighbours. */
+
+  free(on_bdry); csr_dispose(&A); dispose_edge_table(&et); dispose_mesh2D(&m);
 
   return 0;
 }
