@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+
 /* ======================================================================================
  * Part 0 (provided). Dense matrices.
  * ====================================================================================== */
@@ -121,7 +122,7 @@ int lu_decompose(struct DenseMatrix *T)
   for (int p = 0; p < n-1; p++){
     if(m_T[p * n + p] == 0) //pivot is 0
       return -1;
-    int T_pp = m_T[p * n + p];
+    double T_pp = m_T[p * n + p];
     for (int i = p + 1; i < n; i++){ // for each row i > p:
       m_T[i * n + p] = m_T[i * n + p] / T_pp;
       for (int j = p + 1; j < n; j++){ // for each column j > p:
@@ -229,6 +230,33 @@ int main(void)
 
   /* Exercise 3 */
   printf("--- EX3 ---\n");
+
+  int n_3 = 100;
+  struct DenseMatrix A_3, T_3;
+
+  dense_initialize(&A_3, n_3);
+  random_dd_matrix(&A_3);
+
+  dense_copy(&T_3, &A_3);
+
+
+  double *x_3, *b_3;
+  x_3 = malloc(n_3 * sizeof(double));
+  b_3 = malloc(n_3 * sizeof(double));
+
+  for(int i = 0; i < 100; i++){
+    x_3[i] = 1.0;
+    b_3[i] = 1.0;
+  }
+
+  lu_decompose(&T_3);
+  lu_solve(&T_3, x_3);
+
+  double res = residual(&A_3, x_3, b_3);
+    printf("Residual (lf): %lf\n", res);
+  printf("Residual (e): %e\n", res);
+
+
 
   /* Exercise 4 */
   printf("--- EX4 ---\n");
