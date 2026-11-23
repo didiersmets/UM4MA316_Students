@@ -140,6 +140,24 @@ void lu_solve(const struct DenseMatrix *T, double *x)
 {
   /* TODO: 1) forward substitution with L (ones on the diagonal),
    *       2) backward substitution with U.                                              */
+
+  int n = T -> n;
+  double* mat = T -> a;
+
+  // L solve
+  for(int j = 0; j < n; j++) {
+    for(int k = 0; k < j; k++) {
+      x[j] = x[j] - mat[j * n + k] * x[k];
+    }
+  }
+
+  // U solve
+  for(int p = n - 1; p >= 0; p--) {
+    for(int k = p + 1; k < n; k++) {
+      x[p] = x[p] - mat[p * n + k] * x[k];
+    }
+    x[p] = x[p] / mat[p * n + p];
+  }
 }
 
 /* ======================================================================================
@@ -190,6 +208,8 @@ void arrow_matrix(struct DenseMatrix *A, int first)
 
 int main(void)
 {
+
+  printf("excercise 1:\n");
   double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
   struct DenseMatrix A, T;
   dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
@@ -197,7 +217,10 @@ int main(void)
   printf(" lu_decompose returns %d, T =\n", ret);
   dense_print(&T);
 
-  /* Exercise 2 */
+  printf("excercise 2:\n");
+  double x[3] = {7, 8, 7};
+  lu_solve(&T, x);
+  print_vector("x", x, 3);
 
   /* Exercise 3 */
 
