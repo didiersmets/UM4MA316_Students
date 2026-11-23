@@ -99,7 +99,7 @@ struct EdgeTable build_edge_table(const struct Mesh2D *m)
   et.next = malloc(3 * m->nt * sizeof(int));
   for (int v = 0; v < m->nv; ++v)
     et.head[v] = -1;
-  for (int i =0; i < m->nt; ++i)
+  for (int i = 0; i < m->nt; ++i)
     for (int j = 0; j < 3; ++j)
     {
       int v1 = m->tri[i].v[j];
@@ -253,31 +253,38 @@ int vertex_neighbours(int v, const struct EdgeTable *et, const struct Mesh2D *m,
 {
   int count = 0;
 
-  for (int e = et->head[v]; e != -1; e = et->next[e]) {
+  for (int e = et->head[v]; e != -1; e = et->next[e])
+  {
     int i = e / 3; /* triangle index */
     int j = e % 3; /* local vertex index */
 
     int w1 = m->tri[i].v[(j + 1) % 3];
     int flag = 0;
-    for (int k = 0; k < count; k++) {
-      if (nbrs[k] == w1) {
+    for (int k = 0; k < count; k++)
+    {
+      if (nbrs[k] == w1)
+      {
         flag = 1;
         break;
       }
     }
-    if (flag != 1) {
+    if (flag != 1)
+    {
       nbrs[count++] = w1;
     }
 
     int w2 = m->tri[i].v[(j + 2) % 3];
     flag = 0;
-    for (int k = 0; k < count; k++) {
-      if (nbrs[k] == w2) {
+    for (int k = 0; k < count; k++)
+    {
+      if (nbrs[k] == w2)
+      {
         flag = 1;
         break;
       }
     }
-    if (flag != 1) {
+    if (flag != 1)
+    {
       nbrs[count++] = w2;
     }
   }
@@ -335,21 +342,72 @@ void csr_print(const struct CSRMatrix *A)
   printf("\n");
 }
 
+/*The functions csr_initialize, csr_dispose and csr_print are provided. In the functions
+below, to get the neighbours of a vertex v, declare an array int nbrs[MAX_NBRS]; and call int
+d = vertex_neighbours(v, et, m, nbrs);: then d is the degree of v, and its neighbours are
+nbrs[0], . . . , nbrs[d-1].
+1) Complete number_unknowns, which sets num[v] to −1 for a boundary vertex, numbers the
+interior vertices 0, 1, . . . , N − 1 in increasing order, and returns N .
+
+
 /* num[v] = -1 if v is a boundary vertex; otherwise num[v] is the number of the unknown at v:
  * the interior vertices are numbered 0, 1, ..., N-1 in increasing order. Returns N. */
 int number_unknowns(const int *on_bdry, int nv, int *num)
 {
-  /* TODO */
-  return 0;
+  int count = 0;
+  for (int i = 0; i < nv; i++)
+  {
+    if (on_bdry[i] == 1)
+      num[i] = -1;
+    if (on_bdry[i] == 0)
+    {
+      num[i] = count;
+      count++;
+    }
+  }
+  return count;
 }
+
+/*2) Complete count_nonzeros, which returns the number of nonzero entries of A: for each
+interior vertex, 1 (the diagonal entry) plus the number of its interior neighbours.
+
 
 /* Number of nonzero entries of A: for each interior vertex, 1 (diagonal) plus the number
  * of its interior neighbours. */
 int count_nonzeros(const struct Mesh2D *m, const struct EdgeTable *et, const int *num)
 {
-  /* TODO */
-  return 0;
+  int count = 0;
+  int nbrs[MAX_NBRS];
+  for (int i = 0; i < m->nv; i++)
+  {
+    if (num[i] != -1)
+    {
+      count++;
+      int d = vertex_neighbours(i, et, m, nbrs);
+      for (int j = 0; j < d; j++)
+      {
+        if (num[nbrs[j]] != -1)
+        {
+          count++;
+        }
+      }
+    }
+  }
+
+  return count;
 }
+/*3) Complete assemble_plate. The array b is allocated by the caller, with N entries. The
+function proceeds as follows.
+• Allocate A with csr_initialize(A, N, count_nonzeros(m, et, num)).
+• Set A->row_ptr[0] = 0, and use a variable pos, initialised to 0, for the next free posi-
+tion in val and col_ind.
+• Loop over the vertices. For an interior vertex v, with i = num[v], write row i: first the
+diagonal entry deg(v), in column i; then −1 in column num[w] for each interior neighbour
+w. Set b[i] = 0, then add the temperature g(m->vert[w].x, m->vert[w].y) of each
+boundary neighbour w. At the end of the row, set A->row_ptr[i+1] = pos.
+4
+Since num increases with v, the rows are written in the order 0, 1, . . . , N − 1, so that row_ptr
+is filled from left to right*/
 
 /* Builds A (with csr_initialize) and fills b (allocated by the caller, size N).
  * For each interior vertex v, with i = num[v], row i contains:
@@ -366,7 +424,40 @@ int assemble_plate(const struct Mesh2D *m, const struct EdgeTable *et, const int
    *          write the diagonal entry, then the entries of the interior neighbours,
    *          set b[i] = 0 and add g(w) for each boundary neighbour w,
    *          and set A->row_ptr[i+1] = pos at the end of the row.                       */
-  return -1;
+
+  if (csr_initialize(A, N, count_nonzeros(m, et, num)) != 0)
+    return -1;
+  A->row_ptr[0] = 0;
+  int nbrs[MAX_NBRS];
+  int pos = 0;
+  for (int i = 0; i < m->nv; i++)
+  {
+    if (num[i] != -1)
+    {
+      int deg = vertex_neighbours(i, et, m, nbrs);
+      int row_index = num[i];
+      A->val[pos] = deg;
+      A->col_ind[pos] = row_index;
+      pos++;
+      b[row_index] = 0;
+      for (int j = 0; j < deg; j++)
+      {
+        if (num[nbrs[j]] != -1)
+        {
+          A->val[pos] = -1;
+          A->col_ind[pos] = num[nbrs[j]];
+          pos++;
+        }
+        else
+        {
+          b[row_index] += g(m->vert[nbrs[j]].x, m->vert[nbrs[j]].y);
+        }
+      }
+      A->row_ptr[row_index + 1] = pos;
+    }
+  }
+
+  return 0;
 }
 
 /* ======================================================================================
@@ -458,7 +549,14 @@ int main(void)
   int *on_bdry = boundary_vertices(&m, &et);
   print_neighbours(&m, &et, on_bdry);
 
-  /* Exercise 3 */
+  int num[15];
+  int N = number_unknowns(on_bdry, m.nv, num);
+  print_numbering(num, m.nv);
+  printf("  N = %d, nnz = %d\n", N, count_nonzeros(&m, &et, num));
+  struct CSRMatrix A;
+  double b[3];
+  assemble_plate(&m, &et, num, N, &A, b);
+  print_system(&A, b);
 
   /* Exercise 4 */
 
