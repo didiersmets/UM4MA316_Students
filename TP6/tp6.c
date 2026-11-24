@@ -107,14 +107,6 @@ double seconds(void) { return (double)clock() / CLOCKS_PER_SEC; }
  * the diagonal. Returns 0 on success, and -1 if a pivot T(p,p) = 0 is met. */
 int lu_decompose(struct DenseMatrix *T)
 {
-  /* TODO: translate Algorithm 2.2 into three nested loops (entry (i,j) is T->a[i*n + j]):
-  *   for p = 0, ..., n-2:
-  *     if T(p,p) == 0, return -1             (zero pivot: no LU without pivoting)
-  *     for each row i > p:
-  *       T(i,p) = T(i,p) / T(p,p)            (multiplier, stored in place of the zero)
-  *       for each column j > p:
-  *         T(i,j) = T(i,j) - T(i,p) * T(p,j)
-  * Then check the last pivot T(n-1,n-1) in the same way, and return 0.                */
   
   int n = T -> n;
   double *mat = T -> a;
@@ -137,10 +129,7 @@ int lu_decompose(struct DenseMatrix *T)
 /* Solves A x = b, where T contains the LU factorisation of A (Algorithm 2.3).
  * On input, x contains b; on output, x contains the solution. */
 void lu_solve(const struct DenseMatrix *T, double *x)
-{
-  /* TODO: 1) forward substitution with L (ones on the diagonal),
-   *       2) backward substitution with U.                                              */
-
+{ 
   int n = T -> n;
   double* mat = T -> a;
 
@@ -209,20 +198,83 @@ void arrow_matrix(struct DenseMatrix *A, int first)
 int main(void)
 {
 
-  printf("excercise 1:\n");
-  double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
-  struct DenseMatrix A, T;
-  dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
-  int ret = lu_decompose(&T);
-  printf(" lu_decompose returns %d, T =\n", ret);
-  dense_print(&T);
+  printf("------------\nexcercise 1:\n--------------\n");
+  {
+    double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
+    struct DenseMatrix A, T;
+    dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
+    int ret = lu_decompose(&T);
+    printf(" lu_decompose returns %d, T =\n", ret);
+    dense_print(&T);
 
-  printf("excercise 2:\n");
-  double x[3] = {7, 8, 7};
-  lu_solve(&T, x);
-  print_vector("x", x, 3);
+    dense_dispose(&A);
+    dense_dispose(&T);
+  }
 
-  /* Exercise 3 */
+
+  printf("------------\nexcercise 2.2:\n--------------\n");
+  {
+    double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
+    struct DenseMatrix T;
+    dense_initialize(&T, 3); dense_set(&T, v);
+    lu_decompose(&T);
+
+    double x[3] = {7, 8, 7};
+    lu_solve(&T, x);
+    print_vector("x", x, 3);
+
+    dense_dispose(&T);
+  }
+
+
+  printf("------------\nexcercise 2.3:\n--------------\n");
+  {
+    int n = 100;
+
+    struct DenseMatrix A, T;
+    double* b = malloc(n * sizeof(double));
+    double* x = malloc(n * sizeof(double));
+
+    dense_initialize(&A, n); random_dd_matrix(&A); dense_copy(&T, &A);
+    for(int i = 0; i < n; i++) {
+      b[i] = 1;
+      x[i] = 1;
+    }
+
+    lu_decompose(&T);
+    lu_solve(&T, x);
+
+    printf("residual: %e\n", residual(&A, x, b));
+
+    dense_dispose(&A);
+    dense_dispose(&T);
+    free(x);
+    free(b);
+  }
+
+
+
+
+  printf("------------\nexcercise 2.3:\n--------------\n");
+  {
+    printf(" %6s %14s %14s\n", "n", "factorise (s)", "solve (s)");
+    for (int n = 100; n <= 1600; n *= 2) {
+    struct DenseMatrix B;
+    dense_initialize(&B, n); random_dd_matrix(&B);
+    double *y = malloc(n * sizeof(double));
+    double t0 = seconds();
+    lu_decompose(&B);
+    double t1 = seconds();
+    for (int r = 0; r < 100; ++r) {
+    /* 100 solves: one is too fast to measure */
+    for (int i = 0; i < n; ++i) y[i] = 1.0;
+    lu_solve(&B, y);
+    }
+    double t2 = seconds();
+    printf(" %6d %14.4f %14.6f\n", n, t1 - t0, (t2 - t1) / 100);
+    free(y); dense_dispose(&B);
+    }
+  }
 
   /* Exercise 4 */
 
