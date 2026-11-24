@@ -58,10 +58,15 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
         return -1;
     }
 
+    /*
+    //ci dessous se trouve un test vérifier si les points des triangles correspondent bien
+    //à ceux formant une arête commune
+
     fprintf(stdout,"save_indice_vertices_tri1[0] = %d\n",save_indice_vertices_tri1[0]);
     fprintf(stdout,"save_indice_vertices_tri1[1] = %d\n",save_indice_vertices_tri1[1]);
     fprintf(stdout,"save_indice_vertices_tri2[0] = %d\n",save_indice_vertices_tri2[0]);
     fprintf(stdout,"save_indice_vertices_tri2[1] = %d\n",save_indice_vertices_tri2[1]);
+    */
 
 
     //calcul de l'orientation
@@ -76,20 +81,9 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
     int sens_tri2 = (edge_pos_in_tri(m->triangles[tri2].idx[save_indice_vertices_tri2[0]],
     m->triangles[tri2].idx[save_indice_vertices_tri2[1]], m->triangles[tri2]) != -1) ? 1 : 2;
 
-    printf("sens1 = %d sens2 = %d\n",sens_tri1, sens_tri2);
+    //printf("sens1 = %d sens2 = %d\n",sens_tri1, sens_tri2);
 
 
-
-
-    /*test à supprimer
-    if ((edge_pos_in_tri(m->triangles[tri1].idx[save_indice_vertices_tri1[0]],
-    m->triangles[tri1].idx[save_indice_vertices_tri1[1]], m->triangles[tri1])) == edge_pos_in_tri(m->triangles[tri1].idx[save_indice_vertices_tri1[1]],
-    m->triangles[tri1].idx[save_indice_vertices_tri1[0]], m->triangles[tri1]) ){
-        printf("YOUPIIIIII");
-    } else {
-        printf("merde\n");
-    }
-    */
 
     if (sens_tri1 == sens_tri2){
         //même sens, donc pas voisins
@@ -108,7 +102,8 @@ int tris_are_neighbors(int tri1, int tri2, const struct Mesh *m){
 
 int *build_adjacency_table1(const struct Mesh *m){
     int taille_adj = m->ntri * 3;
-    int* adj = malloc(taille_adj);
+    printf("%d\n",taille_adj); //bizarre, sans cette ligne, j'ai malloc (): invalid size (unsorted)
+    int* adj = malloc(taille_adj*sizeof(int));
 
     for(int i = 0; i<taille_adj; i++){
         adj[i]=-1;
@@ -117,12 +112,33 @@ int *build_adjacency_table1(const struct Mesh *m){
     int i = 0;
     int voisinOuNon = -1;
 
+
     while(i<m->ntri){
         adj[i*m->ntri] = i;
         for(int j=0; j<m->ntri;j++){
             voisinOuNon = tris_are_neighbors(i,j, m);
-            if(voisinOuNon !=1){
-                adj[i*m->ntri+voisinOuNon] = j;
+            if(voisinOuNon !=-1){
+
+              
+                if(adj[i*3+voisinOuNon]!=-1){
+                    printf("\nREWRITE I\n");
+                    printf("adj[%d] = %d, will be replaced by j = %d\n",i*3+voisinOuNon,adj[i*3+voisinOuNon],j);
+                    printf("Probleme : le triangle tri[%d] est voisin avec tri[%d] sur le cote %d mais deja voisin avec tri[%d] \n",i, j , voisinOuNon, adj[i*3+voisinOuNon] );
+
+                } else {
+                    if (adj[j*3+tris_are_neighbors(j,i, m)]!= -1 ){
+                        printf("\nREWRITE J\n");
+                        printf("adj[%d] = %d, will be replaced by i = %d\n",j*3+tris_are_neighbors(j,i, m),adj[j*3+tris_are_neighbors(j,i, m)],i);
+                        printf("Probleme : le triangle tri[%d] est voisin avec tri[%d] sur le cote %d mais deja voisin avec tri[%d] \n",j, i , tris_are_neighbors(j,i, m), adj[tris_are_neighbors(j,i, m)] );
+
+
+                    }
+                } //problème le triangle tri[5] est voisin au triangle tri[0] et tri[3], d'arête 0 !
+
+
+                adj[i*3+voisinOuNon] = j;
+                adj[j*3+tris_are_neighbors(j,i, m)] = i;
+                
 
             }
         }

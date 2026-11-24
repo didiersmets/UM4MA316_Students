@@ -61,8 +61,13 @@ int main(){
     //si ça fonctionne comme il faut comme triangle 0 et 5 sont voisins,  
     //le common edge est en position 1, donc on s'attend à Tableau_adjacence[0+1] = 5
 
-    //printf("Tableau_adjacence[1] = %d\n", Tableau_adjacence[1]);
-    //free(Tableau_adjacence);
+    
+   /* for(int i=0; i<20; i++){
+        printf("Tableau_adjacence[%d] = %d\n",i,  Tableau_adjacence[i]);
+    }*/
+    
+    
+    //free(Tableau_adjacence); //apparemment cette ligne ferait un double free...
 
 
 
