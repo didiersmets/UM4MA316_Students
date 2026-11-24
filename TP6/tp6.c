@@ -161,7 +161,42 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
   /* TODO: start with perm[i] = i. For each p: find the row q >= p with the largest
    * |T(q,p)|; if it is < TOL, return -1; swap rows p and q of T (all columns) and
    * perm[p], perm[q]; then eliminate below the pivot as in lu_decompose.               */
-  return -1;
+
+  int n = T -> n;
+  double *mat = T -> a;
+
+  for(int i = 0; i < n; i++) perm[i] = i;
+
+  for(int p = 0; p < n - 1; p++) {
+    // pivoting
+    int q = p;
+    for(int i = p + 1; i < n; i++) {
+      if(absval(mat[i * n + p]) > absval(mat[q * n + p])) q = i;
+    }
+    if(absval(mat[q * n + p]) < TOL) return -1;
+
+    // swap rows p and q of T and perm[p], perm[q]
+    for(int j = 0; j < n; j++) {
+      double tmp = mat[p * n + j];
+      mat[p * n + j] = mat[q * n + j];
+      mat[q * n + j] = tmp;
+    }
+    int tmp = perm[p];
+    perm[p] = perm[q];
+    perm[q] = tmp;
+
+    // gaussian elimination
+    for(int i = p + 1; i < n; i++) {
+      mat[i * n + p] = mat[i * n + p] / mat[p * n + p];
+      for(int j = p + 1; j < n; j++) {
+        mat[i * n + j] = mat[i * n + j] - mat[i * n + p] * mat[p * n + j];
+      }
+    }
+  }
+
+  if(absval(mat[(n - 1) * n + n - 1]) < TOL) return -1;
+
+  return 0;
 }
 
 /* Solves A x = b, where T and perm contain the PLU factorisation of A. On input, x contains
@@ -198,7 +233,7 @@ void arrow_matrix(struct DenseMatrix *A, int first)
 int main(void)
 {
 
-  printf("------------\nexcercise 1:\n--------------\n");
+  printf("--------------\nexcercise 1:\n--------------\n");
   {
     double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
     struct DenseMatrix A, T;
@@ -212,7 +247,7 @@ int main(void)
   }
 
 
-  printf("------------\nexcercise 2.2:\n--------------\n");
+  printf("--------------\nexcercise 2.2:\n--------------\n");
   {
     double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
     struct DenseMatrix T;
@@ -227,7 +262,7 @@ int main(void)
   }
 
 
-  printf("------------\nexcercise 2.3:\n--------------\n");
+  printf("--------------\nexcercise 2.3:\n--------------\n");
   {
     int n = 100;
 
@@ -252,10 +287,8 @@ int main(void)
     free(b);
   }
 
-
-
-
-  printf("------------\nexcercise 2.3:\n--------------\n");
+/*
+  printf("------------\nexcercise 3:\n--------------\n");
   {
     printf(" %6s %14s %14s\n", "n", "factorise (s)", "solve (s)");
     for (int n = 100; n <= 1600; n *= 2) {
@@ -266,7 +299,7 @@ int main(void)
     lu_decompose(&B);
     double t1 = seconds();
     for (int r = 0; r < 100; ++r) {
-    /* 100 solves: one is too fast to measure */
+    // 100 solves: one is too fast to measure
     for (int i = 0; i < n; ++i) y[i] = 1.0;
     lu_solve(&B, y);
     }
@@ -275,8 +308,24 @@ int main(void)
     free(y); dense_dispose(&B);
     }
   }
+*/
 
-  /* Exercise 4 */
+  printf("--------------\nexcercise 4:\n--------------\n");
+  {
+    struct DenseMatrix T;
+    int ret = 0;
+
+    double v1[4] = {0, 1, 1, 0};
+    dense_initialize(&T, 2); dense_set(&T, v1);
+    ret = lu_decompose(&T);
+    printf(" [0 1; 1 0]: lu_decompose returns %d\n", ret);
+    dense_dispose(&T);
+    double eps = 1e-20, v2[4] = {eps, 1, 1, 1}, x2[2] = {1, 2};
+    dense_initialize(&T, 2); dense_set(&T, v2);
+    lu_decompose(&T); lu_solve(&T, x2);
+    print_vector("[eps 1; 1 1], without pivoting: x", x2, 2);
+    dense_dispose(&T);
+  }
 
   /* Exercise 5 */
 
