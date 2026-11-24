@@ -384,6 +384,40 @@ int main(void)
   lu_pivot_solve(&T, perm2, x4);
   print_vector("x", x4, 2);
 
+  /* 5.4 matrix of size n= 100 */
+
+  int n4 = 100;
+  dense_initialize(&A, n4); random_matrix(&A);
+  dense_copy(&T, &A);                      
+  lu_decompose(&T);
+  double *b4 = malloc(n2 * sizeof(double));
+  double *y = malloc(n2 * sizeof(double));
+  int *perm4 = malloc(n2 * sizeof(double));
+  for (int i = 0; i < n2; ++i) { 
+    b4[i] = 1.0;
+  }
+
+  /* without pivoting*/
+  dense_copy(&T, &A);
+  lu_decompose(&T);
+  for(int i = 0; i<100; i++) {
+    y[i] = 1.0;
+  }
+  lu_solve(&T, y);
+  printf("  n = 100, random matrix: residual = %g\n", residual(&A, y, b4));
+  dense_dispose(&T);
+
+
+  /* with pivoting*/
+  dense_copy(&T, &A);
+  lu_pivot(&T, perm4);
+  for(int i = 0; i<100; i++) {
+    y[i] = 1.0;
+  }
+  lu_pivot_solve(&T, perm4, y);
+  printf("  n = 100, random matrix with pivoting: residual = %g\n", residual(&A, y, b4));
+  dense_dispose(&T);
+
   /* Exercise 6 */
 
   for (int first = 1; first >= 0; --first) {
