@@ -255,18 +255,51 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x){
  * ====================================================================================== */
 
 /* Number of entries of T with |T(i,j)| > TOL. */
-int count_nonzeros(const struct DenseMatrix *T)
-{
-  /* TODO */
-  return 0;
+int count_nonzeros(const struct DenseMatrix *T){
+  int count = 0;
+  int n = T->n;
+  int i, j;
+  
+  for (i = 0; i < n; i++){
+      for (j = 0; j < n; j++){
+      if(absval(T->a[i*n + j]) > TOL){
+        count++;
+      }
+    }
+  }
+  
+  return count;
 }
 
 /* Arrow matrix (A already allocated, all entries 0): n on the diagonal and 1 in the
  * first row and the first column if first = 1, in the last row and the last column if
  * first = 0. */
-void arrow_matrix(struct DenseMatrix *A, int first)
-{
-  /* TODO */
+void arrow_matrix(struct DenseMatrix *A, int first){
+  int n = A->n;
+  int i, j;
+
+  for (i = 0; i < n; i++){
+    A->a[i*n + i] = n;
+  }
+
+  if (first == 1){
+    for (j = 0; j < n; j++){
+      A->a[i*0 + j] = 1;
+    }
+    for (i = 0; i < n; i++){
+      A->a[i*n + 0] = 1;
+    }
+  }
+
+  if (first == 0){
+    for (j = 0; j < n; j++){
+      A->a[(n-1)*n + j] = 1;
+    }
+    for (i = 0; i < n; i++){
+      A->a[i*n + (n-1)] = 1;
+    }
+  }
+
 }
 
 /* ======================================================================================
@@ -315,7 +348,7 @@ int main(void)
 
     free(y); 
     dense_dispose(&B);
-  }
+  } 
 
   /* Exercise 4 */
 
@@ -351,6 +384,14 @@ int main(void)
   print_vector("x", x3, 3);
 
   /* Exercise 6 */
+
+  for (int first = 1; first >= 0; --first) {
+    dense_initialize(&A, 8); arrow_matrix(&A, first); dense_print(&A);
+    int before = count_nonzeros(&A);
+    lu_decompose(&A);
+    printf(" first = %d: %d nonzeros in A, %d in T\n", first, before, count_nonzeros(&A));
+    dense_dispose(&A);
+  }
 
   return 0;
 }

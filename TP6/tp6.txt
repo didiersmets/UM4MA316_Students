@@ -58,3 +58,23 @@ so the computed solution is  (0, 1)
 in 10^-13 I, both pivots are 10^-13 and the position (1,1) is 0 
 the multiplier is therefore zero, and LU succeeds with L = I and U = A
 with 10^-12 this matrix would be wrongly rejected this invertible matrix
+
+5.4 -> to do
+
+6.2 
+for first = 1, the first row and column consists of nonzero entries
+due to how the LU_decompose algorithm, since the first iteration, 
+new nonzero coefficients in previously 0 cases appear in the rows under
+so we obtain 64 nonzero entries in T
+
+for first = 0, the last row and column consist of nonzero entries
+since we only have to "clean" the last row, 
+no nonzero cases appear, and we get 22 nonzeros in T
+
+6.3
+so the composition of the nonzero cases has
+a strong impact on the cost of the calculation
+on a sparse matrix, we could permute the matrix so as to reduce the operations needed
+(so as to reduce the number of nonzero cases created)
+
+
