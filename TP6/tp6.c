@@ -174,6 +174,21 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
   /* TODO: start with perm[i] = i. For each p: find the row q >= p with the largest
    * |T(q,p)|; if it is < TOL, return -1; swap rows p and q of T (all columns) and
    * perm[p], perm[q]; then eliminate below the pivot as in lu_decompose.               */
+  
+  int n = T->n;
+  double *m_T = T->a;
+
+  for (int i = 0; i < n; i++){
+    perm[i] = i;
+  }
+
+  for (int p = 0; p < n; p++){
+
+  }
+  
+
+
+
   return -1;
 }
 
@@ -228,9 +243,7 @@ int main(void)
   dense_dispose(&A);
   dense_dispose(&T);
 
-  /* Exercise 3 */
-  printf("--- EX3 ---\n");
-
+  printf("--- EX2.3 ---\n");
   int n_3 = 100;
   struct DenseMatrix A_3, T_3;
 
@@ -256,10 +269,40 @@ int main(void)
   printf("Residual (lf): %lf\n", res);
   printf("Residual (e): %e\n", res);
 
+  /* Exercise 3 */
+  printf("--- EX3 ---\n");
 
+  printf(" %6s %14s %14s\n", "n", "factorise (s)", "solve (s)");
+  for (int n = 100; n <= 400; n *= 2) {
+    struct DenseMatrix B;
+    dense_initialize(&B, n); random_dd_matrix(&B);
+    double *y = malloc(n * sizeof(double));
+    double t0 = seconds();
+    lu_decompose(&B);
+    double t1 = seconds();
+    for (int r = 0; r < 100; ++r) { /* 100 solves: one is too fast to measure */
+      for (int i = 0; i < n; ++i) y[i] = 1.0;
+        lu_solve(&B, y);
+    }
+      double t2 = seconds();
+      printf(" %6d %14.4f %14.6f\n", n, t1 - t0, (t2 - t1) / 100);
+      free(y); dense_dispose(&B);
+  }
 
   /* Exercise 4 */
   printf("--- EX4 ---\n");
+  
+  double v1[4] = {0, 1, 1, 0};
+  dense_initialize(&T, 2); dense_set(&T, v1);
+  ret = lu_decompose(&T);
+  printf(" [0 1; 1 0]: lu_decompose returns %d\n", ret);
+  dense_dispose(&T);
+  double eps = 1e-20, v2[4] = {eps, 1, 1, 1}, x2[2] = {1, 2};
+  dense_initialize(&T, 2); dense_set(&T, v2);
+  lu_decompose(&T); lu_solve(&T, x2);
+  print_vector("[eps 1; 1 1], without pivoting: x", x2, 2);
+  dense_dispose(&T);
+
 
   /* Exercise 5 */
   printf("--- EX5 ---\n");
