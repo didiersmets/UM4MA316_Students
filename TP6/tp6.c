@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 /* ======================================================================================
  * Part 0 (provided). Dense matrices.
@@ -176,11 +177,11 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
     }
 
     for (size_t k = 0 ; k < n - 1 ; k++) {
-	double max_pivot = abs(T->a[k * n + k]);
+	double max_pivot = fabs(T->a[k * n + k]);
 	size_t max_row = k;
 	for (size_t p = k + 1 ; p < n ; p++) {
-	    max_row = (max_pivot < abs(T->a[p * n + k]))?p:max_row;
-	    max_pivot = (max_pivot < abs(T->a[p * n + k]))?abs(T->a[p * n + k]):max_pivot;
+	    max_row = (max_pivot < fabs(T->a[p * n + k]))?p:max_row;
+	    max_pivot = (max_pivot < fabs(T->a[p * n + k]))?fabs(T->a[p * n + k]):max_pivot;
 	}
 	if (max_pivot <= TOL) {
 	    return -1;
@@ -190,10 +191,10 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
 	    perm[k] = perm[max_row];
 	    perm[max_row] = buff;
 
-	    for (size_t q = k ; q < n ; q++) {
+	    for (size_t q = 0 ; q < n ; q++) {
 		double buff = T->a[k * n + q];
-		T->a[k * n + q] = T->a[q * n + q];
-		T->a[q * n + q] = buff;
+		T->a[k * n + q] = T->a[max_row * n + q];
+		T->a[max_row * n + q] = buff;
 	    }
 	}
 	
