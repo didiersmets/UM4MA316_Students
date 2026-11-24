@@ -383,6 +383,43 @@ int main(void)
   lu_pivot_solve(&T, perm, x3);
   print_vector("x", x3, 3);
 
+  /* Exercise 5.4 */
+
+  struct DenseMatrix B;
+  struct DenseMatrix C;
+  int n = 100;
+  int perm100[100];
+  double b[100];
+  double x100[100];
+
+  dense_initialize(&B, n);
+  random_matrix(&B);
+
+  for (int i = 0; i < n; i++) {
+    b[i] = 1;
+    x100[i] = 1;
+  }
+
+  // no pivoting
+  dense_copy(&C, &B);
+  lu_decompose(&C);
+  lu_solve(&C, x100);
+  printf("no pivoting: %g\n", residual(&B, x100, b));
+  dense_dispose(&C);
+
+  // pivoting
+  for (int i = 0; i < n; i++){
+    x100[i] = 1;
+  }
+
+  dense_copy(&C, &B);
+  lu_pivot(&C, perm100);
+  lu_pivot_solve(&C, perm100, x100);
+  printf("pivoting: %g\n", residual(&B, x100, b));
+
+  dense_dispose(&C);
+  dense_dispose(&B);
+
   /* Exercise 6 */
 
   for (int first = 1; first >= 0; --first) {

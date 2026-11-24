@@ -59,7 +59,16 @@ in 10^-13 I, both pivots are 10^-13 and the position (1,1) is 0
 the multiplier is therefore zero, and LU succeeds with L = I and U = A
 with 10^-12 this matrix would be wrongly rejected this invertible matrix
 
-5.4 -> to do
+5.3
+without pivoting, using lu_decompose, after the first elimination step,
+the second pivot becomes zero, so it fails
+
+5.4
+pivoting helps us reduce the residual
+by avoiding small pivots
+
+no pivoting: 2.97505e-12
+pivoting: 4.009e-14
 
 6.2 
 for first = 1, the first row and column consists of nonzero entries
