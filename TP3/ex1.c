@@ -1,3 +1,4 @@
+#include "hash_tables.h"
 int edge_pos_in_tri (int v1, int v2, struct Triangle t) {
 	if (v1==t.x && v2==t.y){
 		return 0;
@@ -42,4 +43,126 @@ struct Edge {
 };
 
 struct HashTable *build_edge_table1(const struct Mesh *m){
+	struct HashTable *h = hash_table_init(m->ntri, sizeof(struct Edge), sizeof(int));
+	h->data = malloc(m->ntri*sizeof(int));
+	for (int i=0; i<m->ntri; i++){
+		h->data = i;
+		h->data +=1;
+	}
+	
+	struct Edge e;
+	for (int i=0; i<m->ntri; i++){
+		for (int j=0; j<3; j++){
+			e.v1 = m->tri[i][j];
+			e.v2 = m->tri[i][(j+1)mod3];
+			hash_table_insert(h, e, i);
+		}
+	}
+
+	return h;
+}
+
+
+int *build_adjacency_table2(const struct Mesh *m){
+	int *adj = malloc(3*m->ntri*sizeof(int));
+	for (int i=0; i<3*m->ntri; i++){
+		adj[i] = -1;
+	}
+
+	struct HashTable *h = build_edge_table1(m); 
+
+	struct Edge e;
+	for (int i=0; i<m->ntri; i++){
+		for (int j=0; j<3; j++){
+			e.v1 = m->tri[i][(j+1)mod3];
+			e.v2 = m->tri[i][j];
+			void res = hash_table_find(h, e);
+			if (res!=NULL){
+				adj[3*i+j] = res;
+			}
+		}
+	}
+
+	hash_table_fini(h);
+	return adj;
+}
+
+
+struct EdgeTable {
+	int *head;
+	int *next;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
