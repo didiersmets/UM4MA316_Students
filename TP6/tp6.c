@@ -136,7 +136,20 @@ int lu_decompose(struct DenseMatrix *T)
 void lu_solve(const struct DenseMatrix *T, double *x)
 {
   /* TODO: 1) forward substitution with L (ones on the diagonal),
-   *       2) backward substitution with U.                                              */
+   *       2) backward substitution with U.   
+   */
+  int n = T->n;
+  for(int i = 0; i<n; i++){
+    for (int j = 0; j<i; j++){
+      x[i] = x[i] - T->a[i*n + j]*x[j];
+    }
+  }
+  for(int i = n-1; i>=0; i--){
+    for(int j = i+1; j<n; j++){
+      x[i] = (x[i] - T->a[i*n + j]*x[j]);
+    }
+    x[i]/=(T->a[i*n + i]);
+  }
 }
 
 /* ======================================================================================
@@ -194,7 +207,37 @@ int main(void)
   printf(" lu_decompose returns %d, T =\n", ret);
   dense_print(&T);
 
-  /* Exercise 2 */
+  double x[3] = {7, 8, 7};
+  lu_solve(&T, x);
+  print_vector("x", x, 3);
+
+  dense_dispose(&A);
+  dense_dispose(&T);
+
+  int n = 100;
+  struct DenseMatrix B, LU;
+  dense_initialize(&B, n); 
+  random_dd_matrix(&B); 
+  dense_copy(&LU, &B);
+  int check = lu_decompose(&LU);
+  printf(" lu_decompose returns %d, LU =\n", check);
+
+  double b[n];
+  double y[n];
+  for(int i = 0; i<n; i++){
+    b[i] = 1;
+    y[i] = 1;
+  }
+
+  lu_solve(&LU, y);
+
+  double resi = residual(&B, y, b);
+
+  printf("residual: %e\n", resi);
+
+  dense_dispose(&B);
+  dense_dispose(&LU);
+
 
   /* Exercise 3 */
 
