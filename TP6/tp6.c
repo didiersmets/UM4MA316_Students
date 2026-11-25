@@ -182,14 +182,48 @@ int lu_pivot(struct DenseMatrix *T, int *perm)
     perm[i] = i;
   }
 
+  double *tmp_row = malloc(n * sizeof(double));
+  //for each col p
   for (int p = 0; p < n; p++){
+    //loop over col p to find the larges fabs(value)
+    double max = 0;
+    int q = p; //declared here to remember the line
+    for (int i = p; i < n; i++){
+      if(fabs(m_T[i * n + p]) > max){
+        max = fabs(m_T[i * n + p]);
+        q = i;
+      }
+    }
+    if(max < TOL){
+      free(tmp_row);
+      return -1;
+    }
+    //swap row p and row q
+    
+    if(q != p){
+      memcpy(tmp_row, &m_T[p*n],n*sizeof(double)); // store row p
+      memcpy(&m_T[p*n], &m_T[q*n],n*sizeof(double)); // copy q to p
+      memcpy(&m_T[q*n], tmp_row,n*sizeof(double)); //copy temp_p to q
+      //swap perm[p] and perm[q]
+      int tmp_perm = perm[p];
+      perm[p] = perm[q];
+      perm[q] = tmp_perm;
+    }
+
+
+
+    // gaussian elimination
+    for(int i = p + 1; i < n; i++){
+      m_T[i * n + p] =  m_T[i * n + p] / m_T[p * n + p];
+      for(int j = p + 1; j < n; j++){
+        m_T[i * n + j] = m_T[i * n + j] - m_T[i * n + p] * m_T[p * n + j];
+      }
+    }
 
   }
-  
+  free(tmp_row);
 
-
-
-  return -1;
+  return 0;
 }
 
 /* Solves A x = b, where T and perm contain the PLU factorisation of A. On input, x contains
@@ -198,6 +232,13 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
 {
   /* TODO: 1) compute P b in an auxiliary array (malloc), entry i being b[perm[i]],
    *       2) copy it into x and free the auxiliary array, 3) call lu_solve.             */
+
+  int n = T->n;
+  int m_T = T->a;
+  double *aux_b = malloc(n * sizeof(*aux_b));
+  
+
+
 }
 
 /* ======================================================================================
