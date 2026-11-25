@@ -448,6 +448,8 @@ int main(void)
     dense_print(&A);
     int before = count_nonzeros(&A);
     lu_decompose(&A);
+    printf("after lu \n");
+    dense_print(&A);
     printf(" first = %d: %d nonzeros in A, %d in T\n", first, before,
     count_nonzeros(&A));
     dense_dispose(&A);
