@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <math.h>
+#include <string.h>
+
 
 /* ======================================================================================
  * Part 0 (provided). Dense matrices.
@@ -234,10 +237,16 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
    *       2) copy it into x and free the auxiliary array, 3) call lu_solve.             */
 
   int n = T->n;
-  int m_T = T->a;
   double *aux_b = malloc(n * sizeof(*aux_b));
-  
 
+  for (int i = 0; i < n; i++){
+    aux_b[i] = x[perm[i]];
+  }
+
+  memcpy(x, aux_b, n * sizeof(double));
+  free(aux_b);
+
+  lu_solve(T,x);
 
 }
 
@@ -249,7 +258,19 @@ void lu_pivot_solve(const struct DenseMatrix *T, const int *perm, double *x)
 int count_nonzeros(const struct DenseMatrix *T)
 {
   /* TODO */
-  return 0;
+
+  int n = T->n;
+  double *m_T = T->a;
+
+  int zeros = 0;
+  for(int i = 0; i < n; i++){
+    for (int j = 0; j < n; j++){
+      if(fabs(m_T[i * n + j]) > TOL){
+        zeros++;
+      }
+    }
+  }
+  return zeros;
 }
 
 /* Arrow matrix (A already allocated, all entries 0): n on the diagonal and 1 in the
@@ -258,6 +279,18 @@ int count_nonzeros(const struct DenseMatrix *T)
 void arrow_matrix(struct DenseMatrix *A, int first)
 {
   /* TODO */
+  int n = A->n;
+  for(int i = 0; i < n; i++){
+    if(first == 1){
+      A->a[i] = 1;
+      A->a[i*n] = 1;
+    }else if(first == 0){
+      A->a[(n - 1) * n + i] = 1;
+      A->a[i * n + n - 1] = 1;
+    }
+    A->a[i * n + i] = n;
+  }
+
 }
 
 /* ======================================================================================
@@ -348,8 +381,79 @@ int main(void)
   /* Exercise 5 */
   printf("--- EX5 ---\n");
 
+  double v3[9] = {1, 2, 3, 2, 4, 5, 3, 5, 6};
+  int perm[3];
+  dense_initialize(&A, 3); dense_set(&A, v3); dense_copy(&T, &A);
+  ret = lu_decompose(&T);
+  printf(" without pivoting: lu_decompose returns %d\n", ret);
+  dense_dispose(&T); dense_copy(&T, &A);
+  ret = lu_pivot(&T, perm);
+  printf(" with pivoting: lu_pivot returns %d, perm = %d %d %d, T =\n", ret, perm[0], perm[1], perm[2]);
+  dense_print(&T);
+  double x3[3] = {6, 11, 14};
+  lu_pivot_solve(&T, perm, x3);
+  print_vector("x", x3, 3);
+
+  printf("--- EX5.3 ---\n");
+  double eps_2 = 1e-20, v2_2[4] = {eps_2, 1, 1, 1}, x2_2[2] = {1, 2};
+  int perm_2[2];
+  dense_initialize(&T, 2); dense_set(&T, v2_2);
+  lu_decompose(&T);
+  ret = lu_pivot(&T, perm_2);
+  printf(" with pivoting: lu_pivot returns %d, perm = %d %d, T =\n", ret, perm_2[0], perm_2[1]);
+  lu_pivot_solve(&T, perm_2, x2_2);
+  print_vector("[eps 1; 1 1], without pivoting: x", x2_2, 2);
+  dense_dispose(&T);
+
+  printf("--- EX5.4 ---\n");
+  int n5 = 100;
+  double b5[100];
+  double x5[100];
+  int perm5[100];
+  for (int i = 0; i < n5; i++) {
+    b5[i] = 1.0;
+    x5[i] = 1.0;
+  }
+
+  struct DenseMatrix A5;
+  dense_initialize(&A5, n5);
+  random_matrix(&A5);
+
+  /* Without pivoting */
+  dense_copy(&T, &A5);
+  lu_decompose(&T);
+  lu_solve(&T, x5);
+  double res5 = residual(&A5, x5, b5);
+  printf("residual without pivoting for n = %d : %e\n", n5, res5);
+  dense_dispose(&T);
+
+  /* With pivoting */
+  dense_copy(&T, &A5);
+  for (int i = 0; i < n5; i++) {
+    x5[i] = 1.0;
+  }
+  ret = lu_pivot(&T, perm5);
+  lu_pivot_solve(&T, perm5, x5);
+  res5 = residual(&A5, x5, b5);
+  printf("residual with pivoting for n = %d : %e\n", n5, res5);
+
+  dense_dispose(&T);
+  dense_dispose(&A5);
+
   /* Exercise 6 */
   printf("--- EX6 ---\n");
+  for (int first = 1; first >= 0; --first) {
+    dense_initialize(&A, 8);
+    arrow_matrix(&A, first);
+    dense_print(&A);
+    int before = count_nonzeros(&A);
+    lu_decompose(&A);
+    printf(" first = %d: %d nonzeros in A, %d in T\n", first, before,
+    count_nonzeros(&A));
+    dense_dispose(&A);
+  }
+
+
 
   return 0;
 }
