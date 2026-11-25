@@ -115,7 +115,20 @@ int lu_decompose(struct DenseMatrix *T)
    *       for each column j > p:
    *         T(i,j) = T(i,j) - T(i,p) * T(p,j)
    * Then check the last pivot T(n-1,n-1) in the same way, and return 0.                */
-  return -1;
+  int n = T->n;
+  for (int p = 0; p<n-1; p++){
+    if(T->a[p*n+p]==0) return -1;
+    for (int i = p+1; i<n; i++) //this is the row in a normal scheme matrix we convert later 
+    {
+      T->a[i*n+p] = T->a[i*n+p]/T->a[p*n+p];
+      for(int j = p+1; j<n; j++)
+      {
+        T->a[i*n + j] = T->a[i*n + j] - (T->a[i*n+p] * T->a[p*n + j]);
+      }
+    }   
+  }
+  if(T->a[(n-1)*n+(n-1)]==0) return -1;
+  return 0;
 }
 
 /* Solves A x = b, where T contains the LU factorisation of A (Algorithm 2.3).
@@ -174,7 +187,12 @@ void arrow_matrix(struct DenseMatrix *A, int first)
 
 int main(void)
 {
-  /* Exercise 1 */
+  double v[9] = {4, 2, 1, 2, 4, 2, 1, 2, 4};
+  struct DenseMatrix A, T;
+  dense_initialize(&A, 3); dense_set(&A, v); dense_copy(&T, &A);
+  int ret = lu_decompose(&T);
+  printf(" lu_decompose returns %d, T =\n", ret);
+  dense_print(&T);
 
   /* Exercise 2 */
 
